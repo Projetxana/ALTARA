@@ -11,7 +11,8 @@ export default async function handler(req, res) {
     }
 
     try {
-        const nodeIcal = await import('node-ical');
+        const nodeIcalModule = await import('node-ical');
+        const nodeIcal = nodeIcalModule.default || nodeIcalModule;
         const axios = await import('axios');
 
         // fetch the ical data with User-Agent to avoid blocking
