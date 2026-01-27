@@ -145,10 +145,28 @@ export const SanctuumProvider = ({ children }) => {
     const getGuestById = (id) => null; // Removed mock John Doe
     const getBookingsForChalet = (chaletId) => bookings.filter(b => b.chaletId === chaletId);
 
-    const updateChaletConnections = (chaletId, connections) => {
-        // Implement Cloud Update - TODO: Update Supabase if column exists
-        // For now, LocalStorage (via useEffect) handles persistence
+    const updateChaletConnections = async (chaletId, connections) => {
+        // 1. Optimistic Update (Local)
         setChalets(prev => prev.map(c => c.id === chaletId ? { ...c, connections } : c));
+
+        // 2. Persist to Cloud
+        if (user) {
+            try {
+                const { error } = await supabase
+                    .from('chalets')
+                    .update({ connections })
+                    .eq('id', chaletId);
+
+                if (error) {
+                    console.error("Error saving connections to Supabase:", error);
+                    // If error is "column connections does not exist", we know the issue.
+                } else {
+                    console.log("Connections saved to Supabase!");
+                }
+            } catch (err) {
+                console.error("Persist request failed:", err);
+            }
+        }
     };
 
     const createBooking = (bookingData) => {
