@@ -47,8 +47,9 @@ export const SyncEngine = {
 
                 // PROCESS EVENTS (Upsert to DB)
                 // In a real app, you would call Supabase here to save events
-                // For now, we just log stats
+                // For now, we return them to the UI to update local state
                 stats.imported += events.length;
+                stats.events = [...(stats.events || []), ...events.map(e => ({ ...e, platform }))];
 
             } catch (error) {
                 console.error(`[${platform}] Sync Error:`, error);

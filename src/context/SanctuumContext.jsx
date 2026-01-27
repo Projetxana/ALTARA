@@ -127,6 +127,15 @@ export const SanctuumProvider = ({ children }) => {
         return newBooking;
     };
 
+    const importBookings = (newBookings) => {
+        setBookings(prev => {
+            // Simple de-duplication by ensuring unique start date per chalet (very basic)
+            // ideally we use ID, but external IDs might vary.
+            // For now, just append to demonstrate sync.
+            return [...prev, ...newBookings];
+        });
+    };
+
     const toggleRitual = (ritualId) => {
         setRituals(prev => prev.map(r => r.id === ritualId ? { ...r, active: !r.active } : r));
     };
@@ -183,6 +192,7 @@ export const SanctuumProvider = ({ children }) => {
             getBookingsForChalet,
             updateChaletConnections,
             createBooking,
+            importBookings,
             toggleRitual,
             addChalet
         }}>

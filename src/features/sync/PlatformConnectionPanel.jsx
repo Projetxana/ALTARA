@@ -5,7 +5,7 @@ import { RefreshCw, Link2, CheckCircle, AlertCircle } from 'lucide-react';
 import { SyncEngine } from '../../services/SyncEngine';
 
 const PlatformConnectionPanel = ({ chalet }) => {
-    const { updateChaletConnections, platforms } = useSanctuum();
+    const { updateChaletConnections, platforms, importBookings } = useSanctuum();
     const { addNotification } = useNotification();
     const [syncing, setSyncing] = useState(false);
 
@@ -33,7 +33,23 @@ const PlatformConnectionPanel = ({ chalet }) => {
             setSyncing(false);
 
             if (stats && stats.imported > 0) {
-                addNotification('success', 'Sync Complete', `Imported ${stats.imported} bookings. (${stats.errors} errors)`);
+                // TRANSFORM & SAVE TO STATE
+                const newBookings = (stats.events || []).map(event => {
+                    return {
+                        id: event.uid || `ical-${Math.random()}`,
+                        chaletId: chalet.id,
+                        platformId: event.platform || 'direct',
+                        guestId: 'guest-external', // Placeholder
+                        checkInDate: event.start.split('T')[0], // Assuming ISO or similar
+                        checkOutDate: event.end.split('T')[0],
+                        totalRevenue: 0, // Unknown from iCal
+                        totalNights: 1, // simplified calculation
+                        status: 'confirmed'
+                    };
+                });
+
+                importBookings(newBookings);
+                addNotification('success', 'Sync Complete', `Imported ${stats.imported} bookings.`);
             } else if (stats && stats.errors > 0) {
                 addNotification('warning', 'Sync Issue', `Completed with ${stats.errors} errors.`);
             } else {
