@@ -91,7 +91,7 @@ const PropertyDetail = () => {
                                         }
                                     } catch (e) {
                                         console.error("Import Error Details:", e);
-                                        alert(`Import Failed: ${e.message}\n\nTroubleshooting:\n1. Check your RapidAPI Key in Vercel Settings.\n2. Ensure you are subscribed to 'Airbnb Data (Vibe)' API.\n3. Verify VITE_RAPIDAPI_HOST is 'airbnb-data.p.rapidapi.com'.`);
+                                        alert(`Import Failed: ${e.message}\n\nTroubleshooting:\n1. Check your RapidAPI Key in Vercel Settings.\n2. Ensure you are subscribed to 'Airbnb (3B Data)' API.\n3. Verify VITE_RAPIDAPI_HOST is 'airbnb13.p.rapidapi.com'.`);
                                     }
                                 }}
                             >

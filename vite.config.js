@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/airbnb': {
-        target: 'https://airbnb-data.p.rapidapi.com',
+        target: 'https://airbnb13.p.rapidapi.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/airbnb/, ''),
       },
