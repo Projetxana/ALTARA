@@ -14,8 +14,12 @@ export default async function handler(req, res) {
         const nodeIcal = await import('node-ical');
         const axios = await import('axios');
 
-        // fetch the ical data
-        const response = await axios.default.get(url);
+        // fetch the ical data with User-Agent to avoid blocking
+        const response = await axios.default.get(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        });
         const data = await nodeIcal.async.parseICS(response.data);
 
         // Convert to array and filter

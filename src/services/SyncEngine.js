@@ -32,7 +32,8 @@ export const SyncEngine = {
                     let errMsg = 'Proxy fetch failed';
                     try {
                         const errJson = JSON.parse(errText);
-                        errMsg = errJson.error || errJson.details || errMsg;
+                        // Prefer details if available for debugging
+                        errMsg = (errJson.details && errJson.details !== 'undefined') ? errJson.details : (errJson.error || errMsg);
                     } catch (e) {
                         errMsg = `Error ${response.status}: ${errText.substring(0, 50)}`;
                     }
