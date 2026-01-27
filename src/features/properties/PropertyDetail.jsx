@@ -47,10 +47,10 @@ const PropertyDetail = () => {
 
                     {/* Manual Price Edit */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Base Night Price (€)</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Base Night Price ({formatPrice(0).replace(/\d|\s/g, '')})</label>
                         <input
                             type="number"
-                            defaultValue={chalet.baseNightPrice}
+                            defaultValue={chalet.baseNightPrice || 0}
                             style={{
                                 width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
                                 background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.2rem'
@@ -109,21 +109,21 @@ const PropertyDetail = () => {
                         <DollarSign size={18} />
                         <span style={{ fontSize: '0.9rem' }}>{t('prop_base_price')}</span>
                     </div>
-                    <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>{formatPrice(chalet.baseNightPrice)}</div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>{formatPrice(chalet.baseNightPrice || 0)}</div>
                 </div>
                 <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>
                         <Calendar size={18} />
                         <span style={{ fontSize: '0.9rem' }}>{t('prop_min_stay')}</span>
                     </div>
-                    <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>{chalet.minStay} {t('nights')}</div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>{chalet.minStay || 2} {t('nights')}</div>
                 </div>
                 <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>
                         <BarChart2 size={18} />
                         <span style={{ fontSize: '0.9rem' }}>{t('analytics_occupancy')}</span>
                     </div>
-                    <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>85%</div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>0%</div>
                 </div>
             </div>
 
