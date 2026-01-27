@@ -240,19 +240,23 @@ const CalendarBoard = () => {
                                 </div>
 
                                 {bookingsForDay.map(booking => {
-                                    const platform = getPlatformById(booking.platformId);
-                                    const guest = getGuestById(booking.guestId);
-                                    // Calculate mock daily revenue
-                                    const dailyRev = booking.totalNights > 0 ? Math.round(booking.totalRevenue / booking.totalNights) : 0;
+                                    // Logic requested by user for coloring
+                                    // Mapping internal schema to the requested visual logic
+                                    const backgroundColor =
+                                        booking.source === "airbnb" ? "#FF5A5F" :
+                                            booking.source === "manual" ? "#4CAF50" :
+                                                booking.source === "booking" ? "#3F51B5" :
+                                                    booking.source === "vrbo" ? "#FF9800" :
+                                                        "#9E9E9E";
 
                                     return (
                                         <ReservationCard
                                             key={booking.id}
-                                            guestName={guest?.fullName || 'Unknown'}
-                                            platform={platform}
-                                            revenue={formatPrice(dailyRev)}
+                                            guestName={booking.guestName || booking.guest || 'Unknown'}
+                                            platform={{ name: booking.source, color: backgroundColor }} // Mocking platform obj to pass color
+                                            color={backgroundColor}
+                                            revenue={formatPrice(booking.totalRevenue || 0)}
                                             upsells={booking.upsells}
-                                            color={platform?.color}
                                         />
                                     );
                                 })}

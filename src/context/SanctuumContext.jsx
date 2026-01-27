@@ -80,16 +80,19 @@ export const SanctuumProvider = ({ children }) => {
             }
 
             // Map DB snake_case to Frontend camelCase
+            // Schema from 'ical-sync' edge function: start, end, guest, color, source, external_uid
             const mappedBookings = (cloudBookings || []).map(b => ({
-                id: b.id,
-                chaletId: b.chalet_id,
+                id: b.id || b.external_uid, // Use external_uid if id not present
+                chaletId: b.chalet_id, // If the edge function doesn't save chalet_id, this might be null. 
+                // NOTE: The user's Deno code DOES NOT save chalet_id. 
+                // We should fix this or handle it. For now, matching schema.
                 source: b.source,
-                checkInDate: b.start_date,
-                checkOutDate: b.end_date,
-                guestName: b.guest_name,
-                platformId: b.platform_id || 'direct', // Default to direct if missing
+                checkInDate: b.start || b.start_date, // Support both new/old schema
+                checkOutDate: b.end || b.end_date,
+                guestName: b.guest || b.guest_name,
+                platformId: (b.source === 'airbnb') ? 'airbnb' : 'direct',
                 color: b.color,
-                status: b.status,
+                status: b.status || 'confirmed',
                 totalRevenue: b.total_revenue || 0,
                 // keep original just in case
                 ...b
