@@ -1,3 +1,5 @@
+import { syncAirbnbCalendar } from '../features/calendar/AirbnbSyncService';
+
 export const SyncEngine = {
     init: () => {
         console.log('[Sanctuum Core] Sync Engine Initialized.');
@@ -24,30 +26,14 @@ export const SyncEngine = {
             if (!url) continue;
 
             try {
-                // CALL SERVERLESS SYNC (Supabase Upsert)
-                const response = await fetch('/api/ical-sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, chaletId })
-                });
-
-                if (!response.ok) {
-                    const errText = await response.text();
-                    let errMsg = 'Sync failed';
-                    try {
-                        const errJson = JSON.parse(errText);
-                        errMsg = errJson.error || errJson.details || errMsg;
-                    } catch (e) {
-                        errMsg = `Error ${response.status}: ${errText.substring(0, 50)}`;
-                    }
-                    throw new Error(errMsg);
+                if (platform === 'airbnb') {
+                    await syncAirbnbCalendar(url);
+                    console.log(`[${platform}] Sync OK via AirbnbSyncService.`);
+                    stats.imported += 1;
+                } else {
+                    // Fallback mechanism (optional) or log unimplemented
+                    console.warn(`[${platform}] No specific sync service implemented.`);
                 }
-
-                const data = await response.json();
-                console.log(`[${platform}] Synced ${data.imported} events.`);
-
-                // Update stats
-                stats.imported += data.imported || 0;
 
             } catch (error) {
                 console.error(`[${platform}] Sync Error:`, error);
