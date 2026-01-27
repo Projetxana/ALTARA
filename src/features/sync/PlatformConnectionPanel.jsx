@@ -8,6 +8,7 @@ const PlatformConnectionPanel = ({ chalet }) => {
     const { updateChaletConnections, platforms, importBookings } = useSanctuum();
     const { addNotification } = useNotification();
     const [syncing, setSyncing] = useState(false);
+    const [progress, setProgress] = useState(''); // New state for progress text
 
     // Initial state from chalet or defaults
     const [connections, setConnections] = useState(chalet.connections || {});
@@ -26,11 +27,15 @@ const PlatformConnectionPanel = ({ chalet }) => {
 
     const handleManualSync = async () => {
         setSyncing(true);
+        setProgress('Starting sync...'); // Init progress
         addNotification('info', 'Sync Started', 'Fetching latest calendars...');
 
         try {
-            const stats = await SyncEngine.syncNow(chalet.id, connections);
+            // Pass setProgress as callback
+            const stats = await SyncEngine.syncNow(chalet.id, connections, (msg) => setProgress(msg));
+
             setSyncing(false);
+            setProgress('');
 
             if (stats && stats.imported > 0) {
                 addNotification('success', 'Sync Complete', `Imported ${stats.imported} bookings.`);
@@ -43,6 +48,7 @@ const PlatformConnectionPanel = ({ chalet }) => {
             }
         } catch (err) {
             setSyncing(false);
+            setProgress('');
             console.error(err);
             addNotification('error', 'Sync Failed', err.message || 'Could not connect to calendar proxy.');
         }
@@ -55,21 +61,34 @@ const PlatformConnectionPanel = ({ chalet }) => {
                     <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Platform Connections</h3>
                     <p style={{ color: 'var(--color-text-muted)' }}>Manage iCal synchronization for {chalet.name}</p>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button
-                        onClick={handleSave}
-                        style={{ padding: '0.75rem 1.5rem', background: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff', cursor: 'pointer' }}>
-                        Save URLs
-                    </button>
-                    <button
-                        onClick={handleManualSync}
-                        className="btn-primary"
-                        disabled={syncing}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: syncing ? 0.7 : 1 }}
-                    >
-                        <RefreshCw size={18} className={syncing ? "spin-animation" : ""} />
-                        <span>{syncing ? 'Syncing...' : 'Sync Now'}</span>
-                    </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            onClick={handleSave}
+                            style={{ padding: '0.75rem 1.5rem', background: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff', cursor: 'pointer' }}>
+                            Save URLs
+                        </button>
+                        <button
+                            onClick={handleManualSync}
+                            className="btn-primary"
+                            disabled={syncing}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: syncing ? 0.7 : 1 }}
+                        >
+                            <RefreshCw size={18} className={syncing ? "spin-animation" : ""} />
+                            <span>{syncing ? 'Syncing...' : 'Sync Now'}</span>
+                        </button>
+                    </div>
+                    {/* PROGRESS BAR UI */}
+                    {syncing && (
+                        <div style={{ width: '100%', maxWidth: '200px' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '4px', textAlign: 'right' }}>
+                                {progress}
+                            </div>
+                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                <div className="indeterminate-bar" style={{ width: '100%', height: '100%', background: 'var(--color-primary)', transformOrigin: 'left' }}></div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -138,6 +157,15 @@ const PlatformConnectionPanel = ({ chalet }) => {
             <style>{`
                 @keyframes spin { 100% { transform: rotate(360deg); } }
                 .spin-animation { animation: spin 1s linear infinite; }
+                
+                @keyframes indeterminate {
+                    0% { transform: translateX(-100%) scaleX(0.2); }
+                    50% { transform: translateX(0%) scaleX(0.5); }
+                    100% { transform: translateX(100%) scaleX(0.2); }
+                }
+                .indeterminate-bar {
+                    animation: indeterminate 1.5s infinite linear;
+                }
             `}</style>
         </div>
     );

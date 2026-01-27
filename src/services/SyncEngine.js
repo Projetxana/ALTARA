@@ -12,11 +12,13 @@ export const SyncEngine = {
         }, 15 * 60 * 1000);
     },
 
-    syncNow: async (chaletId, connections) => {
+    syncNow: async (chaletId, connections, onProgress = () => { }) => {
         console.log(`[Sanctuum Core] syncing Chalet ${chaletId}...`);
+        onProgress("Initializing Sync Engine...");
 
         if (!connections || Object.keys(connections).length === 0) {
             console.log("No connections configured.");
+            onProgress("No connections found.");
             return;
         }
 
@@ -27,16 +29,20 @@ export const SyncEngine = {
 
             try {
                 if (platform === 'airbnb') {
+                    onProgress(`Syncing ${platform}...`);
                     await syncAirbnbCalendar(url);
                     console.log(`[${platform}] Sync OK via AirbnbSyncService.`);
+                    onProgress(`${platform} synced successfully.`);
                     stats.imported += 1;
                 } else {
+                    onProgress(`Processing ${platform}...`);
                     // Fallback mechanism (optional) or log unimplemented
                     console.warn(`[${platform}] No specific sync service implemented.`);
                 }
 
             } catch (error) {
                 console.error(`[${platform}] Sync Error:`, error);
+                onProgress(`Error syncing ${platform}: ${error.message}`);
                 stats.errors++;
                 // Propagate if single connection for UI feedback
                 if (Object.keys(connections).length === 1) {
@@ -49,6 +55,7 @@ export const SyncEngine = {
             throw new Error(`Sync failed for all connections.`);
         }
 
+        onProgress("Sync Complete!");
         return stats;
     },
 
