@@ -33,23 +33,9 @@ const PlatformConnectionPanel = ({ chalet }) => {
             setSyncing(false);
 
             if (stats && stats.imported > 0) {
-                // TRANSFORM & SAVE TO STATE
-                const newBookings = (stats.events || []).map(event => {
-                    return {
-                        id: event.uid || `ical-${Math.random()}`,
-                        chaletId: chalet.id,
-                        platformId: event.platform || 'direct',
-                        guestId: 'guest-external', // Placeholder
-                        checkInDate: event.start.split('T')[0], // Assuming ISO or similar
-                        checkOutDate: event.end.split('T')[0],
-                        totalRevenue: 0, // Unknown from iCal
-                        totalNights: 1, // simplified calculation
-                        status: 'confirmed'
-                    };
-                });
-
-                importBookings(newBookings);
                 addNotification('success', 'Sync Complete', `Imported ${stats.imported} bookings.`);
+                // Refresh to fetch new data from Supabase
+                setTimeout(() => window.location.reload(), 1000);
             } else if (stats && stats.errors > 0) {
                 addNotification('warning', 'Sync Issue', `Completed with ${stats.errors} errors.`);
             } else {

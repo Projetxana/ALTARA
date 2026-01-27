@@ -70,7 +70,32 @@ export const SanctuumProvider = ({ children }) => {
                 setChalets(cloudChalets || []);
             }
 
-            // Fetch Bookings (Cloud) (Not implemented locally before, but good to have)
+            // Fetch Bookings (Cloud)
+            const { data: cloudBookings, error: bookingError } = await supabase
+                .from('bookings')
+                .select('*');
+
+            if (bookingError) {
+                console.error('Error fetching bookings:', bookingError);
+            }
+
+            // Map DB snake_case to Frontend camelCase
+            const mappedBookings = (cloudBookings || []).map(b => ({
+                id: b.id,
+                chaletId: b.chalet_id,
+                source: b.source,
+                checkInDate: b.start_date,
+                checkOutDate: b.end_date,
+                guestName: b.guest_name,
+                platformId: b.platform_id || 'direct', // Default to direct if missing
+                color: b.color,
+                status: b.status,
+                totalRevenue: b.total_revenue || 0,
+                // keep original just in case
+                ...b
+            }));
+
+            setBookings(mappedBookings);
         };
 
         fetchData();
@@ -78,28 +103,12 @@ export const SanctuumProvider = ({ children }) => {
 
     // --- PERSISTENCE (LocalStorage Fallback) ---
     // Save Chalets to LocalStorage whenever they change (to keep 'connections')
+    // Bookings are now in Supabase, so no need to persist to LS
     useEffect(() => {
         if (chalets.length > 0) {
             localStorage.setItem('altara_chalets_v2', JSON.stringify(chalets));
         }
     }, [chalets]);
-
-    // Load/Save Bookings
-    useEffect(() => {
-        const savedBookings = localStorage.getItem('altara_bookings');
-        if (savedBookings) {
-            try {
-                setBookings(JSON.parse(savedBookings));
-            } catch (e) { console.error("Failed to load bookings", e); }
-        }
-    }, []);
-
-    useEffect(() => {
-        if (bookings.length > 0) {
-            localStorage.setItem('altara_bookings', JSON.stringify(bookings));
-        }
-    }, [bookings]);
-
 
     const [selectedChaletId, setSelectedChaletId] = useState(null);
     const currentChalet = chalets.find(c => c.id === selectedChaletId) || chalets[0] || null;

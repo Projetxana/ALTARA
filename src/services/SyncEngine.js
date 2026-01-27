@@ -24,16 +24,19 @@ export const SyncEngine = {
             if (!url) continue;
 
             try {
-                // CALL OUR SERVERLESS PROXY
-                const response = await fetch(`/api/fetch-calendar?url=${encodeURIComponent(url)}`);
+                // CALL SERVERLESS SYNC (Supabase Upsert)
+                const response = await fetch('/api/ical-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, chaletId })
+                });
 
                 if (!response.ok) {
                     const errText = await response.text();
-                    let errMsg = 'Proxy fetch failed';
+                    let errMsg = 'Sync failed';
                     try {
                         const errJson = JSON.parse(errText);
-                        // Prefer details if available for debugging
-                        errMsg = (errJson.details && errJson.details !== 'undefined') ? errJson.details : (errJson.error || errMsg);
+                        errMsg = errJson.error || errJson.details || errMsg;
                     } catch (e) {
                         errMsg = `Error ${response.status}: ${errText.substring(0, 50)}`;
                     }
@@ -41,20 +44,15 @@ export const SyncEngine = {
                 }
 
                 const data = await response.json();
-                const events = data.events;
+                console.log(`[${platform}] Synced ${data.imported} events.`);
 
-                console.log(`[${platform}] Fetched ${events.length} events.`);
-
-                // PROCESS EVENTS (Upsert to DB)
-                // In a real app, you would call Supabase here to save events
-                // For now, we return them to the UI to update local state
-                stats.imported += events.length;
-                stats.events = [...(stats.events || []), ...events.map(e => ({ ...e, platform }))];
+                // Update stats
+                stats.imported += data.imported || 0;
 
             } catch (error) {
                 console.error(`[${platform}] Sync Error:`, error);
                 stats.errors++;
-                // Propagate the LAST error to help with UI feedback if it's a single sync
+                // Propagate if single connection for UI feedback
                 if (Object.keys(connections).length === 1) {
                     throw error;
                 }
