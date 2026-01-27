@@ -76,6 +76,30 @@ export const SanctuumProvider = ({ children }) => {
         fetchData();
     }, [user]);
 
+    // --- PERSISTENCE (LocalStorage Fallback) ---
+    // Save Chalets to LocalStorage whenever they change (to keep 'connections')
+    useEffect(() => {
+        if (chalets.length > 0) {
+            localStorage.setItem('altara_chalets_v2', JSON.stringify(chalets));
+        }
+    }, [chalets]);
+
+    // Load/Save Bookings
+    useEffect(() => {
+        const savedBookings = localStorage.getItem('altara_bookings');
+        if (savedBookings) {
+            try {
+                setBookings(JSON.parse(savedBookings));
+            } catch (e) { console.error("Failed to load bookings", e); }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (bookings.length > 0) {
+            localStorage.setItem('altara_bookings', JSON.stringify(bookings));
+        }
+    }, [bookings]);
+
 
     const [selectedChaletId, setSelectedChaletId] = useState(null);
     const currentChalet = chalets.find(c => c.id === selectedChaletId) || chalets[0] || null;
@@ -110,7 +134,8 @@ export const SanctuumProvider = ({ children }) => {
     const getBookingsForChalet = (chaletId) => bookings.filter(b => b.chaletId === chaletId);
 
     const updateChaletConnections = (chaletId, connections) => {
-        // Implement Cloud Update
+        // Implement Cloud Update - TODO: Update Supabase if column exists
+        // For now, LocalStorage (via useEffect) handles persistence
         setChalets(prev => prev.map(c => c.id === chaletId ? { ...c, connections } : c));
     };
 
@@ -129,10 +154,9 @@ export const SanctuumProvider = ({ children }) => {
 
     const importBookings = (newBookings) => {
         setBookings(prev => {
-            // Simple de-duplication by ensuring unique start date per chalet (very basic)
-            // ideally we use ID, but external IDs might vary.
-            // For now, just append to demonstrate sync.
-            return [...prev, ...newBookings];
+            const existingIds = new Set(prev.map(b => b.id));
+            const uniqueNew = newBookings.filter(b => !existingIds.has(b.id));
+            return [...prev, ...uniqueNew];
         });
     };
 
