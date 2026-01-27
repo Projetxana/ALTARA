@@ -42,7 +42,7 @@ const PlatformConnectionPanel = ({ chalet }) => {
         } catch (err) {
             setSyncing(false);
             console.error(err);
-            addNotification('error', 'Sync Failed', 'Could not connect to calendar proxy.');
+            addNotification('error', 'Sync Failed', err.message || 'Could not connect to calendar proxy.');
         }
     };
 

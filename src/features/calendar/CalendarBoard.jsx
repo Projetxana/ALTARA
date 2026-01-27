@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Filter, Home } from 'lucide-react';
 import { useSanctuum } from '../../context/SanctuumContext';
 import ReservationCard from './ReservationCard';
@@ -13,24 +13,63 @@ const CalendarBoard = () => {
         getPlatformById,
         getGuestById,
         experiences,
-        formatPrice // ADDED
+        formatPrice
     } = useSanctuum();
+
+    // STATE: Dynamic Calendar Date
+    const [viewDate, setViewDate] = useState(new Date());
 
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    // Generate dates for Jan 2026
-    const generateDates = () => {
+    // Generate dates for current viewDate (Month)
+    const generateDates = (date) => {
+        const year = date.getFullYear();
+        const month = date.getMonth(); // 0-indexed
+
+        // First day of month
+        const firstDay = new Date(year, month, 1);
+        // Last day of month
+        const lastDay = new Date(year, month + 1, 0);
+
         const dates = [];
-        for (let i = 1; i <= 31; i++) {
-            // Simple mock date object
+
+        // Padding for starting day (if month doesn't start on Monday)
+        // Day of week: 0 (Sun) - 6 (Sat)
+        // We want Mon=0, Sun=6
+        let startDay = firstDay.getDay();
+        if (startDay === 0) startDay = 7; // Convert Sun 0 to 7 for easy math
+        startDay -= 1; // Make Mon 0
+
+        // Add empty slots for padding
+        for (let j = 0; j < startDay; j++) {
+            dates.push(null);
+        }
+
+        // Days in month
+        const numDays = lastDay.getDate();
+        for (let i = 1; i <= numDays; i++) {
             const dayString = i < 10 ? `0${i}` : `${i}`;
-            const dateStr = `2026-01-${dayString}`;
+            const monthString = (month + 1) < 10 ? `0${month + 1}` : `${month + 1}`;
+            const dateStr = `${year}-${monthString}-${dayString}`;
             dates.push({ day: i, dateStr });
         }
+
         return dates;
     };
 
-    const dates = generateDates();
+    const dates = generateDates(viewDate);
+
+    // Handlers for navigation
+    const nextMonth = () => {
+        setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    };
+
+    const prevMonth = () => {
+        setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    };
+
+    // Formatter for Header
+    const monthLabel = viewDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
     if (!currentChalet) {
         return (
@@ -48,7 +87,9 @@ const CalendarBoard = () => {
     const chaletBookings = getBookingsForChalet(selectedChaletId);
 
     const getBookingForDate = (dateStr) => {
+        if (!dateStr) return [];
         // Find booking where date is within range [checkIn, checkOut)
+        // ALSO: Be robust to string/date mismatch. Assuming strings "YYYY-MM-DD"
         return chaletBookings.filter(b => {
             return dateStr >= b.checkInDate && dateStr < b.checkOutDate;
         });
@@ -121,14 +162,23 @@ const CalendarBoard = () => {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)' }}>
-                            <button style={{ padding: '0.5rem', border: 'none', background: 'transparent', color: 'var(--color-text-main)', cursor: 'pointer' }}>
+                            <button
+                                onClick={prevMonth}
+                                style={{ padding: '0.5rem', border: 'none', background: 'transparent', color: 'var(--color-text-main)', cursor: 'pointer' }}>
                                 <ChevronLeft size={20} />
                             </button>
-                            <span style={{ padding: '0 1rem', fontWeight: 600, fontSize: '0.95rem' }}>January 2026</span>
-                            <button style={{ padding: '0.5rem', border: 'none', background: 'transparent', color: 'var(--color-text-main)', cursor: 'pointer' }}>
+                            <span style={{ padding: '0 1rem', fontWeight: 600, fontSize: '0.95rem', minWidth: '140px', textAlign: 'center' }}>{monthLabel}</span>
+                            <button
+                                onClick={nextMonth}
+                                style={{ padding: '0.5rem', border: 'none', background: 'transparent', color: 'var(--color-text-main)', cursor: 'pointer' }}>
                                 <ChevronRight size={20} />
                             </button>
                         </div>
+                        <button
+                            onClick={() => setViewDate(new Date())}
+                            style={{ fontSize: '0.8rem', background: 'none', border: '1px solid var(--color-border)', padding: '0.25rem 0.75rem', borderRadius: '4px', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+                            Today
+                        </button>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
@@ -161,6 +211,11 @@ const CalendarBoard = () => {
                 {/* Scrollable Grid */}
                 <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridAutoRows: 'minmax(120px, 1fr)' }}>
                     {dates.map((dateObj, i) => {
+                        // Handle Padding Strings (nulls)
+                        if (!dateObj) {
+                            return <div key={`pad-${i}`} style={{ background: 'rgba(0,0,0,0.2)', borderRight: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}></div>;
+                        }
+
                         const bookingsForDay = getBookingForDate(dateObj.dateStr);
 
                         return (
@@ -187,14 +242,8 @@ const CalendarBoard = () => {
                                 {bookingsForDay.map(booking => {
                                     const platform = getPlatformById(booking.platformId);
                                     const guest = getGuestById(booking.guestId);
-                                    const isCheckIn = booking.checkInDate === dateObj.dateStr;
-                                    // Calculate mock daily revenue simply by dividing total
-                                    const dailyRev = Math.round(booking.totalRevenue / booking.totalNights);
-
-                                    // Only show card if it is check-in OR first of month if spanning (simplified for this view)
-                                    // For grid view, we usually show a pill spanning. 
-                                    // To follow the "Night Cell" requirement: "Each night cell shows...". 
-                                    // We will render a card for THIS night.
+                                    // Calculate mock daily revenue
+                                    const dailyRev = booking.totalNights > 0 ? Math.round(booking.totalRevenue / booking.totalNights) : 0;
 
                                     return (
                                         <ReservationCard
@@ -207,8 +256,6 @@ const CalendarBoard = () => {
                                         />
                                     );
                                 })}
-
-
                             </div>
                         );
                     })}

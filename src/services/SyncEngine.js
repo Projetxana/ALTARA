@@ -26,7 +26,18 @@ export const SyncEngine = {
             try {
                 // CALL OUR SERVERLESS PROXY
                 const response = await fetch(`/api/fetch-calendar?url=${encodeURIComponent(url)}`);
-                if (!response.ok) throw new Error('Proxy fetch failed');
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    let errMsg = 'Proxy fetch failed';
+                    try {
+                        const errJson = JSON.parse(errText);
+                        errMsg = errJson.error || errJson.details || errMsg;
+                    } catch (e) {
+                        errMsg = `Error ${response.status}: ${errText.substring(0, 50)}`;
+                    }
+                    throw new Error(errMsg);
+                }
 
                 const data = await response.json();
                 const events = data.events;
@@ -41,7 +52,15 @@ export const SyncEngine = {
             } catch (error) {
                 console.error(`[${platform}] Sync Error:`, error);
                 stats.errors++;
+                // Propagate the LAST error to help with UI feedback if it's a single sync
+                if (Object.keys(connections).length === 1) {
+                    throw error;
+                }
             }
+        }
+
+        if (stats.errors > 0 && stats.imported === 0) {
+            throw new Error(`Sync failed for all connections.`);
         }
 
         return stats;
