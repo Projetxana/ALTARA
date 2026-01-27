@@ -9,7 +9,7 @@ import ListingLabPanel from './ListingLabPanel';
 const PropertyDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { chalets, formatPrice } = useSanctuum();
+    const { chalets, formatPrice, updateChalet } = useSanctuum();
     const { t } = useLanguage();
 
     const chalet = chalets.find(c => c.id === id);
@@ -56,6 +56,38 @@ const PropertyDetail = () => {
                                 background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.2rem'
                             }}
                         />
+                    </div>
+
+                    {/* Photo URL Edit */}
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Photo URL</label>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                                type="text"
+                                placeholder="https://..."
+                                defaultValue={chalet.image_url || ''}
+                                id="photo-url-input"
+                                style={{
+                                    flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)',
+                                    background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1rem'
+                                }}
+                            />
+                            <button
+                                className="btn-primary"
+                                onClick={() => {
+                                    const url = document.getElementById('photo-url-input').value;
+                                    updateChalet(chalet.id, { image_url: url });
+                                    alert('Photo URL saved!');
+                                }}
+                            >
+                                Save
+                            </button>
+                        </div>
+                        {chalet.image_url && (
+                            <div style={{ marginTop: '1rem', borderRadius: 'var(--radius-md)', overflow: 'hidden', height: '150px', border: '1px solid var(--color-border)' }}>
+                                <img src={chalet.image_url} alt="Chalet" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
+                        )}
                     </div>
 
                     {/* Airbnb Sync */}

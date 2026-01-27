@@ -145,29 +145,30 @@ export const SanctuumProvider = ({ children }) => {
     const getGuestById = (id) => null; // Removed mock John Doe
     const getBookingsForChalet = (chaletId) => bookings.filter(b => b.chaletId === chaletId);
 
-    const updateChaletConnections = async (chaletId, connections) => {
+    const updateChalet = async (chaletId, updates) => {
         // 1. Optimistic Update (Local)
-        setChalets(prev => prev.map(c => c.id === chaletId ? { ...c, connections } : c));
+        setChalets(prev => prev.map(c => c.id === chaletId ? { ...c, ...updates } : c));
 
         // 2. Persist to Cloud
         if (user) {
             try {
                 const { error } = await supabase
                     .from('chalets')
-                    .update({ connections })
+                    .update(updates)
                     .eq('id', chaletId);
 
                 if (error) {
-                    console.error("Error saving connections to Supabase:", error);
-                    // If error is "column connections does not exist", we know the issue.
+                    console.error("Error saving chalet update to Supabase:", error);
                 } else {
-                    console.log("Connections saved to Supabase!");
+                    console.log("Chalet updated in Supabase!");
                 }
             } catch (err) {
                 console.error("Persist request failed:", err);
             }
         }
     };
+
+    const updateChaletConnections = (chaletId, connections) => updateChalet(chaletId, { connections });
 
     const createBooking = (bookingData) => {
         // Mock for now, should be Supabase insert
@@ -244,6 +245,8 @@ export const SanctuumProvider = ({ children }) => {
             getPlatformById,
             getGuestById,
             getBookingsForChalet,
+            getBookingsForChalet,
+            updateChalet,
             updateChaletConnections,
             createBooking,
             importBookings,
