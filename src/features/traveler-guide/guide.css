@@ -203,15 +203,26 @@
 
 /* 1. Unified Header (Replaces old header bar) */
 /* 1. Unified Header (Replaces old header bar) */
+/* 1. Unified Header (Replaces old header bar) */
 .tg-unified-header {
     background-color: #F8F4EA;
-    /* Slightly darker/warmer beige */
     padding: 2.5rem 1.5rem 1.5rem 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
+    position: sticky; /* Make it sticky */
+    top: 0;
+    z-index: 100;
     border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.tg-unified-header.tg-header-compact {
+    padding: 1rem 1.5rem;
+    background-color: rgba(253, 251, 247, 0.98);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .tg-header-back-absolute {
@@ -224,6 +235,11 @@
     cursor: pointer;
     opacity: 0.6;
     z-index: 20;
+    transition: top 0.3s ease;
+}
+
+.tg-header-compact .tg-header-back-absolute {
+    top: 1.25rem; /* Better alignment when compact */
 }
 
 .tg-header-welcome {
@@ -235,24 +251,36 @@
     line-height: 1;
     position: relative;
     z-index: 1;
+    transition: all 0.3s ease;
+    height: auto;
+    opacity: 1;
+}
+
+.tg-header-compact .tg-header-welcome {
+    height: 0;
+    opacity: 0;
+    margin: 0;
+    overflow: hidden;
 }
 
 .tg-header-script {
     font-family: var(--tg-font-script);
     font-size: 1.5rem;
     color: var(--tg-primary);
-    /* Taupe */
-
-    /* Absolute positioning relative to header container */
     position: absolute;
     top: 3.8rem;
-    /* Adjust based on welcome text height */
     left: 50%;
     margin-left: 20px;
-    /* Offset to right of center line */
     transform: rotate(-5deg);
     white-space: nowrap;
     z-index: 2;
+    transition: all 0.3s ease;
+    opacity: 1;
+}
+
+.tg-header-compact .tg-header-script {
+    opacity: 0;
+    top: 0rem; 
 }
 
 .tg-header-divider {
@@ -261,17 +289,30 @@
     background-color: var(--tg-primary);
     opacity: 0.4;
     margin: 1.2rem 0;
+    transition: all 0.3s ease;
+}
+
+.tg-header-compact .tg-header-divider {
+    height: 0;
+    margin: 0;
+    opacity: 0;
 }
 
 .tg-header-section-title {
     font-family: var(--tg-font-serif);
     font-size: 2rem;
-    /* Big */
     text-transform: uppercase;
     letter-spacing: 3px;
     color: var(--tg-text);
     margin: 0;
     text-align: center;
+    transition: all 0.3s ease;
+}
+
+.tg-header-compact .tg-header-section-title {
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    margin-top: 0.5rem; /* Add subtle spacing */
 }
 
 /* 2. Content Image (Now inside content area) */

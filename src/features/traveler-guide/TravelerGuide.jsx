@@ -145,6 +145,16 @@ const GuideItem = ({ item, layout }) => {
 
 const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
     const { guideData } = useGuide();
+    const [scrolled, setScrolled] = useState(false);
+
+    const handleScroll = (e) => {
+        const scrollTop = e.currentTarget.scrollTop;
+        if (scrollTop > 50) {
+            setScrolled(true);
+        } else {
+            setScrolled(false);
+        }
+    };
 
     // Default data if section not found
     const content = guideData.content[sectionId] || {
@@ -161,7 +171,7 @@ const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
     return (
         <div className="traveler-guide-mobile-frame">
             {/* 1. UNIFIED HEADER (New Design) */}
-            <div className="tg-unified-header">
+            <div className={`tg-unified-header ${scrolled ? 'tg-header-compact' : ''}`}>
                 <button className="tg-header-back-absolute" onClick={onBack}>
                     <ChevronLeft size={28} />
                 </button>
@@ -175,7 +185,7 @@ const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
             </div>
 
             {/* 2. Content Area */}
-            <div className="tg-scroll-content">
+            <div className="tg-scroll-content" onScroll={handleScroll}>
 
                 {/* Hero Image / Map moved inside content */}
                 <img
