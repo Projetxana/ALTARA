@@ -316,10 +316,10 @@ const TravelerGuide = () => {
                                     {/* Footer Image */}
                                     <div className="tg-home-footer-container">
                                         <img
-                                            src="/chalet_facade.jpg"
+                                            src={guideData.homeImage || "/chalet_facade.jpg"}
                                             alt="Chalet Facade"
                                             className="tg-home-footer-image clickable"
-                                            onClick={() => setExpandedImage('/chalet_facade.jpg')}
+                                            onClick={() => setExpandedImage(guideData.homeImage || '/chalet_facade.jpg')}
                                         />
                                     </div>
                                 </div>
