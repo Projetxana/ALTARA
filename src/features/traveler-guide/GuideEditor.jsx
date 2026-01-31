@@ -420,6 +420,21 @@ const GuideEditor = () => {
                                         </div>
 
                                         <div style={{ marginBottom: '0.5rem' }}>
+                                            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>GPS Link (Map Button)</label>
+                                            <input
+                                                type="text"
+                                                value={item.gpsLink || ''}
+                                                onChange={(e) => {
+                                                    const newItems = [...guideData.content[activeSection].items];
+                                                    newItems[index].gpsLink = e.target.value;
+                                                    updateSection(activeSection, { ...guideData.content[activeSection], items: newItems });
+                                                }}
+                                                placeholder="https://maps.google.com/..."
+                                                style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', color: '#fff' }}
+                                            />
+                                        </div>
+
+                                        <div style={{ marginBottom: '0.5rem' }}>
                                             <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Description</label>
                                             <input
                                                 type="text"

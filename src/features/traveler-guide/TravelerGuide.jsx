@@ -48,6 +48,17 @@ const GuideItem = ({ item, layout }) => {
                 {isOpen && hasDetails && (
                     <div className="tg-details-panel">
                         {item.details}
+                        {item.gpsLink && (
+                            <a
+                                href={item.gpsLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="tg-btn"
+                                style={{ marginTop: '1rem', textDecoration: 'none', background: '#2C2C2C', color: '#fff' }}
+                            >
+                                <span className="tg-btn-label" style={{ color: '#fff' }}>OBTENIR L'ITINÉRAIRE</span>
+                            </a>
+                        )}
                     </div>
                 )}
             </div>
