@@ -80,9 +80,11 @@
     flex-direction: column;
     align-items: center;
     border: none;
-    min-height: 90vh;
-    /* Fill screen */
-    justify-content: center;
+    min-height: auto;
+    /* Removed 90vh constraint */
+    justify-content: flex-start;
+    /* Start from top */
+    padding-bottom: 4rem;
 }
 
 .tg-home-title {
