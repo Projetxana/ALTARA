@@ -145,16 +145,6 @@ const GuideItem = ({ item, layout }) => {
 
 const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
     const { guideData } = useGuide();
-    const [scrolled, setScrolled] = useState(false);
-
-    const handleScroll = (e) => {
-        const scrollTop = e.currentTarget.scrollTop;
-        if (scrollTop > 50) {
-            setScrolled(true);
-        } else {
-            setScrolled(false);
-        }
-    };
 
     // Default data if section not found
     const content = guideData.content[sectionId] || {
@@ -170,22 +160,25 @@ const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
 
     return (
         <div className="traveler-guide-mobile-frame">
-            {/* 1. UNIFIED HEADER (New Design) */}
-            <div className={`tg-unified-header ${scrolled ? 'tg-header-compact' : ''}`}>
-                <button className="tg-header-back-absolute" onClick={onBack}>
-                    <ChevronLeft size={28} />
-                </button>
+            {/* BACK BUTTON (Fixed position, always visible) */}
+            <button className="tg-header-back-fixed" onClick={onBack}>
+                <ChevronLeft size={28} />
+            </button>
 
-                <h2 className="tg-header-welcome">BIENVENUE</h2>
-                <span className="tg-header-script">chez nous</span>
+            {/* Content Area with Native Scroll */}
+            <div className="tg-scroll-content">
 
-                <div className="tg-header-divider"></div>
+                {/* 1. HERO HEADER (Scrolls away) */}
+                <div className="tg-header-hero">
+                    <h2 className="tg-header-welcome">BIENVENUE</h2>
+                    <span className="tg-header-script">chez nous</span>
+                    <div className="tg-header-divider"></div>
+                </div>
 
-                <h1 className="tg-header-section-title">{content.title}</h1>
-            </div>
-
-            {/* 2. Content Area */}
-            <div className="tg-scroll-content" onScroll={handleScroll}>
+                {/* 2. STICKY TITLE BAR (Sticks to top) */}
+                <div className="tg-header-sticky-bar">
+                    <h1 className="tg-header-section-title">{content.title}</h1>
+                </div>
 
                 {/* Hero Image / Map moved inside content */}
                 <img
@@ -292,7 +285,7 @@ const TravelerGuide = () => {
                             backgroundColor: 'var(--tg-bg)' // Replaced image with solid color
                         }} />
 
-                        <div className="tg-content-layer" style={{ justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
+                        <div className="tg-content-layer" style={{ justifyContent: 'center', alignItems: 'center', padding: '1rem', overflowY: 'auto' }}>
                             <div className="tg-home-card full-width-card">
                                 <h1 className="tg-home-title">BIENVENUE</h1>
                                 <p className="tg-home-subtitle">chez nous</p>
