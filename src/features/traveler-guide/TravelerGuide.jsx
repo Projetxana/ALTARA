@@ -299,7 +299,7 @@ const TravelerGuide = () => {
                             backgroundColor: 'var(--tg-bg)' // Replaced image with solid color
                         }} />
 
-                        <div className="tg-content-layer" style={{ justifyContent: 'center', alignItems: 'center', padding: '1rem', overflowY: 'auto' }}>
+                        <div className="tg-content-layer" style={{ justifyContent: 'flex-start', alignItems: 'center', padding: '1rem', paddingTop: '4rem', overflowY: 'auto' }}>
                             <div className="tg-home-card full-width-card">
                                 <h1 className="tg-home-title">BIENVENUE</h1>
                                 <p className="tg-home-subtitle">chez nous</p>
