@@ -64,10 +64,18 @@ const GuideItem = ({ item, layout }) => {
                                 <DynamicIcon name={item.icon || 'info'} size={20} />
                             </div>
                         )}
-                        <div className="tg-row-label">{item.label || item.title}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div className="tg-row-label">{item.label || item.title}</div>
+                            {/* Value/RightText moved below title */}
+                            {rightText && (
+                                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '400', marginTop: '2px' }}>
+                                    {rightText}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="tg-row-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {rightText}
+                        {/* Right text removed from here */}
                         {hasDetails && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', fontWeight: '600', color: '#000' }}>
@@ -80,6 +88,12 @@ const GuideItem = ({ item, layout }) => {
                 </div>
                 {isOpen && hasDetails && (
                     <div className="tg-details-panel">
+                        {/* Description added above details */}
+                        {item.desc && (
+                            <div style={{ marginBottom: '1rem', fontStyle: 'italic', color: '#334155' }}>
+                                {item.desc}
+                            </div>
+                        )}
                         {item.details}
                     </div>
                 )}
