@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Loader } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const AuthPage = () => {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -43,7 +45,7 @@ const AuthPage = () => {
                 });
                 if (error) throw error;
                 // Auto login usually happens, or check email confirmation
-                alert("Account created! You can now log in."); // Or direct redirect if Supabase auto-confirms
+                alert(t('auth_account_created')); // Or direct redirect if Supabase auto-confirms
                 setIsLogin(true);
             }
         } catch (err) {
@@ -83,7 +85,7 @@ const AuthPage = () => {
                         ALTARA
                     </h1>
                     <p style={{ color: 'var(--color-text-muted)' }}>
-                        {isLogin ? 'Welcome back to your sanctuary.' : 'Join the new era of property management.'}
+                        {isLogin ? t('auth_welcome') : t('auth_join')}
                     </p>
                 </div>
 
@@ -109,7 +111,7 @@ const AuthPage = () => {
                             <input
                                 name="fullName"
                                 type="text"
-                                placeholder="Full Name"
+                                placeholder={t('auth_full_name')}
                                 value={formData.fullName}
                                 onChange={handleChange}
                                 required={!isLogin}
@@ -131,7 +133,7 @@ const AuthPage = () => {
                         <input
                             name="email"
                             type="email"
-                            placeholder="Email Address"
+                            placeholder={t('auth_email')}
                             value={formData.email}
                             onChange={handleChange}
                             required
@@ -152,7 +154,7 @@ const AuthPage = () => {
                         <input
                             name="password"
                             type="password"
-                            placeholder="Password"
+                            placeholder={t('auth_password')}
                             value={formData.password}
                             onChange={handleChange}
                             required
@@ -182,14 +184,14 @@ const AuthPage = () => {
                     >
                         {loading ? <Loader className="spin" size={20} /> : (
                             <>
-                                {isLogin ? 'Sign In' : 'Create Account'} <ArrowRight size={18} />
+                                {isLogin ? t('auth_sign_in') : t('auth_create_account')} <ArrowRight size={18} />
                             </>
                         )}
                     </button>
                 </form>
 
                 <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
-                    {isLogin ? "Don't have an account? " : "Already have an account? "}
+                    {isLogin ? t('auth_no_account') : t('auth_has_account')}
                     <button
                         onClick={() => setIsLogin(!isLogin)}
                         style={{
@@ -201,7 +203,7 @@ const AuthPage = () => {
                             textDecoration: 'underline'
                         }}
                     >
-                        {isLogin ? 'Sign Up' : 'Log In'}
+                        {isLogin ? t('auth_sign_up') : t('auth_login')}
                     </button>
                 </div>
             </div>

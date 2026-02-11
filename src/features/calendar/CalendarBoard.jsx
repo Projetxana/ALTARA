@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Filter, Home } from 'lucide-react';
 import { useSanctuum } from '../../context/SanctuumContext';
+import { useLanguage } from '../../context/LanguageContext';
 import ReservationCard from './ReservationCard';
+
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
+)
 
 const CalendarBoard = () => {
     const {
@@ -9,17 +17,50 @@ const CalendarBoard = () => {
         selectedChaletId,
         setSelectedChaletId,
         currentChalet,
-        getBookingsForChalet,
-        getPlatformById,
-        getGuestById,
-        experiences,
         formatPrice
     } = useSanctuum();
+    const { t, language } = useLanguage();
 
     // STATE: Dynamic Calendar Date
     const [viewDate, setViewDate] = useState(new Date());
+    const [events, setEvents] = useState([])
 
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    useEffect(() => {
+        const loadEvents = async () => {
+            // Corrected: Read from 'bookings' table where SyncEngine writes
+            const { data } = await supabase
+                .from('bookings')
+                .select('*')
+
+            const formatted = (data || []).map(e => {
+                // Formatting helper for YYYYMMDD -> YYYY-MM-DD
+                const formatDate = (str) => {
+                    if (!str) return '';
+                    if (str.length === 8) {
+                        return `${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}`;
+                    }
+                    return str; // Fallback or already formatted
+                };
+
+                return {
+                    id: e.external_uid,
+                    start: formatDate(e.start),
+                    end: formatDate(e.end),
+                    title: e.source,
+                    color: e.color,
+                    // Keep these for rendering if needed
+                    guestName: e.guest_name || 'Guest',
+                    source: e.source
+                };
+            })
+
+            setEvents(formatted)
+        }
+
+        loadEvents()
+    }, [])
+
+    const days = [t('cal_mon'), t('cal_tue'), t('cal_wed'), t('cal_thu'), t('cal_fri'), t('cal_sat'), t('cal_sun')];
 
     // Generate dates for current viewDate (Month)
     const generateDates = (date) => {
@@ -69,29 +110,26 @@ const CalendarBoard = () => {
     };
 
     // Formatter for Header
-    const monthLabel = viewDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+    const monthLabel = viewDate.toLocaleString(language, { month: 'long', year: 'numeric' });
 
     if (!currentChalet) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80vh', flexDirection: 'column', gap: '1rem', color: 'var(--color-text-muted)' }}>
                 <Home size={48} style={{ opacity: 0.5 }} />
-                <h3>Welcome to ALTARA</h3>
-                <p>You have no properties under management yet.</p>
+                <h3>{t('cal_welcome')}</h3>
+                <p>{t('cal_no_props')}</p>
                 <a href="/properties" className="btn-primary" style={{ textDecoration: 'none' }}>
-                    Create your first Property
+                    {t('cal_create_prop')}
                 </a>
             </div>
         );
     }
 
-    const chaletBookings = getBookingsForChalet(selectedChaletId);
-
     const getBookingForDate = (dateStr) => {
         if (!dateStr) return [];
-        // Find booking where date is within range [checkIn, checkOut)
-        // ALSO: Be robust to string/date mismatch. Assuming strings "YYYY-MM-DD"
-        return chaletBookings.filter(b => {
-            return dateStr >= b.checkInDate && dateStr < b.checkOutDate;
+        // Use new events state
+        return events.filter(b => {
+            return dateStr >= b.start && dateStr < b.end;
         });
     };
 
@@ -100,7 +138,7 @@ const CalendarBoard = () => {
 
             {/* 2. PLANNING UI - LEFT PANEL (Chalet Selector) */}
             <div className="glass-panel" style={{ borderRadius: 'var(--radius-lg)', padding: '1rem' }}>
-                <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Collection</h3>
+                <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('cal_collection')}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {chalets.map(chalet => (
                         <button
@@ -137,13 +175,13 @@ const CalendarBoard = () => {
                 </div>
 
                 <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Current Stats</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>{t('cal_stats')}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.85rem' }}>Occupancy</span>
+                        <span style={{ fontSize: '0.85rem' }}>{t('cal_occupancy')}</span>
                         <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>78%</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.85rem' }}>RevPAR</span>
+                        <span style={{ fontSize: '0.85rem' }}>{t('cal_revpar')}</span>
                         <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{formatPrice(currentChalet.baseNightPrice)}</span>
                     </div>
                 </div>
@@ -177,7 +215,7 @@ const CalendarBoard = () => {
                         <button
                             onClick={() => setViewDate(new Date())}
                             style={{ fontSize: '0.8rem', background: 'none', border: '1px solid var(--color-border)', padding: '0.25rem 0.75rem', borderRadius: '4px', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-                            Today
+                            {t('cal_today')}
                         </button>
                     </div>
 
@@ -240,21 +278,12 @@ const CalendarBoard = () => {
                                 </div>
 
                                 {bookingsForDay.map(booking => {
-                                    // Logic requested by user for coloring
-                                    // Mapping internal schema to the requested visual logic
-                                    const backgroundColor =
-                                        booking.source === "airbnb" ? "#FF5A5F" :
-                                            booking.source === "manual" ? "#4CAF50" :
-                                                booking.source === "booking" ? "#3F51B5" :
-                                                    booking.source === "vrbo" ? "#FF9800" :
-                                                        "#9E9E9E";
-
                                     return (
                                         <ReservationCard
                                             key={booking.id}
                                             guestName={booking.guestName || booking.guest || 'Unknown'}
-                                            platform={{ name: booking.source, color: backgroundColor }} // Mocking platform obj to pass color
-                                            color={backgroundColor}
+                                            platform={{ name: booking.source, color: booking.color }}
+                                            color={booking.color}
                                             revenue={formatPrice(booking.totalRevenue || 0)}
                                             upsells={booking.upsells}
                                         />

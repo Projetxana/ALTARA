@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGuide } from '../../context/GuideContext';
+import { supabase } from '../../lib/supabase';
 import { Save, RotateCcw, Plus, Trash2, Upload, ArrowUp, ArrowDown } from 'lucide-react';
 import { ICON_OPTIONS, DynamicIcon } from './utils/iconMap';
 
@@ -26,15 +27,39 @@ const GuideEditor = () => {
 
     const handleSave = async () => {
         setIsSaving(true);
+        // 1. Save "French" (Base) content
         const { success, error } = await saveToDatabase();
-        setIsSaving(false);
 
         if (success) {
-            alert("Changes saved to Database (Live)!");
+            try {
+                // 2. Trigger AI Translation (if needed)
+                // We send the ID so the function can refetch the fresh data and update it
+                // We use invoke with fire-and-forget or await depending on preference.
+                // Awaiting allows us to say "Saved & Translated"
+                const { data, error: fnError } = await supabase.functions.invoke('translate-guide', {
+                    body: { guideId: 1 } // Using hardcoded ID 1 as per context
+                });
+
+                if (fnError) throw fnError;
+
+                if (data?.updated) {
+                    alert("Changes saved & AI Translation updated!");
+                    // reload content? Context might need refresh
+                    window.location.reload();
+                } else {
+                    alert("Changes saved! (No new translations needed)");
+                }
+
+            } catch (translateError) {
+                console.error("Translation trigger failed:", translateError);
+                // Still success for the main save
+                alert("Changes saved, but auto-translation failed. Check console.");
+            }
         } else {
             console.error(error);
             alert("Failed to save. Error: " + (error?.message || "Unknown"));
         }
+        setIsSaving(false);
     };
 
     const handleImageUpload = async (e, targetField = 'image', itemIndex = null) => {

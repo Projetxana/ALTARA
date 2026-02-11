@@ -8,9 +8,20 @@ import { useGuide } from '../../context/GuideContext';
 /* --- Components --- */
 
 const GuideItem = ({ item, layout }) => {
+    const { t, t_content } = useGuide();
     const [isOpen, setIsOpen] = useState(false);
-    const hasDetails = !!item.details;
-    const rightText = item.right || item.text || item.value || item.contact;
+
+    const details = t_content(item, 'details');
+    const hasDetails = !!details;
+
+    // Resolve localized texts
+    const title = t_content(item, 'title') || t_content(item, 'label');
+    const desc = t_content(item, 'desc');
+    const text = t_content(item, 'text');
+    const right = t_content(item, 'right');
+
+    // Fallback logic for right text (matches previous logic but with localized values)
+    const rightText = right || text || item.value || item.contact;
 
     const toggleOpen = () => {
         if (hasDetails) setIsOpen(!isOpen);
@@ -22,7 +33,7 @@ const GuideItem = ({ item, layout }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', textAlign: 'center' }}>
 
                     {/* 1. Centered Title */}
-                    <div className="tg-list-title">{item.title || item.label}</div>
+                    <div className="tg-list-title">{title}</div>
 
                     {/* 2. Value / Right Text (Centered below title) */}
                     {rightText && (
@@ -32,13 +43,13 @@ const GuideItem = ({ item, layout }) => {
                     )}
 
                     {/* 3. Description (Below value) */}
-                    <div className="tg-list-desc">{item.desc}</div>
+                    <div className="tg-list-desc">{desc}</div>
 
                     {/* Chevron (if expandable) */}
                     {hasDetails && (
                         <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                             <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '600', color: '#000' }}>
-                                {isOpen ? 'Fermer' : 'Voir Plus'}
+                                {isOpen ? t.close : t.see_more}
                             </span>
                             <ChevronDown size={20} color="#000" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                         </div>
@@ -47,7 +58,7 @@ const GuideItem = ({ item, layout }) => {
 
                 {isOpen && hasDetails && (
                     <div className="tg-details-panel">
-                        {item.details}
+                        {details}
                         {item.gpsLink && (
                             <a
                                 href={item.gpsLink}
@@ -56,12 +67,13 @@ const GuideItem = ({ item, layout }) => {
                                 className="tg-btn"
                                 style={{ marginTop: '1rem', textDecoration: 'none', background: '#2C2C2C', color: '#fff' }}
                             >
-                                <span className="tg-btn-label" style={{ color: '#fff' }}>OBTENIR L'ITINÉRAIRE</span>
+                                <span className="tg-btn-label" style={{ color: '#fff' }}>{t.get_directions}</span>
                             </a>
                         )}
                     </div>
-                )}
-            </div>
+                )
+                }
+            </div >
         );
     }
 
@@ -76,7 +88,7 @@ const GuideItem = ({ item, layout }) => {
                             </div>
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div className="tg-row-label">{item.label || item.title}</div>
+                            <div className="tg-row-label">{title}</div>
                             {/* Value/RightText moved below title */}
                             {rightText && (
                                 <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '400', marginTop: '2px' }}>
@@ -90,7 +102,7 @@ const GuideItem = ({ item, layout }) => {
                         {hasDetails && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', fontWeight: '600', color: '#000' }}>
-                                    {isOpen ? 'Fermer' : 'Plus'}
+                                    {isOpen ? t.close : t.more}
                                 </span>
                                 <ChevronDown size={18} color="#000" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                             </div>
@@ -100,12 +112,12 @@ const GuideItem = ({ item, layout }) => {
                 {isOpen && hasDetails && (
                     <div className="tg-details-panel">
                         {/* Description added above details */}
-                        {item.desc && (
+                        {desc && (
                             <div style={{ marginBottom: '1rem', fontStyle: 'italic', color: '#334155' }}>
-                                {item.desc}
+                                {desc}
                             </div>
                         )}
-                        {item.details}
+                        {details}
                     </div>
                 )}
             </div>
@@ -119,13 +131,13 @@ const GuideItem = ({ item, layout }) => {
                 <div className="tg-grid-icon-box">
                     <DynamicIcon name={item.icon || 'info'} size={24} />
                 </div>
-                <div className="tg-grid-title">{item.title}</div>
-                <div className="tg-grid-text">{item.text}</div>
+                <div className="tg-grid-title">{title}</div>
+                <div className="tg-grid-text">{text}</div>
 
                 {hasDetails && (
                     <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                         <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 'bold', color: '#000' }}>
-                            {isOpen ? 'Fermer' : 'Plus'}
+                            {isOpen ? t.close : t.more}
                         </span>
                         <ChevronDown size={18} color="#000" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                     </div>
@@ -133,7 +145,7 @@ const GuideItem = ({ item, layout }) => {
 
                 {isOpen && hasDetails && (
                     <div className="tg-details-panel" style={{ marginTop: '1rem', width: '100%', textAlign: 'left', fontSize: '0.75rem' }}>
-                        {item.details}
+                        {details}
                     </div>
                 )}
             </div>
@@ -144,13 +156,13 @@ const GuideItem = ({ item, layout }) => {
     if (layout === 'wifi-card') {
         return (
             <div className="tg-wifi-card" onClick={toggleOpen} style={{ cursor: hasDetails ? 'pointer' : 'default', position: 'relative' }}>
-                <div className="tg-wifi-title">{item.title}</div>
-                <div className="tg-wifi-text" style={{ whiteSpace: 'pre-line' }}>{item.text}</div>
+                <div className="tg-wifi-title">{title}</div>
+                <div className="tg-wifi-text" style={{ whiteSpace: 'pre-line' }}>{text}</div>
 
                 {hasDetails && (
                     <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                         <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '600', color: '#000' }}>
-                            {isOpen ? 'Fermer' : 'Voir Plus de Détails'}
+                            {isOpen ? t.close : t.see_more_details}
                         </span>
                         <ChevronDown size={20} color="#000" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                     </div>
@@ -158,7 +170,7 @@ const GuideItem = ({ item, layout }) => {
 
                 {isOpen && hasDetails && (
                     <div className="tg-details-panel" style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
-                        {item.details}
+                        {details}
                     </div>
                 )}
             </div>
@@ -169,7 +181,7 @@ const GuideItem = ({ item, layout }) => {
 };
 
 const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
-    const { guideData } = useGuide();
+    const { guideData, t, language, toggleLanguage, t_content } = useGuide();
 
     // Default data if section not found
     const content = guideData.content[sectionId] || {
@@ -190,19 +202,43 @@ const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
                 <ChevronLeft size={28} />
             </button>
 
+            {/* LANGUAGE TOGGLE BUTTON (Fixed position, top right) */}
+            <button
+                onClick={toggleLanguage}
+                style={{
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: '1.3rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    zIndex: 1000
+                }}
+            >
+                {language === 'fr' ? '🇬🇧' : '🇫🇷'}
+            </button>
+
             {/* Content Area with Native Scroll */}
             <div className="tg-scroll-content">
 
                 {/* 1. HERO HEADER (Scrolls away) */}
                 <div className="tg-header-hero">
-                    <h2 className="tg-header-welcome">BIENVENUE</h2>
-                    <span className="tg-header-script">chez nous</span>
+                    <h2 className="tg-header-welcome">{t.welcome}</h2>
+                    <span className="tg-header-script">{t.at_our_place}</span>
                     <div className="tg-header-divider"></div>
                 </div>
 
                 {/* 2. STICKY TITLE BAR (Sticks to top) */}
                 <div className="tg-header-sticky-bar">
-                    <h1 className="tg-header-section-title">{content.title}</h1>
+                    <h1 className="tg-header-section-title">{t_content(content, 'title')}</h1>
                 </div>
 
                 {/* Hero Image / Map moved inside content */}
@@ -252,7 +288,7 @@ const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
 
                 {content.layout === 'simple' && (
                     <div style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
-                        Content coming soon for {sectionId}...
+                        {t.coming_soon} {sectionId}...
                     </div>
                 )}
 
@@ -267,7 +303,7 @@ const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
                             key={key}
                             className={`tg-nav-icon ${key === sectionId ? 'active' : ''}`}
                             onClick={() => onNavigate(key)}
-                            title={sectionData.title}
+                            title={t_content(sectionData, 'title')}
                         >
                             <DynamicIcon name={sectionData.icon || 'info'} size={20} />
                         </div>
@@ -279,7 +315,7 @@ const GuideSection = ({ sectionId, onBack, onNavigate, onImageClick }) => {
 };
 
 const TravelerGuide = () => {
-    const { guideData } = useGuide();
+    const { guideData, toggleLanguage, language, t } = useGuide();
     const [activeSection, setActiveSection] = useState(null);
     const [expandedImage, setExpandedImage] = useState(null);
 
@@ -311,17 +347,42 @@ const TravelerGuide = () => {
                         }} />
 
                         <div className="tg-content-layer" style={{ justifyContent: 'flex-start', alignItems: 'center', padding: '1rem', paddingTop: '4rem', overflowY: 'auto' }}>
+
+                            {/* LANGUAGE TOGGLE (Absolute Top Right) */}
+                            <button
+                                onClick={toggleLanguage}
+                                style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    right: '20px',
+                                    background: 'rgba(255, 255, 255, 0.2)',
+                                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                                    borderRadius: '50%',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: '1.2rem',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                    zIndex: 100
+                                }}
+                            >
+                                {language === 'fr' ? '🇬🇧' : '🇫🇷'}
+                            </button>
+
                             <div className="tg-home-card full-width-card">
-                                <h1 className="tg-home-title">BIENVENUE</h1>
-                                <p className="tg-home-subtitle">chez nous</p>
+                                <h1 className="tg-home-title">{t.welcome}</h1>
+                                <p className="tg-home-subtitle">{t.at_our_place}</p>
 
                                 <div className="tg-resort-container">
-                                    <span className="tg-resort-prefix">Chalet</span>
+                                    <span className="tg-resort-prefix">{t.chalet}</span>
                                     <h2 className="tg-home-resort">AYANA</h2>
                                 </div>
 
                                 <div style={{ width: '100%', marginTop: '2rem' }}>
-                                    <h3 style={{ fontFamily: 'var(--font-serif)', textAlign: 'center', marginBottom: '1rem', letterSpacing: '2px', fontSize: '0.9rem' }}>ACCUEIL</h3>
+                                    <h3 style={{ fontFamily: 'var(--font-serif)', textAlign: 'center', marginBottom: '1rem', letterSpacing: '2px', fontSize: '0.9rem' }}>{t.home}</h3>
                                     <GuideMenu onNavigate={handleNavigate} />
 
                                     {/* Footer Image */}
@@ -347,7 +408,7 @@ const TravelerGuide = () => {
                     >
                         <div className="tg-lightbox-content">
                             <img src={expandedImage} alt="Expanded" className="tg-lightbox-img" />
-                            <p className="tg-lightbox-hint">Toucher pour fermer</p>
+                            <p className="tg-lightbox-hint">{t.touch_to_close}</p>
                         </div>
                     </div>
                 )}

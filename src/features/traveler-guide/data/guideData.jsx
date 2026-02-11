@@ -118,3 +118,174 @@ export const GUIDE_CONTENT = {
         ]
     }
 };
+
+export const GUIDE_CONTENT_EN = {
+    restaurants: {
+        title: "Restaurants",
+        image: GUIDE_CONTENT.restaurants.image,
+        layout: "list",
+        items: [
+            {
+                id: 1,
+                title: "Sushi Shop",
+                desc: "Fresh sushi daily. Delivery available.",
+                thumb: GUIDE_CONTENT.restaurants.items[0].thumb,
+                contact: "+1 555 7890",
+                details: "Varied menu including freshly prepared sushi, maki and sashimi.\nFast delivery in 30-45 minutes.\nOpen daily from 11am to 10pm."
+            },
+            {
+                id: 2,
+                title: "Lomem Food",
+                desc: "Best local noodles.",
+                thumb: GUIDE_CONTENT.restaurants.items[1].thumb,
+                contact: "+1 555 2345",
+                details: "Authentic Asian noodle specialties.\nHomemade broths simmered for 12 hours.\nVegetarian and gluten-free options available.\nCasual atmosphere."
+            },
+            {
+                id: 3,
+                title: "Yaki Burgers",
+                desc: "Gourmet burgers and fries.",
+                thumb: GUIDE_CONTENT.restaurants.items[2].thumb,
+                contact: "+1 555 9999",
+                details: "Gourmet burgers with local beef.\nHand-cut fries cooked in duck fat.\nWide selection of local craft beers.\nTerrace in summer."
+            }
+        ]
+    },
+    bars: {
+        title: "Bars & Clubs",
+        image: GUIDE_CONTENT.bars.image,
+        layout: "list",
+        items: [
+            {
+                id: 1,
+                title: "Moavie Club",
+                desc: "Live jazz every Friday.",
+                thumb: GUIDE_CONTENT.bars.items[0].thumb,
+                contact: "+1 555 1200"
+            },
+            {
+                id: 2,
+                title: "Garden Club",
+                desc: "Outdoor seating.",
+                thumb: GUIDE_CONTENT.bars.items[1].thumb,
+                contact: "Open Late"
+            }
+        ]
+    },
+    information: {
+        title: "Information",
+        image: GUIDE_CONTENT.information.image,
+        layout: "list",
+        items: [
+            { icon: 'trash', title: "Garbage Cans/Bins", text: "The garbage room is located on the ground floor.", details: "Please sort your waste.\nGarbage (black) and recycling (blue) bins are located in the room on the ground floor.\nAccess is via the side door." },
+            { icon: 'coffee', title: "Coffee Machine", text: "Nespresso pods are available in the kitchen.", details: "The Nespresso Vertuo machine is on the counter.\nA few welcome capsules are provided.\nUse filtered water for better taste." },
+            { icon: 'wifi', title: "WiFi Password", text: "Network: Chalet_Guest\nPass: Vacances!", details: "The network covers the entire chalet.\nIf you have connection problems, the router is in the living room." },
+            { icon: 'car', title: "Parking", text: "Reserved spot #42 in front of the building.", details: "Your parking space (#42) is cleared of snow in winter.\nIf you have a second car, use the visitor spaces (V) near the entrance." }
+        ]
+    },
+    emergency: {
+        title: "Emergency",
+        image: GUIDE_CONTENT.emergency.image,
+        layout: "row",
+        items: [
+            { icon: 'phone', label: "Emergency Contacts", right: "Police: 911" },
+            { icon: 'fire', label: "Fire Extinguisher", right: "Under Sink" },
+            { icon: 'medical', label: "First Aid Kit", right: "Bathroom Cabinet" },
+            { icon: 'hospital', label: "Hospital", right: "15 mins away" }
+        ]
+    },
+    checkin: {
+        title: "Check In",
+        image: GUIDE_CONTENT.checkin.image,
+        layout: "row",
+        items: [
+            { icon: 'key', label: "Door Code", right: "1234 #" },
+            { icon: 'sun', label: "Check-in Time", right: "4:00 PM" },
+            { icon: 'logout', label: "Check-out Time", right: "11:00 AM" }
+        ]
+    },
+    wifi: {
+        title: "Wifi",
+        image: GUIDE_CONTENT.wifi.image,
+        layout: "wifi-card",
+        items: [
+            { title: "STARLINK", text: "password:\nAYANA5135" }
+        ]
+    },
+    'getting-there': {
+        title: "Getting There",
+        icon: 'map',
+        layout: 'map',
+        image: '/map_chalet_v2.jpg',
+        items: [
+            { title: "Address", text: "5135 rue de la Tortille, St-Adèle", desc: "Use Google Maps for accuracy." },
+            { title: "Access Code", text: "Sent by email", desc: "The code is valid from 4:00 PM." }
+        ]
+    },
+    spa: {
+        title: "Wellness Space - Thermal Circuit",
+        image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        layout: "list",
+        items: [
+            {
+                id: 1,
+                title: "Thermal Circuit Steps",
+                desc: "Inspired by wellness rituals, our thermal circuit is an invitation to slow down and reconnect with your senses.",
+                details: "Alternate the enveloping heat of the dry sauna, the humid warmth of the hammam, then take time to relax in the relaxation room before extending the experience in the spa."
+            },
+            {
+                id: 2,
+                title: "Spa, Sauna & Jacuzzi Rules",
+                desc: "Please respect these rules for everyone's safety and comfort.",
+                details: "- Reserved for registered guests\n- Mandatory shower before access\n- No glass, alcohol or fragile objects in facilities (plastic cups available)\n- Children must be supervised at all times\n- Responsible use required (respect recommended durations)"
+            }
+        ]
+    },
+    activities: {
+        title: "Activities - Regional Experiences",
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        layout: "list",
+        items: []
+    },
+    rules: {
+        title: "Chalet Ayana Rules Summary",
+        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        layout: "list",
+        items: []
+    },
+    animals: {
+        title: "Animals",
+        image: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+        layout: "list",
+        items: []
+    }
+};
+
+export const TRANSLATIONS = {
+    fr: {
+        welcome: "BIENVENUE",
+        at_our_place: "chez nous",
+        home: "ACCUEIL",
+        chalet: "Chalet",
+        close: "Fermer",
+        see_more: "Voir Plus",
+        more: "Plus",
+        see_more_details: "Voir Plus de Détails",
+        get_directions: "OBTENIR L'ITINÉRAIRE",
+        touch_to_close: "Toucher pour fermer",
+        coming_soon: "Contenu bientôt disponible pour"
+    },
+    en: {
+        welcome: "WELCOME",
+        at_our_place: "to our place",
+        home: "HOME",
+        chalet: "Chalet",
+        close: "Close",
+        see_more: "See More",
+        more: "More",
+        see_more_details: "See Full Details",
+        get_directions: "GET DIRECTIONS",
+        touch_to_close: "Tap to close",
+        coming_soon: "Content coming soon for"
+    }
+};

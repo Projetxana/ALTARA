@@ -1,14 +1,14 @@
-import { supabase } from '../../lib/supabase'
-
 export async function syncAirbnbCalendar(icalUrl) {
-    const { data, error } = await supabase.functions.invoke('ical-sync', {
-        body: { icalUrl }
-    })
+    const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ical-sync`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ icalUrl }),
+        }
+    );
 
-    if (error) {
-        console.error(error)
-        throw error
-    }
-
-    return data
+    return await res.text();
 }

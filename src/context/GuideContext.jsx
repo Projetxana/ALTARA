@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { GUIDE_CONTENT as INITIAL_CONTENT, RESORT_NAME as INITIAL_NAME, RESORT_ADDRESS as INITIAL_ADDRESS, HOME_IMAGE as INITIAL_IMAGE } from '../features/traveler-guide/data/guideData';
+import { GUIDE_CONTENT as INITIAL_CONTENT, RESORT_NAME as INITIAL_NAME, RESORT_ADDRESS as INITIAL_ADDRESS, HOME_IMAGE as INITIAL_IMAGE, GUIDE_CONTENT_EN, TRANSLATIONS } from '../features/traveler-guide/data/guideData';
 
 const GuideContext = createContext();
 
 export const useGuide = () => useContext(GuideContext);
 
 export const GuideProvider = ({ children }) => {
+    const [language, setLanguage] = useState('fr');
     const [isLoading, setIsLoading] = useState(true);
     const [guideData, setGuideData] = useState({
         resortName: INITIAL_NAME,
@@ -18,7 +19,6 @@ export const GuideProvider = ({ children }) => {
 
     const [guideId, setGuideId] = useState(1); // Default to 1, but update on fetch
 
-    // Fetch from Supabase on Mount
     useEffect(() => {
         const fetchGuide = async () => {
             try {
@@ -213,9 +213,50 @@ export const GuideProvider = ({ children }) => {
         });
     };
 
+    // --- LANGUAGE HELPERS ---
+    useEffect(() => {
+        // Initialize language from localStorage or navigator
+        const storedLang = localStorage.getItem('guide_language');
+        if (storedLang && (storedLang === 'fr' || storedLang === 'en')) {
+            setLanguage(storedLang);
+        } else {
+            const browserLang = navigator.language.startsWith('fr') ? 'fr' : 'en';
+            setLanguage(browserLang);
+        }
+    }, []);
+
+    const toggleLanguage = () => {
+        setLanguage(prev => {
+            const newLang = prev === 'fr' ? 'en' : 'fr';
+            localStorage.setItem('guide_language', newLang);
+            return newLang;
+        });
+    };
+
+    // Helper to get localized text for an item
+    // Usage: t_content(item, 'title') -> returns item.title_en (if lang=en) or item.title (fallback)
+    const t_content = (item, field) => {
+        if (!item) return '';
+        if (language === 'en') {
+            return item[`${field}_en`] || item[field] || '';
+        }
+        return item[field] || '';
+    };
+
+    // Legacy static translations (for UI elements like buttons)
+    const t = TRANSLATIONS[language];
+
+    // For the "displayGuideData", we simply pass the raw guideData now.
+    // The translation logic happens at the COMPONENT LEVEL using t_content helper.
+    // However, to keep compatibility with existing components that might expect "title" to be translated already,
+    // we could map it here. BUT sticking to the plan: "UI Rendering... update components to use helper".
+    // So we just pass guideData as is.
+    const displayGuideData = guideData;
+
     return (
         <GuideContext.Provider value={{
-            guideData,
+            guideData: displayGuideData, // Use the computed one
+            editorData: guideData, // Expose raw data for editor
             isLoading,
             updateSection,
             addSection,
@@ -224,6 +265,11 @@ export const GuideProvider = ({ children }) => {
             resetToDefaults,
             reorderSections, // Exposed
             saveToDatabase,
+            // Language props
+            language,
+            toggleLanguage,
+            t,
+            t_content, // Expose dynamic content translation helper
             uploadImage: async (file) => {
                 const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
                 const { data, error } = await supabase.storage

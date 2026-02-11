@@ -1,28 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import ical from "npm:node-ical"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-serve(async (req) => {
-    // CORS Headers
-    const headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    }
-
-    // Handle Preflight
-    if (req.method === "OPTIONS") {
-        return new Response("ok", { headers })
-    }
-
+export default async (req) => {
     try {
-        const { icalUrl } = await req.json()
+        const url = new URL(req.url);
+        const icalUrl = url.searchParams.get("icalUrl");
 
-        const supabase = createClient(
-            Deno.env.get("SUPABASE_URL")!,
-            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-        )
-
-        // Télécharger le iCal Airbnb avec headers
         const res = await fetch(icalUrl, {
             redirect: "follow",
             headers: {
@@ -31,42 +13,64 @@ serve(async (req) => {
                 "Accept": "text/calendar,text/plain;q=0.9,*/*;q=0.8",
                 "Accept-Language": "fr-CA,fr;q=0.9,en;q=0.8",
             },
-        })
+        });
 
-        if (!res.ok) {
-            throw new Error(`Failed to fetch iCal: ${res.status} ${res.statusText}`);
+        const text = await res.text();
+
+        const now = new Date();
+        const oneYear = new Date();
+        oneYear.setFullYear(now.getFullYear() + 1);
+
+        const events = text
+            .split("BEGIN:VEVENT")
+            .slice(1)
+            .filter((e) => {
+                const start = e.match(/DTSTART:(\d+)/)?.[1];
+                if (!start) return false;
+
+                const year = parseInt(start.substring(0, 4));
+                return year >= now.getFullYear() && year <= oneYear.getFullYear();
+            });
+
+        const bookings = events.map((e) => {
+            const start = e.match(/DTSTART:(\d+)/)?.[1];
+            const end = e.match(/DTEND:(\d+)/)?.[1];
+            const uid = e.match(/UID:(.+)/)?.[1];
+
+            return {
+                start,
+                end,
+                uid,
+                source: "airbnb",
+                color: "#FF5A5F",
+            };
+        });
+
+        const supabase = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_ANON_KEY")!
+        );
+
+        for (const b of bookings) {
+            await supabase.from("bookings").upsert(
+                {
+                    external_uid: b.uid,
+                    start: b.start,
+                    end: b.end,
+                    source: b.source,
+                    color: b.color,
+                },
+                { onConflict: "external_uid" }
+            );
         }
 
-        const icalData = await res.text()
-        const events = await ical.async.parseICS(icalData)
-
-        for (const k in events) {
-            const ev: any = events[k]
-
-            if (ev.type === "VEVENT") {
-                const start = new Date(ev.start).toISOString().split("T")[0]
-                const end = new Date(ev.end).toISOString().split("T")[0]
-
-                await supabase
-                    .from("bookings")
-                    .upsert({
-                        external_uid: ev.uid,
-                        source: "airbnb",
-                        start,
-                        end,
-                        guest: ev.summary || "Airbnb Guest",
-                        color: "#FF5A5F"
-                    })
-            }
-        }
-
-        return new Response(JSON.stringify({ status: "ok" }), {
-            headers: { ...headers, "Content-Type": "application/json" },
-        })
-    } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), {
+        return new Response(JSON.stringify(bookings), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+        });
+    } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), {
             status: 500,
-            headers: { ...headers, "Content-Type": "application/json" },
-        })
+        });
     }
-})
+};

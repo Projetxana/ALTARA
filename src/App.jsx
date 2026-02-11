@@ -91,6 +91,7 @@ function App() {
                   <Route path="/guests" element={<GuestsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/settings/guide-editor" element={<GuideEditor />} />
+                  <Route path="/editor" element={<GuideEditor />} />
                 </Route>
               </Routes>
             </BrowserRouter>

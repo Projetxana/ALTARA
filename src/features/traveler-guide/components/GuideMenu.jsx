@@ -4,7 +4,7 @@ import { useGuide } from '../../../context/GuideContext';
 import { DynamicIcon } from '../utils/iconMap';
 
 const GuideMenu = ({ onNavigate }) => {
-    const { guideData } = useGuide();
+    const { guideData, t_content } = useGuide();
     const sections = guideData.sectionOrder || (guideData.content ? Object.keys(guideData.content) : []);
 
     return (
@@ -23,7 +23,7 @@ const GuideMenu = ({ onNavigate }) => {
                         <div className="tg-icon-circle">
                             <DynamicIcon name={section.icon || 'info'} size={18} />
                         </div>
-                        <span className="tg-btn-label">{section.title || key}</span>
+                        <span className="tg-btn-label">{t_content(section, 'title') || key}</span>
                     </button>
                 );
             })}
