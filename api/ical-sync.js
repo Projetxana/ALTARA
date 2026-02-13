@@ -43,7 +43,7 @@ export default async function handler(req, res) {
                 end_date: e.end.toISOString().split('T')[0],
                 guest_name: e.summary || 'Airbnb Guest',
                 color: '#FF5A5F',
-                external_id: e.uid,
+                external_uid: e.uid,
                 status: 'confirmed'
             };
         });
@@ -61,10 +61,10 @@ export default async function handler(req, res) {
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         // 5. Upsert to DB
-        // Using 'upsert' to avoid duplicates based on 'external_id' (must be unique constraint in DB)
+        // Using 'upsert' to avoid duplicates based on 'external_uid' (must be unique constraint in DB)
         const { data: result, error } = await supabase
             .from('bookings')
-            .upsert(validEvents, { onConflict: 'external_id' })
+            .upsert(validEvents, { onConflict: 'external_uid' })
             .select();
 
         if (error) {
