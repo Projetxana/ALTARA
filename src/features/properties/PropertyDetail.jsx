@@ -15,14 +15,25 @@ const PropertyDetail = () => {
 
     const chalet = chalets.find(c => c.id === id);
 
-    if (!chalet) return <div>Chalet not found</div>;
-
     const [editForm, setEditForm] = React.useState({
-        name: chalet.name,
-        location: chalet.location || '',
-        description: chalet.description || '',
-        minStay: chalet.minStay || 2
+        name: '',
+        location: '',
+        description: '',
+        minStay: 2
     });
+
+    React.useEffect(() => {
+        if (chalet) {
+            setEditForm({
+                name: chalet.name || '',
+                location: chalet.location || '',
+                description: chalet.description || '',
+                minStay: chalet.minStay || 2
+            });
+        }
+    }, [chalet]);
+
+    if (!chalet) return <div>Chalet not found</div>;
 
     const handleSaveDetails = () => {
         updateChalet(chalet.id, editForm);
