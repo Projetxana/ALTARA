@@ -48,27 +48,46 @@ export const SanctuumProvider = ({ children }) => {
             if (chaletError) console.error('Error fetching chalets:', chaletError);
 
             // MIGRATION/SYNC LOGIC: 
-            // If Cloud is empty, but Local has data => OFFER SYNC?
-            // For now, let's auto-upload if cloud is empty to verify the feature immediately.
+            // If Cloud is empty, but Local has data => Auto-migrate
             const localChalets = JSON.parse(localStorage.getItem('altara_chalets_v2') || '[]');
+            let finalChalets = cloudChalets || [];
 
             if ((!cloudChalets || cloudChalets.length === 0) && localChalets.length > 0) {
                 console.log("Auto-migrating local chalets to cloud...");
+                const migrationResults = [];
+
                 for (const c of localChalets) {
-                    await supabase.from('chalets').insert({
+                    const { data, error } = await supabase.from('chalets').insert({
                         user_id: user.id,
                         name: c.name,
                         location: c.location,
-                        base_night_price: c.baseNightPrice, // Note key mapping
-                        description: c.description
-                    });
+                        base_night_price: c.baseNightPrice,
+                        description: c.description,
+                        image_url: c.image_url
+                    }).select().single();
+
+                    if (data) migrationResults.push(data);
+                    if (error) console.error("Migration failed for chalet:", c.name, error);
                 }
-                // Refetch after insertion
-                const { data: refetched } = await supabase.from('chalets').select('*');
-                setChalets(refetched || []);
-            } else {
-                setChalets(cloudChalets || []);
+
+                if (migrationResults.length > 0) {
+                    finalChalets = migrationResults;
+                } else {
+                    // Fallback to local if migration failed completely
+                    console.warn("Migration failed. Falling back to local data.");
+                    finalChalets = localChalets;
+                }
             }
+
+            // Map DB snake_case to Frontend camelCase
+            const mappedChalets = finalChalets.map(c => ({
+                ...c,
+                baseNightPrice: c.base_night_price || c.baseNightPrice, // Handle both DB (snake) and Local (camel) source
+                minStay: c.min_stay || c.minStay || 2,
+                image_url: c.image_url // snake_case in both DB and Frontend usage currently
+            }));
+
+            setChalets(mappedChalets);
 
             // Fetch Bookings (Cloud)
             const { data: cloudBookings, error: bookingError } = await supabase
@@ -152,9 +171,19 @@ export const SanctuumProvider = ({ children }) => {
         // 2. Persist to Cloud
         if (user) {
             try {
+                // Map camelCase updates back to snake_case for DB
+                const dbUpdates = {};
+                if (updates.name !== undefined) dbUpdates.name = updates.name;
+                if (updates.location !== undefined) dbUpdates.location = updates.location;
+                if (updates.description !== undefined) dbUpdates.description = updates.description;
+                if (updates.baseNightPrice !== undefined) dbUpdates.base_night_price = updates.baseNightPrice;
+                if (updates.minStay !== undefined) dbUpdates.min_stay = updates.minStay;
+                if (updates.image_url !== undefined) dbUpdates.image_url = updates.image_url;
+                if (updates.connections !== undefined) dbUpdates.connections = updates.connections;
+
                 const { error } = await supabase
                     .from('chalets')
-                    .update(updates)
+                    .update(dbUpdates)
                     .eq('id', chaletId);
 
                 if (error) {
