@@ -2,39 +2,131 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSanctuum } from '../../context/SanctuumContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { ArrowLeft, Settings, BarChart2, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, Settings, BarChart2, Calendar, DollarSign, Trash2 } from 'lucide-react';
 import PlatformConnectionPanel from '../sync/PlatformConnectionPanel';
 import ListingLabPanel from './ListingLabPanel';
 
 const PropertyDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { chalets, formatPrice, updateChalet } = useSanctuum();
+    const { chalets, formatPrice, updateChalet, deleteChalet } = useSanctuum();
     const { t } = useLanguage();
+    const [isEditing, setIsEditing] = React.useState(false);
 
     const chalet = chalets.find(c => c.id === id);
 
     if (!chalet) return <div>Chalet not found</div>;
 
+    const [editForm, setEditForm] = React.useState({
+        name: chalet.name,
+        location: chalet.location || '',
+        description: chalet.description || '',
+        minStay: chalet.minStay || 2
+    });
+
+    const handleSaveDetails = () => {
+        updateChalet(chalet.id, editForm);
+        setIsEditing(false);
+    };
+
+    const handleDelete = async () => {
+        await deleteChalet(chalet.id);
+        navigate('/properties');
+    };
+
     return (
         <div>
             {/* Nav Back */}
-            <button
-                onClick={() => navigate('/properties')}
-                style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginBottom: '2rem' }}
-            >
-                <ArrowLeft size={18} /> {t('nav_properties')}
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <button
+                    onClick={() => navigate('/properties')}
+                    style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                >
+                    <ArrowLeft size={18} /> {t('nav_properties')}
+                </button>
 
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                <h1 style={{ fontSize: '2.5rem' }}>{chalet.name}</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div className="glass-panel" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }}></span>
-                        <span style={{ fontSize: '0.9rem' }}>{t('soul_active')}</span>
-                    </div>
+                    {isEditing ? (
+                        <>
+                            <button
+                                onClick={() => setIsEditing(false)}
+                                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', cursor: 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveDetails}
+                                className="btn-primary"
+                            >
+                                Save Changes
+                            </button>
+                        </>
+                    ) : (
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1px solid var(--color-border)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                                <Settings size={16} /> Edit Property
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                                <Trash2 size={16} /> Delete
+                            </button>
+                        </div>
+                    )}
                 </div>
+            </div>
+
+            {/* Header / Edit Form */}
+            <div style={{ marginBottom: '3rem' }}>
+                {isEditing ? (
+                    <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Property Name</label>
+                            <input
+                                type="text"
+                                value={editForm.name}
+                                onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.2rem' }}
+                            />
+                        </div>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Location</label>
+                            <input
+                                type="text"
+                                value={editForm.location}
+                                onChange={e => setEditForm({ ...editForm, location: e.target.value })}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }}
+                            />
+                        </div>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Description</label>
+                            <textarea
+                                value={editForm.description}
+                                rows={3}
+                                onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }}
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{chalet.name}</h1>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--color-text-muted)' }}>
+                                <span>{chalet.location}</span>
+                                <div className="glass-panel" style={{ padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', border: 'none' }}>
+                                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }}></span>
+                                    <span style={{ fontSize: '0.8rem', color: '#10b981' }}>{t('soul_active')}</span>
+                                </div>
+                            </div>
+                            {chalet.description && <p style={{ marginTop: '1rem', maxWidth: '600px', lineHeight: 1.6 }}>{chalet.description}</p>}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Manual Edit & Airbnb Sync */}
@@ -51,6 +143,7 @@ const PropertyDetail = () => {
                         <input
                             type="number"
                             defaultValue={chalet.baseNightPrice || 0}
+                            onChange={(e) => updateChalet(chalet.id, { baseNightPrice: parseFloat(e.target.value) })}
                             style={{
                                 width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
                                 background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.2rem'

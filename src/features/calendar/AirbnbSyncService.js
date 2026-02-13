@@ -1,6 +1,6 @@
 export async function syncAirbnbCalendar(icalUrl) {
     const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ical-sync`,
+        `/api/ical-sync`,
         {
             method: "POST",
             headers: {

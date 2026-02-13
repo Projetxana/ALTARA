@@ -217,6 +217,29 @@ export const SanctuumProvider = ({ children }) => {
         }
     };
 
+    // --- DELETE CHALET ---
+    const deleteChalet = async (chaletId) => {
+        if (!window.confirm("Are you sure you want to delete this property? This action cannot be undone.")) return;
+
+        // 1. Optimistic Update
+        setChalets(prev => prev.filter(c => c.id !== chaletId));
+        if (selectedChaletId === chaletId) setSelectedChaletId(null);
+
+        // 2. Persist to Cloud
+        if (user) {
+            const { error } = await supabase
+                .from('chalets')
+                .delete()
+                .eq('id', chaletId);
+
+            if (error) {
+                console.error("Error deleting chalet:", error);
+                alert("Error deleting from cloud: " + error.message);
+                // Revert if needed, but for now we assume success or refresh
+            }
+        }
+    };
+
     // --- CURRENCY ---
     const [currency, setCurrency] = useState(() => localStorage.getItem('altara_currency') || 'CAD');
     useEffect(() => localStorage.setItem('altara_currency', currency), [currency]);
@@ -251,7 +274,8 @@ export const SanctuumProvider = ({ children }) => {
             createBooking,
             importBookings,
             toggleRitual,
-            addChalet
+            addChalet,
+            deleteChalet
         }}>
             {children}
         </SanctuumContext.Provider>
