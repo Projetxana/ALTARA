@@ -49,11 +49,12 @@ export default async function handler(req, res) {
         });
 
         // 4. Initialize Supabase
-        // Note: Using standard environment variables.
-        const supabaseUrl = process.env.VITE_SUPABASE_URL;
-        const supabaseKey = process.env.VITE_SUPABASE_KEY;
+        // Note: Check for VITE_ prefix (frontend aligned) AND standard server-side env vars.
+        const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+        const supabaseKey = process.env.VITE_SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
         if (!supabaseUrl || !supabaseKey) {
+            console.error("Missing Supabase Credentials. Checked: VITE_SUPABASE_URL, SUPABASE_URL, VITE_SUPABASE_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY.");
             throw new Error("Missing Supabase Credentials on Server");
         }
 
