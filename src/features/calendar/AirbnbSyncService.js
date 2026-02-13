@@ -1,4 +1,4 @@
-export async function syncAirbnbCalendar(icalUrl) {
+export async function syncAirbnbCalendar(icalUrl, chaletId) {
     const res = await fetch(
         `/api/ical-sync`,
         {
@@ -6,9 +6,14 @@ export async function syncAirbnbCalendar(icalUrl) {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ icalUrl }),
+            body: JSON.stringify({ url: icalUrl, chaletId }),
         }
     );
 
-    return await res.text();
+    if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Sync failed: ${res.status} ${res.statusText} - ${errText}`);
+    }
+
+    return await res.json();
 }

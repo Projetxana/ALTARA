@@ -31,7 +31,7 @@ export const SyncEngine = {
                 if (platform === 'airbnb') {
                     onProgress(`Syncing ${platform}...`);
                     // STRICT ENFORCEMENT: Use AirbnbSyncService
-                    await syncAirbnbCalendar(url);
+                    await syncAirbnbCalendar(url, chaletId);
 
                     console.log(`[${platform}] Sync OK via AirbnbSyncService.`);
                     onProgress(`${platform} synced successfully.`);
