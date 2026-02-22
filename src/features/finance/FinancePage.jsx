@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Plus, TrendingUp, TrendingDown, DollarSign, X, Calendar as CalendarIcon, Edit2, Trash2, FileText } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, X, Calendar as CalendarIcon, Edit2, Trash2, FileText, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '../../context/LanguageContext';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const FinancePage = () => {
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
+
+    // Filters State
+    const currentYear = new Date().getFullYear();
+    const [selectedYear, setSelectedYear] = useState(currentYear.toString());
+    const [selectedMonth, setSelectedMonth] = useState('All');
 
     // Form State
     const [newItem, setNewItem] = useState({
@@ -24,11 +30,6 @@ const FinancePage = () => {
     });
     const [newCategory, setNewCategory] = useState('');
     const [editingId, setEditingId] = useState(null);
-
-    useEffect(() => {
-        fetchTransactions();
-        fetchCategories();
-    }, []);
 
     const fetchTransactions = async () => {
         setIsLoading(true);
@@ -66,6 +67,12 @@ const FinancePage = () => {
             }
         }
     };
+
+    useEffect(() => {
+        fetchTransactions();
+        fetchCategories();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Tax Logic
     const getTaxRate = (type) => {
@@ -171,7 +178,7 @@ const FinancePage = () => {
         e.preventDefault();
         if (!newCategory.trim()) return;
 
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('finance_categories')
             .insert([{ name: newCategory.trim() }])
             .select();
@@ -190,8 +197,14 @@ const FinancePage = () => {
         if (!error) fetchCategories();
     };
 
-    // Derived Totals
-    const totals = transactions.reduce((acc, curr) => {
+    // Filter Transactions
+    const annualTransactions = transactions.filter(tItem => tItem.date && tItem.date.startsWith(selectedYear));
+    const displayedTransactions = selectedMonth === 'All'
+        ? annualTransactions
+        : annualTransactions.filter(tItem => tItem.date && tItem.date.startsWith(`${selectedYear}-${selectedMonth}`));
+
+    // Derived Totals (Annual)
+    const totals = annualTransactions.reduce((acc, curr) => {
         const amt = parseFloat(curr.amount);
         if (curr.type === 'revenue') {
             acc.revenue += amt;
@@ -203,8 +216,26 @@ const FinancePage = () => {
         return acc;
     }, { revenue: 0, expenses: 0, net: 0 });
 
-    // Tax Report Calculation
-    const taxReport = transactions.reduce((acc, curr) => {
+    // Chart Data Preparation
+    const chartDataMap = {};
+    displayedTransactions.forEach(tItem => {
+        const cat = tItem.category || 'General';
+        const type = tItem.type;
+        const amt = parseFloat(tItem.amount);
+
+        if (!chartDataMap[cat]) {
+            chartDataMap[cat] = { name: cat, revenue: 0, expense: 0 };
+        }
+        if (type === 'revenue') {
+            chartDataMap[cat].revenue += amt;
+        } else {
+            chartDataMap[cat].expense += amt;
+        }
+    });
+    const chartData = Object.values(chartDataMap).sort((a, b) => (b.revenue + b.expense) - (a.revenue + a.expense));
+
+    // Tax Report Calculation (Filtered)
+    const taxReport = displayedTransactions.reduce((acc, curr) => {
         const rate = parseFloat(curr.tax_rate || 0);
         const { net, tax } = calculateAmounts(parseFloat(curr.amount), rate);
 
@@ -243,12 +274,45 @@ const FinancePage = () => {
     return (
         <div style={{ position: 'relative' }}>
             {/* HEADER */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                 <div>
                     <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0 }}>{t('fin_title')}</h1>
-                    <p style={{ color: 'var(--color-text-muted)' }}>{t('fin_subtitle')}</p>
+                    <p style={{ color: 'var(--color-text-muted)' }}>{t('fin_subtitle') || 'Track Revenue & Expenses'}</p>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', marginTop: '1rem', width: 'fit-content' }}>
+                        <Filter size={16} color="var(--color-text-muted)" />
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(e.target.value)}
+                            style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                            {Array.from({ length: 5 }, (_, i) => currentYear - i).map(year => (
+                                <option key={year} value={year} style={{ background: '#1a1a1a' }}>{year}</option>
+                            ))}
+                        </select>
+                        <span style={{ color: 'var(--color-text-muted)' }}>|</span>
+                        <select
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                            <option value="All" style={{ background: '#1a1a1a' }}>{t('all_months') || 'Tous les mois'}</option>
+                            <option value="01" style={{ background: '#1a1a1a' }}>01 - Jan</option>
+                            <option value="02" style={{ background: '#1a1a1a' }}>02 - Fév</option>
+                            <option value="03" style={{ background: '#1a1a1a' }}>03 - Mar</option>
+                            <option value="04" style={{ background: '#1a1a1a' }}>04 - Avr</option>
+                            <option value="05" style={{ background: '#1a1a1a' }}>05 - Mai</option>
+                            <option value="06" style={{ background: '#1a1a1a' }}>06 - Jun</option>
+                            <option value="07" style={{ background: '#1a1a1a' }}>07 - Jul</option>
+                            <option value="08" style={{ background: '#1a1a1a' }}>08 - Aoû</option>
+                            <option value="09" style={{ background: '#1a1a1a' }}>09 - Sep</option>
+                            <option value="10" style={{ background: '#1a1a1a' }}>10 - Oct</option>
+                            <option value="11" style={{ background: '#1a1a1a' }}>11 - Nov</option>
+                            <option value="12" style={{ background: '#1a1a1a' }}>12 - Déc</option>
+                        </select>
+                    </div>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', height: 'fit-content' }}>
                     <button onClick={() => setShowReportModal(true)} className="btn-secondary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid #3b82f6', color: '#60a5fa' }}>
                         <FileText size={18} /> {t('fin_report_btn')}
                     </button>
@@ -263,17 +327,41 @@ const FinancePage = () => {
 
             {/* SUMMARY CARDS */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
-                <StatsCard title={t('fin_total_rev')} value={totals.revenue} icon={<TrendingUp size={20} />} color="#10b981" />
-                <StatsCard title={t('fin_total_exp')} value={totals.expenses} icon={<TrendingDown size={20} />} color="#ef4444" />
-                <StatsCard title={t('fin_net_profit')} value={totals.net} icon={<DollarSign size={20} />} color="#3b82f6" />
+                <StatsCard title={`${t('fin_total_rev') || 'Total Revenue'} (Annuel)`} value={totals.revenue} icon={<TrendingUp size={20} />} color="#10b981" />
+                <StatsCard title={`${t('fin_total_exp') || 'Total Expenses'} (Annuel)`} value={totals.expenses} icon={<TrendingDown size={20} />} color="#ef4444" />
+                <StatsCard title={`${t('fin_net_profit') || 'Net Profit'} (Annuel)`} value={totals.net} icon={<DollarSign size={20} />} color="#3b82f6" />
             </div>
+
+            {/* CHARTS */}
+            {chartData.length > 0 && (
+                <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2rem' }}>
+                    <h3 style={{ marginBottom: '1.5rem' }}>Aperçu par Catégorie ({selectedMonth === 'All' ? 'Annuel' : `Mois: ${selectedMonth}`})</h3>
+                    <div style={{ height: '300px', width: '100%' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                                <XAxis dataKey="name" stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-muted)' }} />
+                                <YAxis stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-muted)' }} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid var(--color-border)', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#fff' }}
+                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                />
+                                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                <Bar dataKey="revenue" name="Revenus" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="expense" name="Dépenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            )}
 
             {/* TRANSACTIONS TABLE */}
             <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
                 <h3 style={{ marginBottom: '1.5rem' }}>{t('fin_recent_trans')}</h3>
                 {isLoading ? (
                     <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>{t('loading')}</div>
-                ) : transactions.length === 0 ? (
+                ) : displayedTransactions.length === 0 ? (
                     <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '2rem' }}>
                         {t('fin_no_trans')}
                     </div>
@@ -292,7 +380,7 @@ const FinancePage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactions.map((tItem) => {
+                                {displayedTransactions.map((tItem) => {
                                     const { net, tax, total } = calculateAmounts(parseFloat(tItem.amount), parseFloat(tItem.tax_rate || 0));
                                     const isRev = tItem.type === 'revenue';
 
