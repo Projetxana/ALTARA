@@ -335,7 +335,12 @@ const FinancePage = () => {
             {/* CHARTS */}
             {chartData.length > 0 && (
                 <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2rem' }}>
-                    <h3 style={{ marginBottom: '1.5rem' }}>Aperçu par Catégorie ({selectedMonth === 'All' ? 'Annuel' : `Mois: ${selectedMonth}`})</h3>
+                    <h3 style={{ marginBottom: '1.5rem' }}>Aperçu par Catégorie ({selectedMonth === 'All' ? 'Annuel' : `Mois: ${{
+                            '01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril',
+                            '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août',
+                            '09': 'Septembre', '10': 'Octobre', '11': 'Novembre', '12': 'Décembre'
+                        }[selectedMonth]
+                        }`})</h3>
                     <div style={{ height: '300px', width: '100%' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
