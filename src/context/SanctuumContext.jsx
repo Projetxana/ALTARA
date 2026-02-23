@@ -286,6 +286,21 @@ export const SanctuumProvider = ({ children }) => {
         }
     };
 
+    const updateCleaningTaskNotes = async (taskId, newNotes) => {
+        setCleaningTasks(prev => prev.map(t => t.id === taskId ? { ...t, notes: newNotes } : t));
+
+        if (user) {
+            const { error } = await supabase
+                .from('cleaning_tasks')
+                .update({ notes: newNotes })
+                .eq('id', taskId);
+
+            if (error) {
+                console.error("Error updating cleaning task notes:", error);
+            }
+        }
+    };
+
     // --- DELETE CHALET ---
     const deleteChalet = async (chaletId) => {
         if (!window.confirm("Are you sure you want to delete this property? This action cannot be undone.")) return;
@@ -329,6 +344,7 @@ export const SanctuumProvider = ({ children }) => {
             bookings,
             cleaningTasks,
             toggleCleaningTaskStatus,
+            updateCleaningTaskNotes,
             rituals,
             currentChalet,
             selectedChaletId,
