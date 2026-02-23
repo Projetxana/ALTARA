@@ -4,61 +4,40 @@ import { useSanctuum } from '../../context/SanctuumContext';
 import { useLanguage } from '../../context/LanguageContext';
 import ReservationCard from './ReservationCard';
 
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
-)
-
 const CalendarBoard = () => {
     const {
         chalets,
         selectedChaletId,
         setSelectedChaletId,
         currentChalet,
-        formatPrice
+        formatPrice,
+        bookings
     } = useSanctuum();
     const { t, language } = useLanguage();
 
     // STATE: Dynamic Calendar Date
     const [viewDate, setViewDate] = useState(new Date());
-    const [events, setEvents] = useState([])
 
-    useEffect(() => {
-        const loadEvents = async () => {
-            // Corrected: Read from 'bookings' table where SyncEngine writes
-            const { data } = await supabase
-                .from('bookings')
-                .select('*')
+    // Compute formatted events for the currently selected chalet
+    const events = React.useMemo(() => {
+        if (!selectedChaletId) return [];
 
-            const formatted = (data || []).map(e => {
-                // Formatting helper for YYYYMMDD -> YYYY-MM-DD
-                const formatDate = (str) => {
-                    if (!str) return '';
-                    if (str.length === 8) {
-                        return `${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}`;
-                    }
-                    return str; // Fallback or already formatted
-                };
+        const chaletBookings = bookings.filter(b => b.chaletId === selectedChaletId);
 
-                return {
-                    id: e.external_uid,
-                    start: formatDate(e.start),
-                    end: formatDate(e.end),
-                    title: e.source,
-                    color: e.color,
-                    // Keep these for rendering if needed
-                    guestName: e.guest_name || 'Guest',
-                    source: e.source
-                };
-            })
-
-            setEvents(formatted)
-        }
-
-        loadEvents()
-    }, [])
+        return chaletBookings.map(b => {
+            // Context standardizes start to checkInDate, end to checkOutDate
+            return {
+                id: b.id,
+                start: b.checkInDate,
+                end: b.checkOutDate,
+                title: b.source || 'reservation',
+                color: b.color,
+                guestName: b.guestName || 'Guest',
+                source: b.source,
+                totalRevenue: b.totalRevenue || 0
+            };
+        });
+    }, [bookings, selectedChaletId]);
 
     const days = [t('cal_mon'), t('cal_tue'), t('cal_wed'), t('cal_thu'), t('cal_fri'), t('cal_sat'), t('cal_sun')];
 
