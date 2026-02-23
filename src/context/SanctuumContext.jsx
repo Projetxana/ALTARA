@@ -268,6 +268,24 @@ export const SanctuumProvider = ({ children }) => {
         }
     };
 
+    // --- MANAGE CLEANING TASKS ---
+    const toggleCleaningTaskStatus = async (taskId, newStatus) => {
+        // Optimistic update
+        setCleaningTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+
+        if (user) {
+            const { error } = await supabase
+                .from('cleaning_tasks')
+                .update({ status: newStatus })
+                .eq('id', taskId);
+
+            if (error) {
+                console.error("Error updating cleaning task:", error);
+                // In a robust app, you would revert the optimistic update here
+            }
+        }
+    };
+
     // --- DELETE CHALET ---
     const deleteChalet = async (chaletId) => {
         if (!window.confirm("Are you sure you want to delete this property? This action cannot be undone.")) return;
