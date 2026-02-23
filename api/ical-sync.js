@@ -46,7 +46,6 @@ export default async function handler(req, res) {
             return {
                 chalet_id: chaletId,
                 source: platform,
-                platform_id: platform,
                 start_date: e.start.toISOString().split('T')[0],
                 end_date: e.end.toISOString().split('T')[0],
                 guest_name: e.summary || `${platform} Guest`,
