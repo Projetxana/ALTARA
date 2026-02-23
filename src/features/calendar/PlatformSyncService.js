@@ -1,4 +1,4 @@
-export async function syncAirbnbCalendar(icalUrl, chaletId) {
+export async function syncPlatformCalendar(icalUrl, chaletId, platform) {
     const res = await fetch(
         `/api/ical-sync`,
         {
@@ -6,7 +6,7 @@ export async function syncAirbnbCalendar(icalUrl, chaletId) {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: icalUrl, chaletId }),
+            body: JSON.stringify({ url: icalUrl, chaletId, platform }),
         }
     );
 

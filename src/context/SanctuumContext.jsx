@@ -145,7 +145,7 @@ export const SanctuumProvider = ({ children }) => {
         { id: 'airbnb', name: 'Airbnb', color: '#ff385c' },
         { id: 'booking', name: 'Booking.com', color: '#003580' },
         { id: 'vrbo', name: 'VRBO', color: '#1e3a8a' },
-        { id: 'expedia', name: 'Expedia', color: '#ffeb3b' },
+        { id: 'mrchalet', name: 'Mr Chalet', color: '#ffeb3b' },
         { id: 'direct', name: 'Direct', color: '#d4af37' }
     ]);
 

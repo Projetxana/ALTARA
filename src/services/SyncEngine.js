@@ -1,4 +1,4 @@
-import { syncAirbnbCalendar } from '../features/calendar/AirbnbSyncService';
+import { syncPlatformCalendar } from '../features/calendar/PlatformSyncService';
 
 export const SyncEngine = {
     init: () => {
@@ -28,20 +28,12 @@ export const SyncEngine = {
             if (!url) continue;
 
             try {
-                if (platform === 'airbnb') {
-                    onProgress(`Syncing ${platform}...`);
-                    // STRICT ENFORCEMENT: Use AirbnbSyncService
-                    await syncAirbnbCalendar(url, chaletId);
+                onProgress(`Syncing ${platform}...`);
+                await syncPlatformCalendar(url, chaletId, platform);
 
-                    console.log(`[${platform}] Sync OK via AirbnbSyncService.`);
-                    onProgress(`${platform} synced successfully.`);
-                    stats.imported += 1;
-                } else {
-                    onProgress(`Processing ${platform}...`);
-                    // Fallback mechanism (optional) or log unimplemented
-                    console.warn(`[${platform}] No specific sync service implemented.`);
-                }
-
+                console.log(`[${platform}] Sync OK via PlatformSyncService.`);
+                onProgress(`${platform} synced successfully.`);
+                stats.imported += 1;
             } catch (error) {
                 console.error(`[${platform}] Sync Error:`, error);
                 onProgress(`Error syncing ${platform}: ${error.message}`);
