@@ -1,55 +1,63 @@
 import React from 'react';
-import { User, DollarSign, Sparkles } from 'lucide-react';
 
-const ReservationCard = ({ guestName, platform, revenue, upsells = [], color }) => {
+const ReservationCard = ({ segment }) => {
+    const { booking, isCheckin, isCheckout, widthCells, leftPercent } = segment;
+
+    let borderRadius = '0';
+    if (isCheckin && isCheckout) {
+        borderRadius = '20px';
+    } else if (isCheckin) {
+        borderRadius = '20px 0 0 20px';
+    } else if (isCheckout) {
+        borderRadius = '0 20px 20px 0';
+    }
+
+    const sourceNames = {
+        airbnb: 'Airbnb',
+        booking: 'Booking.com',
+        vrbo: 'VRBO',
+        mrchalet: 'Mr Chalet',
+        direct: 'Direct'
+    };
+
     return (
         <div style={{
-            marginTop: '0.25rem',
-            padding: '0.5rem',
-            borderRadius: 'var(--radius-md)',
-            background: color || 'linear-gradient(135deg, #3b82f6, #2563eb)',
+            position: 'absolute',
+            left: `${leftPercent}%`,
+            width: `calc(${widthCells * 100}% + 1px)`,
+            top: '32px',
+            height: '26px',
+            background: booking.color || '#3b82f6',
+            borderRadius: borderRadius,
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 10px',
             color: '#fff',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            cursor: 'pointer',
             fontSize: '0.75rem',
-            position: 'relative',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
             overflow: 'hidden',
-            borderLeft: '3px solid rgba(255,255,255,0.3)'
+            border: '1px solid rgba(0,0,0,0.1)',
+            borderLeft: isCheckin ? '1px solid rgba(0,0,0,0.1)' : 'none',
+            borderRight: isCheckout ? '1px solid rgba(0,0,0,0.1)' : 'none',
+            boxSizing: 'border-box'
         }}>
-            {/* Top Row: Name & Platform Icon */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', overflow: 'hidden' }}>
-                    <span style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {guestName}
-                    </span>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
                 <div style={{
-                    width: '18px',
-                    height: '18px',
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.65rem',
-                    fontWeight: 700
+                    width: '16px', height: '16px', borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.25)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '9px'
                 }}>
-                    {platform?.icon || 'D'}
+                    {(booking.source || 'd').charAt(0).toUpperCase()}
                 </div>
-            </div>
-
-            {/* Bottom Row: Revenue & Upsells */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.9 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.1rem' }}>
-
-                    <span>{revenue}</span>
-                </div>
-
-                {upsells.length > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                        <Sparkles size={10} />
-                        <span>{upsells.length}</span>
-                    </div>
+                <span style={{ opacity: 0.9 }}>{sourceNames[booking.source] || 'Direct'}</span>
+                {booking.guestName && (
+                    <>
+                        <span style={{ opacity: 0.5 }}>|</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>{booking.guestName}</span>
+                    </>
                 )}
             </div>
         </div>

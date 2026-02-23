@@ -297,7 +297,6 @@ export const SanctuumProvider = ({ children }) => {
             getPlatformById,
             getGuestById,
             getBookingsForChalet,
-            getBookingsForChalet,
             updateChalet,
             updateChaletConnections,
             createBooking,

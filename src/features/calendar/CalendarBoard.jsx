@@ -41,43 +41,54 @@ const CalendarBoard = () => {
 
     const days = [t('cal_mon'), t('cal_tue'), t('cal_wed'), t('cal_thu'), t('cal_fri'), t('cal_sat'), t('cal_sun')];
 
-    // Generate dates for current viewDate (Month)
     const generateDates = (date) => {
         const year = date.getFullYear();
-        const month = date.getMonth(); // 0-indexed
+        const month = date.getMonth();
 
-        // First day of month
-        const firstDay = new Date(year, month, 1);
-        // Last day of month
-        const lastDay = new Date(year, month + 1, 0);
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+
+        let startDay = firstDayOfMonth.getDay();
+        if (startDay === 0) startDay = 7;
+        startDay -= 1;
 
         const dates = [];
 
-        // Padding for starting day (if month doesn't start on Monday)
-        // Day of week: 0 (Sun) - 6 (Sat)
-        // We want Mon=0, Sun=6
-        let startDay = firstDay.getDay();
-        if (startDay === 0) startDay = 7; // Convert Sun 0 to 7 for easy math
-        startDay -= 1; // Make Mon 0
-
-        // Add empty slots for padding
-        for (let j = 0; j < startDay; j++) {
-            dates.push(null);
+        // Previous month padding
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+        for (let j = startDay - 1; j >= 0; j--) {
+            const padDate = new Date(year, month - 1, prevMonthLastDay - j);
+            const y = padDate.getFullYear();
+            const m = String(padDate.getMonth() + 1).padStart(2, '0');
+            const d = String(padDate.getDate()).padStart(2, '0');
+            dates.push({ day: padDate.getDate(), dateStr: `${y}-${m}-${d}`, isPadding: true });
         }
 
-        // Days in month
-        const numDays = lastDay.getDate();
+        // Current month
+        const numDays = lastDayOfMonth.getDate();
         for (let i = 1; i <= numDays; i++) {
-            const dayString = i < 10 ? `0${i}` : `${i}`;
-            const monthString = (month + 1) < 10 ? `0${month + 1}` : `${month + 1}`;
-            const dateStr = `${year}-${monthString}-${dayString}`;
-            dates.push({ day: i, dateStr });
+            const m = String(month + 1).padStart(2, '0');
+            const d = String(i).padStart(2, '0');
+            dates.push({ day: i, dateStr: `${year}-${m}-${d}`, isPadding: false });
+        }
+
+        // Next month padding
+        const remainder = dates.length % 7;
+        if (remainder !== 0) {
+            const needed = 7 - remainder;
+            for (let i = 1; i <= needed; i++) {
+                const padDate = new Date(year, month + 1, i);
+                const y = padDate.getFullYear();
+                const m = String(padDate.getMonth() + 1).padStart(2, '0');
+                const d = String(padDate.getDate()).padStart(2, '0');
+                dates.push({ day: padDate.getDate(), dateStr: `${y}-${m}-${d}`, isPadding: true });
+            }
         }
 
         return dates;
     };
 
-    const dates = generateDates(viewDate);
+    const dates = React.useMemo(() => generateDates(viewDate), [viewDate]);
 
     // Handlers for navigation
     const nextMonth = () => {
@@ -104,12 +115,45 @@ const CalendarBoard = () => {
         );
     }
 
-    const getBookingForDate = (dateStr) => {
-        if (!dateStr) return [];
-        // Use new events state
-        return events.filter(b => {
-            return dateStr >= b.start && dateStr < b.end;
+    const getSegmentsForCell = (i) => {
+        const cellDate = dates[i].dateStr;
+        const isWeekStart = (i % 7 === 0);
+
+        const weekStartIdx = i - (i % 7);
+        const weekData = dates.slice(weekStartIdx, weekStartIdx + 7);
+        const weekEndDate = weekData[6]?.dateStr;
+
+        const segments = [];
+
+        events.forEach(b => {
+            const isCheckinHere = (b.start === cellDate);
+            const isContinuingHere = isWeekStart && (b.start < cellDate) && (b.end >= cellDate);
+
+            if (isCheckinHere || isContinuingHere) {
+                let X1 = isCheckinHere ? (i % 7) + 0.5 : 0.0;
+
+                let X2 = 7.0;
+                let isCheckoutHere = false;
+
+                if (b.end <= weekEndDate) {
+                    const localColEnd = weekData.findIndex(d => d.dateStr === b.end);
+                    if (localColEnd !== -1) {
+                        X2 = localColEnd + 0.5;
+                        isCheckoutHere = true;
+                    }
+                }
+
+                segments.push({
+                    booking: b,
+                    isCheckin: isCheckinHere,
+                    isCheckout: isCheckoutHere,
+                    widthCells: X2 - X1,
+                    leftPercent: isCheckinHere ? 50 : 0
+                });
+            }
         });
+
+        return segments;
     };
 
     return (
@@ -228,12 +272,7 @@ const CalendarBoard = () => {
                 {/* Scrollable Grid */}
                 <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridAutoRows: 'minmax(120px, 1fr)' }}>
                     {dates.map((dateObj, i) => {
-                        // Handle Padding Strings (nulls)
-                        if (!dateObj) {
-                            return <div key={`pad-${i}`} style={{ background: 'rgba(0,0,0,0.2)', borderRight: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}></div>;
-                        }
-
-                        const bookingsForDay = getBookingForDate(dateObj.dateStr);
+                        const segments = getSegmentsForCell(i);
 
                         return (
                             <div key={i} style={{
@@ -242,32 +281,33 @@ const CalendarBoard = () => {
                                 padding: '0.5rem',
                                 position: 'relative',
                                 cursor: 'pointer',
+                                background: dateObj.isPadding ? 'rgba(0,0,0,0.2)' : 'transparent',
                                 transition: 'background 0.2s',
                             }}
-                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                onMouseEnter={(e) => !dateObj.isPadding && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                                onMouseLeave={(e) => !dateObj.isPadding && (e.currentTarget.style.background = 'transparent')}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                     <span style={{
-                                        color: 'var(--color-text-muted)',
+                                        color: dateObj.isPadding ? 'rgba(255,255,255,0.2)' : 'var(--color-text-muted)',
                                         fontSize: '0.85rem',
                                         fontWeight: 500
                                     }}>{dateObj.day}</span>
-                                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)' }}>{formatPrice(currentChalet.baseNightPrice)}</span>
+                                    {/* Hide base price on padding days */}
+                                    {!dateObj.isPadding && (
+                                        <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)' }}>
+                                            {formatPrice(currentChalet.baseNightPrice)}
+                                        </span>
+                                    )}
                                 </div>
 
-                                {bookingsForDay.map(booking => {
-                                    return (
-                                        <ReservationCard
-                                            key={booking.id}
-                                            guestName={booking.guestName || booking.guest || 'Unknown'}
-                                            platform={{ name: booking.source, color: booking.color }}
-                                            color={booking.color}
-                                            revenue={formatPrice(booking.totalRevenue || 0)}
-                                            upsells={booking.upsells}
-                                        />
-                                    );
-                                })}
+                                {/* Render Continuous Event Segments */}
+                                {segments.map(segment => (
+                                    <ReservationCard
+                                        key={`${segment.booking.id}-${i}`}
+                                        segment={segment}
+                                    />
+                                ))}
                             </div>
                         );
                     })}
