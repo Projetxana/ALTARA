@@ -147,3 +147,13 @@ with check ( bucket_id = 'guide-images' );
 create policy "Users can delete own images"
 on storage.objects for delete
 using ( auth.uid() = owner and bucket_id = 'guide-images' );
+
+-- ==============================================================================
+-- PHASE 5: OVERRIDES FOR SYNCHRONIZATION API
+-- ==============================================================================
+-- Since the Serverless APIs are running with the Anon Key currently, we need
+-- to temporarily allow them to insert and update bookings.
+-- (Ideally, provide SUPABASE_SERVICE_ROLE_KEY in .env instead of this override)
+
+create policy "Allow anonymous insert for sync" on bookings for insert with check (true);
+create policy "Allow anonymous update for sync" on bookings for update using (true);
