@@ -1,8 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-// Initialize Supabase Client (Service Role preferred for Edge Functions, but using Anon for Vercel/Client parity if Env vars are same)
-// WARNING: Ideally use SUPABASE_SERVICE_ROLE_KEY for writing if RLS blocks anon.
-// For this User Request, we assume standard vars.
+// Backend iCal proxy. Pure parsing, NO Supabase DB connections here.
 
 export default async function handler(req, res) {
     if (req.method !== 'POST' && req.method !== 'GET') {
@@ -56,36 +52,12 @@ export default async function handler(req, res) {
             };
         });
 
-        // 4. Initialize Supabase
-        // Note: Check for VITE_ prefix (frontend aligned) AND standard server-side env vars.
-        const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-
-        if (!supabaseUrl || !supabaseKey) {
-            console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY / VITE equivalents");
-            throw new Error("Missing Supabase Credentials on Server");
-        }
-
-        const supabase = createClient(supabaseUrl, supabaseKey);
-
-        // 5. Upsert to DB
-        // Using 'upsert' to avoid duplicates based on 'external_uid' (must be unique constraint in DB)
-        const { data: result, error } = await supabase
-            .from('bookings')
-            .upsert(validEvents, { onConflict: 'external_uid' })
-            .select();
-
-        if (error) {
-            console.error('[ical-sync] Supabase Upsert Error:', error);
-            throw error;
-        }
-
-        console.log(`[ical-sync] Synced ${validEvents.length} events successfully.`);
-
-        res.status(200).json({ success: true, imported: validEvents.length, bookings: result });
+        // 4. Return to Frontend
+        console.log(`[ical-sync] Parsed ${validEvents.length} events successfully. Sending to frontend.`);
+        res.status(200).json({ success: true, count: validEvents.length, events: validEvents });
 
     } catch (error) {
         console.error('[ical-sync] Error:', error);
-        res.status(500).json({ error: 'Sync failed', details: error.message });
+        res.status(500).json({ error: 'Failed to parse iCal', details: error.message });
     }
 }
