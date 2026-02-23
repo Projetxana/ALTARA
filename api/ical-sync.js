@@ -39,16 +39,21 @@ export default async function handler(req, res) {
             else if (platform === 'vrbo') color = '#2C3E50'; // VRBO Navy
             else if (platform === 'direct') color = '#10B981'; // Direct Green
 
+            let isBlocked = false;
+            if (e.summary && (e.summary.toLowerCase().includes('not available') || e.summary.toLowerCase().includes('blocked') || e.summary.toLowerCase().includes('bloc'))) {
+                isBlocked = true;
+            }
+
             return {
                 chalet_id: chaletId,
                 user_id: userId,
                 source: platform,
                 start_date: e.start.toISOString().split('T')[0],
                 end_date: e.end.toISOString().split('T')[0],
-                guest_name: e.summary || `${platform} Guest`,
+                guest_name: isBlocked ? 'Période bloquée' : (e.summary || `${platform} Guest`),
                 color: color,
                 external_uid: e.uid,
-                status: 'confirmed'
+                status: isBlocked ? 'blocked' : 'confirmed'
             };
         });
 

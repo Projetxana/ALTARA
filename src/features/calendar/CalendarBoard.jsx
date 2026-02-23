@@ -36,7 +36,8 @@ const CalendarBoard = () => {
                 color: b.color,
                 guestName: b.guestName || 'Guest',
                 source: b.source,
-                totalRevenue: b.totalRevenue || 0
+                totalRevenue: b.totalRevenue || 0,
+                status: b.status
             };
         });
     }, [bookings, selectedChaletId]);
@@ -386,8 +387,9 @@ const CalendarBoard = () => {
                                         <tbody>
                                             {monthEvents.map(b => {
                                                 const nights = Math.round((new Date(b.end) - new Date(b.start)) / (1000 * 60 * 60 * 24));
+                                                const isBlocked = b.status === 'blocked';
                                                 return (
-                                                    <tr key={b.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                                                    <tr key={b.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', opacity: isBlocked ? 0.4 : 1 }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                                                         <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                             <div style={{ width: 14, height: 14, borderRadius: '50%', background: b.color, boxShadow: `0 0 10px ${b.color}80` }}></div>
                                                             <div>

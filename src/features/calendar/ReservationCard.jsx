@@ -28,6 +28,7 @@ const ReservationCard = ({ segment }) => {
             top: '32px',
             height: '26px',
             background: booking.color || '#3b82f6',
+            opacity: booking.status === 'blocked' ? 0.4 : 1,
             borderRadius: borderRadius,
             zIndex: 10,
             display: 'flex',
