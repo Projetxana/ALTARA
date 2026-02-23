@@ -9,10 +9,10 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { url, chaletId, platform = 'airbnb' } = req.method === 'POST' ? req.body : req.query;
+    const { url, chaletId, platform = 'airbnb', userId } = req.method === 'POST' ? req.body : req.query;
 
-    if (!url || !chaletId) {
-        return res.status(400).json({ error: 'Missing url or chaletId' });
+    if (!url || !chaletId || !userId) {
+        return res.status(400).json({ error: 'Missing url, chaletId, or userId' });
     }
 
     try {
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
 
             return {
                 chalet_id: chaletId,
+                user_id: userId,
                 source: platform,
                 start_date: e.start.toISOString().split('T')[0],
                 end_date: e.end.toISOString().split('T')[0],
