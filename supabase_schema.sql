@@ -157,3 +157,63 @@ using ( auth.uid() = owner and bucket_id = 'guide-images' );
 
 create policy "Allow anonymous insert for sync" on bookings for insert with check (true);
 create policy "Allow anonymous update for sync" on bookings for update using (true);
+
+
+-- ==============================================================================
+-- PHASE 6: HOUSEKEEPING (MÉNAGE)
+-- ==============================================================================
+
+create table cleaning_tasks (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  chalet_id uuid references chalets(id) on delete cascade not null,
+  booking_id uuid references bookings(id) on delete cascade,
+  date date not null,
+  status text default 'pending', -- 'pending', 'in_progress', 'completed'
+  notes text,
+  auto_generated boolean default false
+);
+
+alter table cleaning_tasks enable row level security;
+
+-- Setup RLS (allow public access like bookings for the prototype/sync, or restricted)
+create policy "Allow public access cleaning_tasks" on cleaning_tasks for all using (true);
+
+-- Trigger Function: Auto-create cleaning task on check-out
+create or replace function public.auto_generate_cleaning_task()
+returns trigger as $$
+begin
+  -- If it's a new booking or an updated booking where the checkout date changed
+  if (TG_OP = 'INSERT') or (TG_OP = 'UPDATE' and old.check_out is distinct from new.check_out) then
+    
+    -- Insert or update the cleaning task for this specific booking
+    insert into public.cleaning_tasks (chalet_id, booking_id, date, auto_generated, status)
+    values (new.chalet_id, new.id, new.check_out, true, 'pending')
+    on conflict do nothing; -- We need a unique constraint to avoid duplicates if we want UPSERT, or we can just delete and recreate
+
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- First, let's make sure we don't duplicate auto-generated tasks for the same booking
+alter table cleaning_tasks add constraint unique_booking_cleaning unique (booking_id);
+
+-- Update the function to use UPSERT now that we have a unique constraint
+create or replace function public.auto_generate_cleaning_task()
+returns trigger as $$
+begin
+  if (TG_OP = 'INSERT') or (TG_OP = 'UPDATE' and old.check_out is distinct from new.check_out) then
+    insert into public.cleaning_tasks (chalet_id, booking_id, date, auto_generated, status)
+    values (new.chalet_id, new.id, new.check_out, true, 'pending')
+    on conflict (booking_id) do update set date = EXCLUDED.date;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- Attach trigger to bookings table
+drop trigger if exists on_booking_upsert_cleaning on bookings;
+create trigger on_booking_upsert_cleaning
+  after insert or update on bookings
+  for each row execute procedure public.auto_generate_cleaning_task();

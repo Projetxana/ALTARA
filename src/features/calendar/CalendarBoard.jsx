@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Filter, Home } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, Home, Sparkles } from 'lucide-react';
 import { useSanctuum } from '../../context/SanctuumContext';
 import { useLanguage } from '../../context/LanguageContext';
 import ReservationCard from './ReservationCard';
@@ -11,7 +11,8 @@ const CalendarBoard = () => {
         setSelectedChaletId,
         currentChalet,
         formatPrice,
-        bookings
+        bookings,
+        cleaningTasks
     } = useSanctuum();
     const { t, language } = useLanguage();
 
@@ -293,12 +294,22 @@ const CalendarBoard = () => {
                                         fontSize: '0.85rem',
                                         fontWeight: 500
                                     }}>{dateObj.day}</span>
-                                    {/* Hide base price on padding days */}
-                                    {!dateObj.isPadding && (
-                                        <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)' }}>
-                                            {formatPrice(currentChalet.baseNightPrice)}
-                                        </span>
-                                    )}
+                                    {/* Additional Cell Indicators */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        {!dateObj.isPadding && cleaningTasks.some(t => t.date === dateObj.dateStr && t.chaletId === selectedChaletId && t.status !== 'completed') && (
+                                            <div title="Housekeeping required" style={{
+                                                background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', borderRadius: '4px', padding: '2px 4px', display: 'flex', alignItems: 'center', gap: '2px', fontSize: '0.65rem', fontWeight: 600
+                                            }}>
+                                                <Sparkles size={10} />
+                                            </div>
+                                        )}
+                                        {/* Hide base price on padding days */}
+                                        {!dateObj.isPadding && (
+                                            <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)' }}>
+                                                {formatPrice(currentChalet.baseNightPrice)}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Render Continuous Event Segments */}

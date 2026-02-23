@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, Home, Users, Settings, Sparkles, BarChart, Tag, Briefcase, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Calendar, Home, Users, Settings, Sparkles, BarChart, Tag, Briefcase, DollarSign, ClipboardList } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -11,6 +11,7 @@ const Sidebar = () => {
     const navItems = [
         { icon: <Calendar size={20} />, label: t('nav_planning'), path: '/planning' },
         { icon: <Home size={20} />, label: t('nav_properties'), path: '/properties' },
+        { icon: <ClipboardList size={20} />, label: t('nav_housekeeping') || 'Housekeeping', path: '/housekeeping' },
         { icon: <Tag size={20} />, label: t('nav_pricing'), path: '/pricing' },
         { icon: <Sparkles size={20} />, label: t('nav_experiences'), path: '/experiences' },
         { icon: <Briefcase size={20} />, label: t('nav_soul'), path: '/soul' },

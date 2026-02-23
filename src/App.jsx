@@ -16,6 +16,7 @@ import SoulDashboard from './features/soul/SoulDashboard'
 import FinancePage from './features/finance/FinancePage'
 import SettingsPage from './features/settings/SettingsPage'
 import GuestsPage from './features/guests/GuestsPage'
+import HousekeepingPage from './features/housekeeping/HousekeepingPage'
 
 import TravelerGuide from './features/traveler-guide/TravelerGuide'
 import GuideEditor from './features/traveler-guide/GuideEditor'
@@ -82,6 +83,7 @@ function App() {
                   <Route path="/planning" element={<CalendarBoard />} />
                   <Route path="/properties" element={<PropertiesPage />} />
                   <Route path="/properties/:id" element={<PropertyDetail />} />
+                  <Route path="/housekeeping" element={<HousekeepingPage />} />
                   <Route path="/experiences" element={<ExperiencesPage />} />
                   <Route path="/analytics" element={<AnalyticsDashboard />} />
                   <Route path="/pricing" element={<PricingPage />} />
