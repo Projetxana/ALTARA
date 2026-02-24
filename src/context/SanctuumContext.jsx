@@ -81,12 +81,24 @@ export const SanctuumProvider = ({ children }) => {
             }
 
             // Map DB snake_case to Frontend camelCase
-            const mappedChalets = finalChalets.map(c => ({
-                ...c,
-                baseNightPrice: c.base_night_price || c.baseNightPrice, // Handle both DB (snake) and Local (camel) source
-                minStay: c.min_stay || c.minStay || 2,
-                image_url: c.image_url // snake_case in both DB and Frontend usage currently
-            }));
+            const mappedChalets = finalChalets.map(c => {
+                let parsedPricingInfo = null;
+                if (c.pricing_info) {
+                    try {
+                        parsedPricingInfo = typeof c.pricing_info === 'string' ? JSON.parse(c.pricing_info) : c.pricing_info;
+                    } catch (e) {
+                        console.error("Failed to parse pricing_info:", e);
+                    }
+                }
+
+                return {
+                    ...c,
+                    baseNightPrice: c.base_night_price || c.baseNightPrice, // Handle both DB (snake) and Local (camel) source
+                    minStay: c.min_stay || c.minStay || 2,
+                    pricingInfo: parsedPricingInfo,
+                    image_url: c.image_url // snake_case in both DB and Frontend usage currently
+                };
+            });
 
             setChalets(mappedChalets);
 
@@ -202,6 +214,7 @@ export const SanctuumProvider = ({ children }) => {
                 if (updates.minStay !== undefined) dbUpdates.min_stay = updates.minStay;
                 if (updates.image_url !== undefined) dbUpdates.image_url = updates.image_url;
                 if (updates.connections !== undefined) dbUpdates.connections = updates.connections;
+                if (updates.pricingInfo !== undefined) dbUpdates.pricing_info = JSON.stringify(updates.pricingInfo);
 
                 const { error } = await supabase
                     .from('chalets')

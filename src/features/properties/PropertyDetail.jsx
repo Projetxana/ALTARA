@@ -5,6 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { ArrowLeft, Settings, BarChart2, Calendar, DollarSign, Trash2 } from 'lucide-react';
 import PlatformConnectionPanel from '../sync/PlatformConnectionPanel';
 import ListingLabPanel from './ListingLabPanel';
+import PricingModule from '../pricing/PricingModule';
 
 const PropertyDetail = () => {
     const { id } = useParams();
@@ -140,29 +141,18 @@ const PropertyDetail = () => {
                 )}
             </div>
 
+            {/* Smart Pricing Module */}
+            <div style={{ marginBottom: '3rem' }}>
+                <PricingModule chalet={chalet} />
+            </div>
+
             {/* Manual Edit & Airbnb Sync */}
             <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', marginBottom: '3rem', border: '1px solid var(--color-border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                    <h3 style={{ fontSize: '1.25rem' }}>Property Configuration</h3>
+                    <h3 style={{ fontSize: '1.25rem' }}>Property Content Configuration</h3>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-
-                    {/* Manual Price Edit */}
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Base Night Price ({formatPrice(0).replace(/\d|\s/g, '')})</label>
-                        <input
-                            type="number"
-                            defaultValue={chalet.baseNightPrice || 0}
-                            onChange={(e) => updateChalet(chalet.id, { baseNightPrice: parseFloat(e.target.value) })}
-                            style={{
-                                width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
-                                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.2rem'
-                            }}
-                        />
-                    </div>
-
-                    {/* Photo URL Edit */}
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Photo URL</label>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
