@@ -204,69 +204,97 @@ const FinancePage = () => {
         : annualTransactions.filter(tItem => tItem.date && tItem.date.startsWith(`${selectedYear}-${selectedMonth}`));
 
     // Derived Totals (Annual)
-    const totals = annualTransactions.reduce((acc, curr) => {
-        const amt = parseFloat(curr.amount);
+    const annualTotals = annualTransactions.reduce((acc, curr) => {
+        const rate = parseFloat(curr.tax_rate || 0);
+        const { net } = calculateAmounts(parseFloat(curr.amount), rate);
+
         if (curr.type === 'revenue') {
-            acc.revenue += amt;
-            acc.net += amt;
+            acc.revenue += net; // Now using NET
+            acc.net += net;
         } else {
-            acc.expenses += amt;
-            acc.net -= amt;
+            acc.expenses += net; // Now using NET
+            acc.net -= net;
         }
         return acc;
     }, { revenue: 0, expenses: 0, net: 0 });
 
-    // Chart Data Preparation
+    // Derived Totals (Monthly)
+    const monthlyTotals = selectedMonth === 'All' ? null : displayedTransactions.reduce((acc, curr) => {
+        const rate = parseFloat(curr.tax_rate || 0);
+        const { net } = calculateAmounts(parseFloat(curr.amount), rate);
+
+        if (curr.type === 'revenue') {
+            acc.revenue += net;
+            acc.net += net;
+        } else {
+            acc.expenses += net;
+            acc.net -= net;
+        }
+        return acc;
+    }, { revenue: 0, expenses: 0, net: 0 });
+
+    // Chart Data Preparation (Using NET)
     const chartDataMap = {};
     displayedTransactions.forEach(tItem => {
         const cat = tItem.category || 'General';
         const type = tItem.type;
-        const amt = parseFloat(tItem.amount);
+        const rate = parseFloat(tItem.tax_rate || 0);
+        const { net } = calculateAmounts(parseFloat(tItem.amount), rate);
 
         if (!chartDataMap[cat]) {
             chartDataMap[cat] = { name: cat, revenue: 0, expense: 0 };
         }
         if (type === 'revenue') {
-            chartDataMap[cat].revenue += amt;
+            chartDataMap[cat].revenue += net; // NET
         } else {
-            chartDataMap[cat].expense += amt;
+            chartDataMap[cat].expense += net; // NET
         }
     });
     const chartData = Object.values(chartDataMap).sort((a, b) => (b.revenue + b.expense) - (a.revenue + a.expense));
 
-    // Tax Report Calculation (Filtered)
-    const taxReport = displayedTransactions.reduce((acc, curr) => {
-        const rate = parseFloat(curr.tax_rate || 0);
-        const { net, tax } = calculateAmounts(parseFloat(curr.amount), rate);
+    // Tax Report Calculation (Filtered - Applies to both Annual and Monthly views)
+    const getTaxBreakdown = (transactionsArray) => {
+        return transactionsArray.reduce((acc, curr) => {
+            const rate = parseFloat(curr.tax_rate || 0);
+            const { net, tax } = calculateAmounts(parseFloat(curr.amount), rate);
 
-        // TPS is approx 5/14.975 of the tax if rate is 14.975, or all if 5%
-        // Simplified Logic for Quebec: 
-        // If rate ~ 14.975 => TPS = Net * 0.05, TVQ = Net * 0.09975
-        // If rate ~ 5 => TPS = Tax, TVQ = 0
+            let tps = 0;
+            let tvq = 0;
 
-        let tps = 0;
-        let tvq = 0;
+            if (Math.abs(rate - 14.975) < 0.1) {
+                tps = net * 0.05;
+                tvq = net * 0.09975;
+            } else if (Math.abs(rate - 5.0) < 0.1) {
+                tps = tax;
+            } else {
+                tps = tax;
+            }
 
-        if (Math.abs(rate - 14.975) < 0.1) {
-            tps = net * 0.05;
-            tvq = net * 0.09975;
-        } else if (Math.abs(rate - 5.0) < 0.1) {
-            tps = tax;
-        } else {
-            // Treat as custom/other tax (assign to TPS for simplicity or ignore)
-            tps = tax;
-        }
+            if (curr.type === 'revenue') {
+                acc.tpsCollected += tps;
+                acc.tvqCollected += tvq;
+            } else {
+                acc.tpsPaid += tps;
+                acc.tvqPaid += tvq;
+            }
+            return acc;
+        }, { tpsCollected: 0, tvqCollected: 0, tpsPaid: 0, tvqPaid: 0 });
+    };
 
-        if (curr.type === 'revenue') {
-            acc.tpsCollected += tps;
-            acc.tvqCollected += tvq;
-        } else {
-            acc.tpsPaid += tps;
-            acc.tvqPaid += tvq;
-        }
-        return acc;
-    }, { tpsCollected: 0, tvqCollected: 0, tpsPaid: 0, tvqPaid: 0 });
+    const annualTaxReport = getTaxBreakdown(annualTransactions);
+    const displayedTaxReport = getTaxBreakdown(displayedTransactions); // Will be annual or monthly depending on filter
 
+    const calculateNetTaxes = (report) => {
+        const netTPS = report.tpsCollected - report.tpsPaid;
+        const netTVQ = report.tvqCollected - report.tvqPaid;
+        return netTPS + netTVQ;
+    };
+
+    const annualTaxesToPay = calculateNetTaxes(annualTaxReport);
+    const monthlyTaxesToPay = selectedMonth !== 'All' ? calculateNetTaxes(displayedTaxReport) : 0;
+
+    // For the Report Modal
+    const taxReport = displayedTaxReport;
     const netTPS = taxReport.tpsCollected - taxReport.tpsPaid;
     const netTVQ = taxReport.tvqCollected - taxReport.tvqPaid;
     const totalToPay = netTPS + netTVQ;
@@ -325,21 +353,32 @@ const FinancePage = () => {
                 </div>
             </div>
 
-            {/* SUMMARY CARDS */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
-                <StatsCard title={`${t('fin_total_rev') || 'Total Revenue'} (Annuel)`} value={totals.revenue} icon={<TrendingUp size={20} />} color="#10b981" />
-                <StatsCard title={`${t('fin_total_exp') || 'Total Expenses'} (Annuel)`} value={totals.expenses} icon={<TrendingDown size={20} />} color="#ef4444" />
-                <StatsCard title={`${t('fin_net_profit') || 'Net Profit'} (Annuel)`} value={totals.net} icon={<DollarSign size={20} />} color="#3b82f6" />
+            {/* SUMMARY CARDS (ANNUAL) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: selectedMonth !== 'All' ? '1rem' : '2rem' }}>
+                <StatsCard title={`${t('fin_total_rev') || 'Total Revenue'} (Annuel)`} value={annualTotals.revenue} icon={<TrendingUp size={20} />} color="#10b981" />
+                <StatsCard title={`Taxes à verser (Annuel)`} value={annualTaxesToPay} icon={<FileText size={20} />} color={annualTaxesToPay >= 0 ? "#ef4444" : "#10b981"} />
+                <StatsCard title={`${t('fin_total_exp') || 'Total Expenses'} (Annuel)`} value={annualTotals.expenses} icon={<TrendingDown size={20} />} color="#ef4444" />
+                <StatsCard title={`${t('fin_net_profit') || 'Net Profit'} (Annuel)`} value={annualTotals.net} icon={<DollarSign size={20} />} color="#3b82f6" />
             </div>
+
+            {/* SUMMARY CARDS (MONTHLY) */}
+            {selectedMonth !== 'All' && monthlyTotals && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem', opacity: 0.9 }}>
+                    <StatsCard title={`${t('fin_total_rev') || 'Total Revenue'} (Mois)`} value={monthlyTotals.revenue} icon={<TrendingUp size={16} />} color="#10b981" />
+                    <StatsCard title={`Taxes à verser (Mois)`} value={monthlyTaxesToPay} icon={<FileText size={16} />} color={monthlyTaxesToPay >= 0 ? "#ef4444" : "#10b981"} />
+                    <StatsCard title={`${t('fin_total_exp') || 'Total Expenses'} (Mois)`} value={monthlyTotals.expenses} icon={<TrendingDown size={16} />} color="#ef4444" />
+                    <StatsCard title={`${t('fin_net_profit') || 'Net Profit'} (Mois)`} value={monthlyTotals.net} icon={<DollarSign size={16} />} color="#3b82f6" />
+                </div>
+            )}
 
             {/* CHARTS */}
             {chartData.length > 0 && (
                 <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2rem' }}>
                     <h3 style={{ marginBottom: '1.5rem' }}>Aperçu par Catégorie ({selectedMonth === 'All' ? 'Annuel' : `Mois: ${{
-                            '01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril',
-                            '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août',
-                            '09': 'Septembre', '10': 'Octobre', '11': 'Novembre', '12': 'Décembre'
-                        }[selectedMonth]
+                        '01': 'Janvier', '02': 'Février', '03': 'Mars', '04': 'Avril',
+                        '05': 'Mai', '06': 'Juin', '07': 'Juillet', '08': 'Août',
+                        '09': 'Septembre', '10': 'Octobre', '11': 'Novembre', '12': 'Décembre'
+                    }[selectedMonth]
                         }`})</h3>
                     <div style={{ height: '300px', width: '100%' }}>
                         <ResponsiveContainer width="100%" height="100%">
