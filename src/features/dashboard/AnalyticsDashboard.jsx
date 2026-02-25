@@ -153,6 +153,11 @@ const AnalyticsDashboard = () => {
                     <div style={{ display: 'flex', alignItems: 'flex-end', height: '200px', gap: '0.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)' }}>
                         {monthlyRevenue.map((m, i) => (
                             <div key={i} style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }} title={`${m.name}: ${formatPrice(m.revenue)}`}>
+                                {m.revenue > 0 && (
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', opacity: 0.7, transform: 'rotate(-45deg)', transformOrigin: 'left bottom', whiteSpace: 'nowrap', textAlign: 'left', alignSelf: 'center', marginBottom: '1rem' }}>
+                                        ${Math.round(m.revenue)}
+                                    </div>
+                                )}
                                 <div style={{
                                     width: '60%',
                                     height: `${Math.max(5, (m.revenue / maxMonthlyRevenue) * 100)}%`, // minimum 5% height to be visible
