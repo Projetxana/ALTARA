@@ -26,19 +26,34 @@ const CalendarBoard = () => {
 
         const chaletBookings = bookings.filter(b => b.chaletId === selectedChaletId);
 
-        return chaletBookings.map(b => {
-            // Context standardizes start to checkInDate, end to checkOutDate
-            return {
-                id: b.id,
-                start: b.checkInDate,
-                end: b.checkOutDate,
-                title: b.source || 'reservation',
-                color: b.color,
-                guestName: b.guestName || 'Guest',
-                source: b.source,
-                totalRevenue: b.totalRevenue || 0,
-                status: b.status
-            };
+        // 1. Map to uniform format
+        const mapped = chaletBookings.map(b => ({
+            id: b.id,
+            start: b.checkInDate,
+            end: b.checkOutDate,
+            title: b.source || 'reservation',
+            color: b.color,
+            guestName: b.guestName || 'Guest',
+            source: b.source,
+            totalRevenue: b.totalRevenue || 0,
+            status: b.status
+        }));
+
+        // 2. Deduplicate "blocked" events that overlap with "confirmed" ones
+        const confirmedEvents = mapped.filter(e => e.status !== 'blocked');
+
+        return mapped.filter(event => {
+            // Keep all confirmed events
+            if (event.status !== 'blocked') return true;
+
+            // For blocked events, check if there's any overlapping confirmed event
+            const hasOverlap = confirmedEvents.some(confirmed => {
+                // Check for date overlap: A ends after B starts AND A starts before B ends
+                return event.end > confirmed.start && event.start < confirmed.end;
+            });
+
+            // If it overlaps with a real booking, filter out this blocked period
+            return !hasOverlap;
         });
     }, [bookings, selectedChaletId]);
 
@@ -114,6 +129,70 @@ const CalendarBoard = () => {
 
     const prevMonth = () => {
         setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    };
+
+    // Calculate Monthly Stats
+    const monthStats = React.useMemo(() => {
+        if (!currentChalet) return { occupancy: 0, revPar: 0 };
+
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthStart = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+        const monthEnd = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+
+        let bookedDays = 0;
+        let totalRevenue = 0;
+
+        events.forEach(b => {
+            if (b.end > monthStart && b.start <= monthEnd && b.status !== 'blocked') {
+                const overlapStart = b.start > monthStart ? b.start : monthStart;
+                const overlapEnd = b.end < monthEnd ? b.end : monthEnd;
+
+                const startD = new Date(overlapStart);
+                const endD = new Date(overlapEnd);
+                const daysOverlap = Math.max(0, Math.round((endD - startD) / (1000 * 60 * 60 * 24)));
+
+                bookedDays += daysOverlap;
+
+                const totalBookingDays = Math.max(1, Math.round((new Date(b.end) - new Date(b.start)) / (1000 * 60 * 60 * 24)));
+                const dailyRate = b.totalRevenue ? b.totalRevenue / totalBookingDays : (currentChalet.baseNightPrice || 0);
+
+                totalRevenue += (dailyRate * daysOverlap);
+            }
+        });
+
+        const validBookedDays = Math.min(bookedDays, daysInMonth);
+        const occupancy = Math.round((validBookedDays / daysInMonth) * 100);
+        const revPar = totalRevenue / daysInMonth;
+
+        return { occupancy, revPar };
+    }, [events, viewDate, currentChalet]);
+
+    // Calculate Daily Price
+    const getDailyPrice = (dateStr) => {
+        if (!currentChalet || !currentChalet.pricingInfo) return currentChalet?.baseNightPrice || 0;
+        const pricing = currentChalet.pricingInfo;
+        let currentPrice = pricing.basePrice || currentChalet.baseNightPrice || 0;
+
+        // Custom rules
+        if (pricing.customRules && pricing.customRules.length > 0) {
+            const activeRule = pricing.customRules.find(rule => {
+                if (!rule.startDate || !rule.endDate) return false;
+                return dateStr >= rule.startDate && dateStr <= rule.endDate;
+            });
+            if (activeRule && activeRule.price) return activeRule.price;
+        }
+
+        // Weekend price
+        const [y, m, d] = dateStr.split('-');
+        const localDate = new Date(y, m - 1, d);
+        const dayOfWeek = localDate.getDay();
+        if ((dayOfWeek === 5 || dayOfWeek === 6) && pricing.weekendPrice) {
+            return pricing.weekendPrice;
+        }
+
+        return currentPrice;
     };
 
     // Formatter for Header
@@ -218,11 +297,11 @@ const CalendarBoard = () => {
                     <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>{t('cal_stats')}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
                         <span style={{ fontSize: '0.85rem' }}>{t('cal_occupancy')}</span>
-                        <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>78%</span>
+                        <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>{monthStats.occupancy}%</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontSize: '0.85rem' }}>{t('cal_revpar')}</span>
-                        <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{formatPrice(currentChalet.baseNightPrice)}</span>
+                        <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{formatPrice(monthStats.revPar)}</span>
                     </div>
                 </div>
             </div>
@@ -342,7 +421,7 @@ const CalendarBoard = () => {
                                                 {/* Hide base price on padding days */}
                                                 {!dateObj.isPadding && (
                                                     <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)' }}>
-                                                        {formatPrice(currentChalet.baseNightPrice)}
+                                                        {formatPrice(getDailyPrice(dateObj.dateStr))}
                                                     </span>
                                                 )}
                                             </div>

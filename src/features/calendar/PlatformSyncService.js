@@ -46,5 +46,43 @@ export async function syncPlatformCalendar(icalUrl, chaletId, platform) {
         throw error;
     }
 
+    // 3. Auto-generate cleaning tasks for new bookings
+    if (result && result.length > 0) {
+        try {
+            // Get existing cleaning tasks for these bookings to avoid duplicates
+            const bookingIds = result.map(b => b.id);
+            const { data: existingTasks } = await supabase
+                .from('cleaning_tasks')
+                .select('booking_id')
+                .in('booking_id', bookingIds);
+
+            const existingBookingIds = new Set((existingTasks || []).map(t => t.booking_id));
+
+            const newTasks = result
+                .filter(b => !existingBookingIds.has(b.id))
+                .map(b => ({
+                    chalet_id: b.chalet_id,
+                    booking_id: b.id,
+                    date: b.end_date || b.end,
+                    status: 'pending',
+                    auto_generated: true
+                }));
+
+            if (newTasks.length > 0) {
+                const { error: taskError } = await supabase
+                    .from('cleaning_tasks')
+                    .insert(newTasks);
+
+                if (taskError) {
+                    console.error('[PlatformSyncService] Error generating cleaning tasks:', taskError);
+                } else {
+                    console.log(`[PlatformSyncService] Generated ${newTasks.length} cleaning tasks.`);
+                }
+            }
+        } catch (err) {
+            console.error('[PlatformSyncService] Failed to auto-generate cleaning tasks:', err);
+        }
+    }
+
     return { imported: events.length, bookings: result };
 }
