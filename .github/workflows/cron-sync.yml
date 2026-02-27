@@ -1,0 +1,27 @@
+name: 24/7 Calendar Sync Cron
+
+on:
+  schedule:
+    # Runs every 5 minutes (minimum allowed by GitHub Actions)
+    - cron: '*/5 * * * *'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync_calendars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit Vercel Sync Endpoint
+        run: |
+          echo "Triggering API Call..."
+          curl -s -o response.json "https://altara-beta-sigma.vercel.app/api/cron-sync" || echo "Curl command failed"
+          
+          echo "==== Vercel API Response ===="
+          cat response.json
+          
+          # Check if the response contains success or error keys to potentially fail the job visually in GitHub
+          if grep -q '"success":true' response.json; then
+            echo "✅ Sync successful."
+          else
+            echo "⚠️ Sync might have failed or returned unexpected structure."
+          fi

@@ -154,7 +154,7 @@ const AnalyticsDashboard = () => {
                         {monthlyRevenue.map((m, i) => (
                             <div key={i} style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }} title={`${m.name}: ${formatPrice(m.revenue)}`}>
                                 {m.revenue > 0 && (
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', opacity: 0.7, transform: 'rotate(-45deg)', transformOrigin: 'left bottom', whiteSpace: 'nowrap', textAlign: 'left', alignSelf: 'center', marginBottom: '1rem' }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', opacity: 0.7, transform: 'rotate(-45deg)', transformOrigin: 'left bottom', whiteSpace: 'nowrap', textAlign: 'left', alignSelf: 'center', marginBottom: '1rem' }}>
                                         ${Math.round(m.revenue)}
                                     </div>
                                 )}

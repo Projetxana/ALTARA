@@ -64,10 +64,6 @@ const RequireAuth = () => {
 }
 
 function App() {
-  useEffect(() => {
-    // SyncEngine sera remis plus tard
-  }, [])
-
   return (
     <NotificationProvider>
       <LanguageProvider>

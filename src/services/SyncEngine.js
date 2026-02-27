@@ -1,17 +1,6 @@
 import { syncPlatformCalendar } from '../features/calendar/PlatformSyncService';
 
 export const SyncEngine = {
-    init: () => {
-        console.log('[Sanctuum Core] Sync Engine Initialized.');
-
-        // Sync Loop (every 15 min)
-        setInterval(() => {
-            console.log('[Sanctuum Core] Auto-Syncing...');
-            // In a real app, you would iterate over all chalets here
-            // SyncEngine.syncNow('chalet-1'); 
-        }, 15 * 60 * 1000);
-    },
-
     syncNow: async (chaletId, connections, onProgress = () => { }) => {
         console.log(`[Sanctuum Core] syncing Chalet ${chaletId}...`);
         onProgress("Initializing Sync Engine...");
