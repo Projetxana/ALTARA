@@ -26,6 +26,7 @@ import { SanctuumProvider } from './context/SanctuumContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { GuideProvider } from './context/GuideContext'
+import { ThemeProvider } from './context/ThemeContext'
 
 const DashboardLayout = () => {
   const isConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_KEY;
@@ -67,34 +68,36 @@ function App() {
   return (
     <NotificationProvider>
       <LanguageProvider>
-        <GuideProvider>
-          <SanctuumProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/guide" element={<TravelerGuide />} />
+        <ThemeProvider>
+          <GuideProvider>
+            <SanctuumProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/guide" element={<TravelerGuide />} />
 
-                <Route element={<RequireAuth />}>
-                  <Route path="/" element={<Navigate to="/planning" replace />} />
-                  <Route path="/planning" element={<CalendarBoard />} />
-                  <Route path="/properties" element={<PropertiesPage />} />
-                  <Route path="/properties/:id" element={<PropertyDetail />} />
-                  <Route path="/housekeeping" element={<HousekeepingPage />} />
-                  <Route path="/experiences" element={<ExperiencesPage />} />
-                  <Route path="/analytics" element={<AnalyticsDashboard />} />
-                  <Route path="/pricing" element={<PricingPage />} />
-                  <Route path="/soul" element={<SoulDashboard />} />
-                  <Route path="/finance" element={<FinancePage />} />
-                  <Route path="/book/:id" element={<BookingPage />} />
-                  <Route path="/guests" element={<GuestsPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/settings/guide-editor" element={<GuideEditor />} />
-                  <Route path="/editor" element={<GuideEditor />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </SanctuumProvider>
-        </GuideProvider>
+                  <Route element={<RequireAuth />}>
+                    <Route path="/" element={<Navigate to="/planning" replace />} />
+                    <Route path="/planning" element={<CalendarBoard />} />
+                    <Route path="/properties" element={<PropertiesPage />} />
+                    <Route path="/properties/:id" element={<PropertyDetail />} />
+                    <Route path="/housekeeping" element={<HousekeepingPage />} />
+                    <Route path="/experiences" element={<ExperiencesPage />} />
+                    <Route path="/analytics" element={<AnalyticsDashboard />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/soul" element={<SoulDashboard />} />
+                    <Route path="/finance" element={<FinancePage />} />
+                    <Route path="/book/:id" element={<BookingPage />} />
+                    <Route path="/guests" element={<GuestsPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/settings/guide-editor" element={<GuideEditor />} />
+                    <Route path="/editor" element={<GuideEditor />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </SanctuumProvider>
+          </GuideProvider>
+        </ThemeProvider>
       </LanguageProvider>
     </NotificationProvider>
   )

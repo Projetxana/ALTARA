@@ -1,12 +1,14 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, Home, Users, Settings, Sparkles, BarChart, Tag, Briefcase, DollarSign, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Calendar, Home, Users, Settings, Sparkles, BarChart, Tag, Briefcase, DollarSign, ClipboardList, Moon, Sun } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
 
     const navItems = [
         { icon: <Calendar size={20} />, label: t('nav_planning'), path: '/planning' },
@@ -75,7 +77,27 @@ const Sidebar = () => {
                 })}
             </nav>
 
-            <div style={{ marginTop: 'auto' }}>
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <button
+                    onClick={toggleTheme}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        padding: '0.875rem 1rem',
+                        width: '100%',
+                        background: 'transparent',
+                        borderRadius: 'var(--radius-md)',
+                        border: 'none',
+                        color: 'var(--color-primary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    <span>{theme === 'dark' ? 'Mode Clair' : 'Mode Sombre'}</span>
+                </button>
+
                 <button
                     onClick={() => navigate('/settings')}
                     style={{
