@@ -1,14 +1,18 @@
 {
-    "rewrites": [
-        {
-            "source": "/api/airbnb/:path*",
-            "destination": "https://airbnb13.p.rapidapi.com/:path*"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-      ],
+  "rewrites": [
+    {
+      "source": "/api/airbnb/:path*",
+      "destination": "https://airbnb13.p.rapidapi.com/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "functions": {
     "api/*.js": {
       "runtime": "nodejs18.x"
