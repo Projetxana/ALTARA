@@ -1,9 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
-    if (req.method !== 'GET' && req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
+  return res.status(200).json({ version: "NEW_DEPLOY_TEST" });
+}
 
     try {
         console.log("ENV DEBUG:");
