@@ -6,6 +6,9 @@ export default async function handler(req, res) {
     }
 
     try {
+        console.log("ENV DEBUG:");
+        console.log("SUPABASE_URL exists:", !!process.env.SUPABASE_URL);
+        console.log("SERVICE_ROLE exists:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
         console.log('[cron-sync] Starting 24/7 background calendar sync...');
 
         // 1. Initialize Supabase
