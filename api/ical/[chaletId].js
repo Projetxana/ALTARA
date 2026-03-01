@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
         // Fetch confirmed bookings only
         const { data: bookings, error } = await supabase
-            .from('Booking')
+            .from('booking')
             .select('*')
             .eq('chalet_id', chaletId)
             .eq('statuts', 'confirmed');

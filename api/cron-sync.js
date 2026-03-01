@@ -1,9 +1,19 @@
+console.log("CRON_SECRET:", process.env.CRON_SECRET);
 import { createClient } from '@supabase/supabase-js';
 import ical from 'node-ical';
 import axios from 'axios';
 
 export default async function handler(req, res) {
+
+  // 🔐 Security check
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   try {
+
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -56,7 +66,7 @@ export default async function handler(req, res) {
 
             // Check if already exists
             const { data: existing } = await supabase
-              .from('Booking')
+              .from('booking')
               .select('id')
               .eq('external_uid', externalUid)
               .single();
@@ -65,7 +75,7 @@ export default async function handler(req, res) {
 
             // Insert booking
             const { error: insertError } = await supabase
-              .from('Booking')
+              .from('booking')
               .insert({
                 user_id: chalet.user_id,
                 chalet_id: chalet.id,
