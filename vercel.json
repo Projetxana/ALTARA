@@ -1,12 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/airbnb/:path*",
-      "destination": "https://airbnb13.p.rapidapi.com/:path*"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     },
     {
       "source": "/(.*)",
