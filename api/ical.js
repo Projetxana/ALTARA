@@ -22,7 +22,7 @@ export default async function handler(req, res) {
             .from('booking')
             .select('*')
             .eq('chalet_id', chaletId)
-            .eq('statuts', 'confirmed');
+            .eq('status', 'confirmed');
 
         if (error) throw error;
 
