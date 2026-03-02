@@ -37,7 +37,7 @@ export async function syncPlatformCalendar(icalUrl, chaletId, platform) {
 
     // 2. Safely Upsert into Supabase from FrontEnd (Has active User Session, bypasses missing Vercel Env Vars)
     const { data: result, error } = await supabase
-        .from('bookings')
+        .from('booking')
         .upsert(events, { onConflict: 'external_uid' })
         .select();
 

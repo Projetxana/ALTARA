@@ -104,7 +104,7 @@ export const SanctuumProvider = ({ children }) => {
 
             // Fetch Bookings (Cloud)
             const { data: cloudBookings, error: bookingError } = await supabase
-                .from('bookings')
+                .from('booking')
                 .select('*');
 
             if (bookingError) {
@@ -269,7 +269,7 @@ export const SanctuumProvider = ({ children }) => {
             try {
                 // Insert booking
                 const { error: bookingError } = await supabase
-                    .from('bookings')
+                    .from('booking')
                     .insert([{
                         id: bookingId,
                         chalet_id: bookingData.chaletId,
