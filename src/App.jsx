@@ -28,6 +28,15 @@ import { LanguageProvider } from './context/LanguageContext'
 import { GuideProvider } from './context/GuideContext'
 import { ThemeProvider } from './context/ThemeContext'
 
+// Public Site Imports
+import PublicLayout from './site/layout/PublicLayout'
+import Home from './site/pages/Home'
+import Gallery from './site/pages/Gallery'
+import Experience from './site/pages/Experience'
+import Location from './site/pages/Location'
+import Book from './site/pages/Book'
+import Thanks from './site/pages/Thanks'
+
 const DashboardLayout = () => {
   const isConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_KEY;
 
@@ -73,11 +82,21 @@ function App() {
             <SanctuumProvider>
               <BrowserRouter>
                 <Routes>
+                  {/* Public Site Routes */}
+                  <Route element={<PublicLayout />}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/gallery" element={<Gallery />} />
+                    <Route path="/experience" element={<Experience />} />
+                    <Route path="/location" element={<Location />} />
+                    <Route path="/book" element={<Book />} />
+                    <Route path="/thanks" element={<Thanks />} />
+                  </Route>
+
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/guide" element={<TravelerGuide />} />
 
+                  {/* Admin Routes */}
                   <Route element={<RequireAuth />}>
-                    <Route path="/" element={<Navigate to="/planning" replace />} />
                     <Route path="/planning" element={<CalendarBoard />} />
                     <Route path="/properties" element={<PropertiesPage />} />
                     <Route path="/properties/:id" element={<PropertyDetail />} />
