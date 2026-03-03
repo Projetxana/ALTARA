@@ -54,19 +54,32 @@ const WellnessSanctuarySection = () => {
                     </ul>
                 </div>
 
-                {/* RIGHT COLUMN: Magazine-style Image Gallery */}
+                {/* RIGHT COLUMN: Magazine-style Asymmetric Gallery */}
                 <div className="wellness-gallery">
-                    <div className="wellness-img-wrapper img-main ayana-animate ayana-delay-1">
-                        <img src="/ayana/photos/v2/spa-nouveau-2.jpg" alt="Hammam" loading="lazy" />
+                    {/* Colonne 1 : image verticale, carre, et portrait */}
+                    <div className="wellness-gallery-col">
+                        <div className="wellness-img-wrapper rect-tall ayana-animate">
+                            <img src="/ayana/photos/v2/spa-nouveau-2.jpg" alt="Hammam vapeur douce" loading="lazy" />
+                        </div>
+                        <div className="wellness-img-wrapper square ayana-animate">
+                            <img src="/ayana/photos/v2/japandi-towels.png" alt="Détail serviettes" loading="lazy" />
+                        </div>
+                        <div className="wellness-img-wrapper rect-portrait ayana-animate">
+                            <img src="/ayana/photos/v2/spa-nouveau-3.jpg" alt="Jacuzzi coucher de soleil" loading="lazy" />
+                        </div>
                     </div>
-                    <div className="wellness-img-wrapper img-side ayana-animate ayana-delay-2">
-                        <img src="/ayana/photos/v2/spa-nouveau-4.jpg" alt="Jacuzzi hiver" loading="lazy" />
-                    </div>
-                    <div className="wellness-img-wrapper img-bottom ayana-animate ayana-delay-3">
-                        <img src="/ayana/photos/v2/spa-nouveau-1.jpg" alt="Salle de repos sauna sec" loading="lazy" />
-                    </div>
-                    <div className="wellness-img-wrapper img-wide ayana-animate ayana-delay-4">
-                        <img src="/ayana/photos/v2/spa-nouveau-3.jpg" alt="Jacuzzi coucher de soleil" loading="lazy" />
+
+                    {/* Colonne 2 : Décalée (margin-top: 64px) -> Carre, vertical, portrait */}
+                    <div className="wellness-gallery-col shifted">
+                        <div className="wellness-img-wrapper square ayana-animate ayana-delay-1">
+                            <img src="/ayana/photos/v2/japandi-sauna.png" alt="Détail sauna seau" loading="lazy" />
+                        </div>
+                        <div className="wellness-img-wrapper rect-tall ayana-animate ayana-delay-1">
+                            <img src="/ayana/photos/v2/spa-nouveau-1.jpg" alt="Salle de repos luminosité" loading="lazy" />
+                        </div>
+                        <div className="wellness-img-wrapper rect-portrait ayana-animate ayana-delay-1">
+                            <img src="/ayana/photos/v2/spa-nouveau-4.jpg" alt="Jacuzzi hydrothérapie" loading="lazy" />
+                        </div>
                     </div>
                 </div>
             </div>

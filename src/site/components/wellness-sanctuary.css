@@ -171,36 +171,57 @@
     font-weight: 400;
 }
 
-/* --- COLUMN RIGHT (Images) --- */
+/* --- COLUMN RIGHT (Images Staggered Grid) --- */
 .wellness-gallery {
     grid-column: span 5;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto auto;
-    gap: 16px;
-    position: relative;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.wellness-gallery-col {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.wellness-gallery-col.shifted {
+    margin-top: 64px;
 }
 
 @media (max-width: 600px) {
-    .wellness-gallery {
-        grid-template-columns: 1fr;
+    .wellness-gallery-col.shifted {
+        margin-top: 32px;
     }
 }
 
 .wellness-img-wrapper {
     overflow: hidden;
-    border-radius: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     position: relative;
-    /* background color while loading */
     background-color: var(--ws-sand);
+    width: 100%;
+}
+
+.wellness-img-wrapper.rect-tall {
+    aspect-ratio: 3 / 4;
+}
+
+.wellness-img-wrapper.square {
+    aspect-ratio: 1 / 1;
+}
+
+.wellness-img-wrapper.rect-portrait {
+    aspect-ratio: 4 / 5;
 }
 
 .wellness-img-wrapper img {
     width: 100%;
     height: 100%;
-    border-radius: 16px;
+    border-radius: 12px;
     object-fit: cover;
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: block;
@@ -212,69 +233,4 @@
 
 .wellness-img-wrapper:hover {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-}
-
-/* Layout for the 4 images */
-.wellness-img-1 {
-    grid-column: 1 / -1;
-    aspect-ratio: 4 / 3;
-}
-
-.wellness-img-2 {
-    grid-column: 1;
-    aspect-ratio: 1 / 1;
-}
-
-.wellness-img-3 {
-    grid-column: 2;
-    aspect-ratio: 1 / 1;
-}
-
-.wellness-img-4 {
-    grid-column: 1 / -1;
-    aspect-ratio: 21 / 9;
-    display: none;
-    /* User requested: "1 portrait en haut, 1 ptite à droite, 2 carrés en bas" wait...
-     "1 grande image portrait en haut (hero spa)
-     1 image plus petite à droite [Wait, how to map 4 images to grid?]
-     2 images en bas (2 carrés)" 
-     Let me adjust grid for exactly 4 images as requested: */
-}
-
-/* Better 4-image grid for Japandi */
-.wellness-gallery {
-    grid-template-columns: 2fr 1.5fr;
-    grid-template-rows: auto auto;
-    grid-auto-flow: dense;
-    gap: 16px;
-}
-
-@media (max-width: 768px) {
-    .wellness-gallery {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-.img-main {
-    grid-column: 1;
-    grid-row: 1 / 3;
-    aspect-ratio: 3/4;
-}
-
-.img-side {
-    grid-column: 2;
-    grid-row: 1;
-    aspect-ratio: 1/1;
-}
-
-.img-bottom {
-    grid-column: 2;
-    grid-row: 2;
-    aspect-ratio: 1/1.2;
-}
-
-.img-wide {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    aspect-ratio: 2/1;
 }
