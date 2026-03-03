@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bath, TreePine, Utensils, Wifi, Mountain, Leaf } from 'lucide-react';
 import Book from './Book';
+import WellnessSanctuarySection from '../components/WellnessSanctuarySection';
 
 const Home = () => {
     return (
@@ -122,52 +123,8 @@ const Home = () => {
                 <GalleryCarousel />
             </section>
 
-            {/* 4. SPA THERMAL */}
-            <section id="spa" style={{ padding: '10rem 2rem', backgroundColor: 'var(--ayana-surface)' }}>
-                <div className="ayana-container">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '6rem', alignItems: 'center' }}>
-                        <div className="ayana-animate">
-                            <SectionSubtitle>Le Cœur du Concept</SectionSubtitle>
-                            <SectionTitle>Sanctuaire de Bien-être</SectionTitle>
-                            <p style={{ color: 'var(--ayana-muted)', fontSize: '1.2rem', lineHeight: 1.8, marginBottom: '3rem' }}>
-                                Cœur battant de l'expérience AYANA, nos installations privées sont conçues comme un voyage sensoriel vers la détente absolue pour redessiner votre équilibre intérieur.
-                            </p>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--ayana-border)' }}>
-                                    <span style={{ display: 'block', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--ayana-accent)', marginBottom: '0.5rem' }}>Étape 01</span>
-                                    <span style={{ color: 'var(--ayana-text)', fontSize: '1.2rem', display: 'block', marginBottom: '0.5rem' }}>Chaleur Enveloppante</span>
-                                    <span style={{ color: 'var(--ayana-muted)', fontSize: '1rem', lineHeight: 1.6 }}>Purifiez votre corps dans la douceur de notre hammam ou la chaleur réconfortante de notre sauna sec profond.</span>
-                                </li>
-                                <li style={{ marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--ayana-border)' }}>
-                                    <span style={{ display: 'block', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--ayana-accent)', marginBottom: '0.5rem' }}>Étape 02</span>
-                                    <span style={{ color: 'var(--ayana-text)', fontSize: '1.2rem', display: 'block', marginBottom: '0.5rem' }}>Détente au Cœur de la Nature</span>
-                                    <span style={{ color: 'var(--ayana-muted)', fontSize: '1rem', lineHeight: 1.6 }}>Laissez l'hydrothérapie de notre grand jacuzzi extérieur relâcher chaque tension pendant que vous admirez le paysage sauvage.</span>
-                                </li>
-                                <li>
-                                    <span style={{ display: 'block', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--ayana-accent)', marginBottom: '0.5rem' }}>Étape 03</span>
-                                    <span style={{ color: 'var(--ayana-text)', fontSize: '1.2rem', display: 'block', marginBottom: '0.5rem' }}>Luminosité et Introspection</span>
-                                    <span style={{ color: 'var(--ayana-muted)', fontSize: '1rem', lineHeight: 1.6 }}>Terminez votre rituel dans notre salle de repos, offrant une luminosité magnifique au coucher du soleil.</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div className="ayana-animate" style={{ overflow: 'hidden', borderRadius: '4px' }}>
-                                <img src="/ayana/photos/v2/spa-nouveau-2.jpg" alt="Hammam" loading="lazy" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover' }} />
-                            </div>
-                            <div className="ayana-animate ayana-delay-1" style={{ overflow: 'hidden', borderRadius: '4px', marginTop: '3rem' }}>
-                                <img src="/ayana/photos/v2/spa-nouveau-1.jpg" alt="Salle de repos sauna sec" loading="lazy" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover' }} />
-                            </div>
-                            <div className="ayana-animate ayana-delay-1" style={{ overflow: 'hidden', borderRadius: '4px' }}>
-                                <img src="/ayana/photos/v2/spa-nouveau-4.jpg" alt="Jacuzzi hiver" loading="lazy" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover' }} />
-                            </div>
-                            <div className="ayana-animate ayana-delay-2" style={{ overflow: 'hidden', borderRadius: '4px', marginTop: '3rem' }}>
-                                <img src="/ayana/photos/v2/spa-nouveau-3.jpg" alt="Jacuzzi coucher de soleil" loading="lazy" style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover' }} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/* 4. SPA THERMAL (WELLNESS SANCTUARY) */}
+            <WellnessSanctuarySection />
 
             {/* 4.5 AVIS (REVIEWS) */}
             <section id="avis" style={{ padding: '8rem 2rem', backgroundColor: 'var(--ayana-surface)', borderTop: '1px solid var(--ayana-border)' }}>

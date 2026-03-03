@@ -1,0 +1,280 @@
+/* =========================================================================
+   WELLNESS SANCTUARY SECTION (Premium Japandi)
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+    --ws-bg: #F6F2EA;
+    --ws-surface: #FFFFFF;
+    --ws-text: #1F2328;
+    --ws-muted: #6B7280;
+    --ws-line: rgba(31, 35, 40, 0.12);
+    --ws-accent: #8A9B86;
+    --ws-sand: #D8CBB6;
+
+    --ws-font-serif: 'Cormorant Garamond', serif;
+    --ws-font-sans: 'Inter', sans-serif;
+}
+
+.wellness-section {
+    background-color: var(--ws-bg);
+    padding: 96px 24px;
+    color: var(--ws-text);
+    font-family: var(--ws-font-sans);
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .wellness-section {
+        padding: 64px 20px;
+    }
+}
+
+.wellness-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 64px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .wellness-container {
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+    }
+}
+
+/* --- COLUMN LEFT (Content) --- */
+.wellness-content {
+    grid-column: span 7;
+}
+
+.wellness-kicker {
+    font-family: var(--ws-font-sans);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ws-accent);
+    margin-bottom: 16px;
+    display: block;
+    font-weight: 500;
+}
+
+.wellness-title {
+    font-family: var(--ws-font-serif);
+    font-size: 52px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--ws-text);
+    margin: 0 0 24px 0;
+    letter-spacing: -0.02em;
+}
+
+@media (max-width: 768px) {
+    .wellness-title {
+        font-size: 36px;
+    }
+}
+
+.wellness-intro {
+    font-family: var(--ws-font-sans);
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ws-muted);
+    margin: 0 0 40px 0;
+    font-weight: 300;
+    max-width: 540px;
+}
+
+.wellness-divider {
+    height: 1px;
+    background-color: var(--ws-line);
+    border: none;
+    margin: 0 0 40px 0;
+    width: 100%;
+}
+
+.wellness-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.wellness-step {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--ws-line);
+}
+
+.wellness-step:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.wellness-step-badge {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--ws-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ws-text);
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.wellness-step:hover .wellness-step-badge {
+    background-color: var(--ws-sand);
+    border-color: var(--ws-sand);
+    color: #fff;
+}
+
+.wellness-step-content {
+    flex: 1;
+}
+
+.wellness-step-title {
+    font-family: var(--ws-font-serif);
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: var(--ws-text);
+}
+
+.wellness-step-desc {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ws-muted);
+    margin: 0 0 8px 0;
+    font-weight: 400;
+}
+
+.wellness-step-signature {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ws-accent);
+    margin: 0;
+    font-weight: 400;
+}
+
+/* --- COLUMN RIGHT (Images) --- */
+.wellness-gallery {
+    grid-column: span 5;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
+    gap: 16px;
+    position: relative;
+}
+
+@media (max-width: 600px) {
+    .wellness-gallery {
+        grid-template-columns: 1fr;
+    }
+}
+
+.wellness-img-wrapper {
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    position: relative;
+    /* background color while loading */
+    background-color: var(--ws-sand);
+}
+
+.wellness-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: block;
+}
+
+.wellness-img-wrapper:hover img {
+    transform: scale(1.03);
+}
+
+.wellness-img-wrapper:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Layout for the 4 images */
+.wellness-img-1 {
+    grid-column: 1 / -1;
+    aspect-ratio: 4 / 3;
+}
+
+.wellness-img-2 {
+    grid-column: 1;
+    aspect-ratio: 1 / 1;
+}
+
+.wellness-img-3 {
+    grid-column: 2;
+    aspect-ratio: 1 / 1;
+}
+
+.wellness-img-4 {
+    grid-column: 1 / -1;
+    aspect-ratio: 21 / 9;
+    display: none;
+    /* User requested: "1 portrait en haut, 1 ptite à droite, 2 carrés en bas" wait...
+     "1 grande image portrait en haut (hero spa)
+     1 image plus petite à droite [Wait, how to map 4 images to grid?]
+     2 images en bas (2 carrés)" 
+     Let me adjust grid for exactly 4 images as requested: */
+}
+
+/* Better 4-image grid for Japandi */
+.wellness-gallery {
+    grid-template-columns: 2fr 1.5fr;
+    grid-template-rows: auto auto;
+    grid-auto-flow: dense;
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .wellness-gallery {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.img-main {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    aspect-ratio: 3/4;
+}
+
+.img-side {
+    grid-column: 2;
+    grid-row: 1;
+    aspect-ratio: 1/1;
+}
+
+.img-bottom {
+    grid-column: 2;
+    grid-row: 2;
+    aspect-ratio: 1/1.2;
+}
+
+.img-wide {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    aspect-ratio: 2/1;
+}
