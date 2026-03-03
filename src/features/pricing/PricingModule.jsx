@@ -24,16 +24,41 @@ const PricingModule = ({ chalet }) => {
             lastMinute: { active: false, percentage: 15, daysBefore: 3 },
             earlyBird: { active: false, percentage: 10, monthsBefore: 3 }
         },
-        customRules: []
+        customRules: [],
+        monthlyRates: Array(12).fill(null).map(() => ({
+            basePrice: chalet.baseNightPrice || 150,
+            weekendPrice: chalet.baseNightPrice ? chalet.baseNightPrice + 30 : 180,
+            minStay: chalet.minStay || 2
+        }))
     };
 
-    const [pricing, setPricing] = useState(() => chalet.pricingInfo || defaultPricing);
+    // Migration: If the chalet has existing pricingInfo without monthlyRates, build it from legacy fields
+    const buildInitialPricing = () => {
+        if (!chalet.pricingInfo) return defaultPricing;
+        const info = { ...chalet.pricingInfo };
+        if (!info.monthlyRates) {
+            info.monthlyRates = Array(12).fill(null).map(() => ({
+                basePrice: info.basePrice || chalet.baseNightPrice || 150,
+                weekendPrice: info.weekendPrice || chalet.baseNightPrice + 30 || 180,
+                minStay: info.defaultMinStay || chalet.minStay || 2
+            }));
+        }
+        return info;
+    };
+
+    const [pricing, setPricing] = useState(() => buildInitialPricing());
     const [activeTab, setActiveTab] = useState('base');
+    const [selectedMonthIndex, setSelectedMonthIndex] = useState(new Date().getMonth());
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    const monthsNames = [
+        'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+        'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
 
     // Track changes
     useEffect(() => {
-        if (JSON.stringify(pricing) !== JSON.stringify(chalet.pricingInfo || defaultPricing)) {
+        if (JSON.stringify(pricing) !== JSON.stringify(buildInitialPricing())) {
             setHasUnsavedChanges(true);
         } else {
             setHasUnsavedChanges(false);
@@ -41,11 +66,15 @@ const PricingModule = ({ chalet }) => {
     }, [pricing, chalet.pricingInfo]);
 
     const handleSave = () => {
-        // Also update baseNightPrice for backward compatibility
+        // Find standard baseNightPrice to save on the root chalet object for backward compatibility
+        // We can just use the current month's price as the baseline
+        const currentMonthPrice = pricing.monthlyRates[new Date().getMonth()].basePrice;
+        const currentMinStay = pricing.monthlyRates[new Date().getMonth()].minStay;
+
         updateChalet(chalet.id, {
             pricingInfo: pricing,
-            baseNightPrice: pricing.basePrice,
-            minStay: pricing.defaultMinStay
+            baseNightPrice: currentMonthPrice,
+            minStay: currentMinStay
         });
         setHasUnsavedChanges(false);
     };
@@ -56,6 +85,14 @@ const PricingModule = ({ chalet }) => {
                 return { ...prev, [section]: { ...prev[section], [field]: value } };
             }
             return { ...prev, [field]: value };
+        });
+    };
+
+    const handleMonthlyChange = (monthIndex, field, value) => {
+        setPricing(prev => {
+            const newRates = [...prev.monthlyRates];
+            newRates[monthIndex] = { ...newRates[monthIndex], [field]: value };
+            return { ...prev, monthlyRates: newRates };
         });
     };
 
@@ -145,43 +182,86 @@ const PricingModule = ({ chalet }) => {
             {/* TAB CONTENT */}
             <div style={{ minHeight: '300px' }}>
 
-                {/* 1. BASE PRICE */}
+                {/* 1. BASE PRICE (MONTHLY) */}
                 {activeTab === 'base' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', animation: 'fadeIn 0.3s' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Standard Night Price</label>
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>$</span>
-                                <input
-                                    type="number"
-                                    value={pricing.basePrice}
-                                    onChange={(e) => handleChange(null, 'basePrice', parseFloat(e.target.value))}
-                                    style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
-                                />
-                            </div>
-                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Your default price for Sunday-Thursday nights.</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '3rem', animation: 'fadeIn 0.3s' }}>
+
+                        {/* Month Selector Column */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', borderRight: '1px solid var(--color-border)', paddingRight: '1rem' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem', paddingLeft: '0.75rem' }}>Mois</div>
+                            {monthsNames.map((monthName, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setSelectedMonthIndex(idx)}
+                                    style={{
+                                        textAlign: 'left',
+                                        padding: '0.75rem 1rem',
+                                        background: selectedMonthIndex === idx ? 'var(--color-primary)' : 'transparent',
+                                        color: selectedMonthIndex === idx ? 'white' : 'var(--color-text-muted)',
+                                        border: 'none',
+                                        borderRadius: 'var(--radius-md)',
+                                        cursor: 'pointer',
+                                        fontWeight: selectedMonthIndex === idx ? 600 : 400,
+                                        transition: 'all 0.2s ease',
+                                        opacity: selectedMonthIndex === idx ? 1 : 0.8
+                                    }}
+                                >
+                                    {monthName}
+                                </button>
+                            ))}
                         </div>
+
+                        {/* Month Editing Column */}
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Weekend Night Price</label>
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>$</span>
-                                <input
-                                    type="number"
-                                    value={pricing.weekendPrice}
-                                    onChange={(e) => handleChange(null, 'weekendPrice', parseFloat(e.target.value))}
-                                    style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
-                                />
+                            <div style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px dashed var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div>
+                                    <h4 style={{ fontSize: '1.25rem', margin: '0 0 0.25rem 0', color: 'white' }}>Tarifs de {monthsNames[selectedMonthIndex]}</h4>
+                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', margin: 0 }}>Configurez les tarifs standards et week-ends spécifiques à ce mois.</p>
+                                </div>
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', color: 'var(--color-primary)', fontWeight: 500 }}>
+                                    {monthsNames[selectedMonthIndex]}
+                                </div>
                             </div>
-                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Premium applied automatically to Friday and Saturday.</p>
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Default Minimum Stay (Nights)</label>
-                            <input
-                                type="number"
-                                value={pricing.defaultMinStay}
-                                onChange={(e) => handleChange(null, 'defaultMinStay', parseInt(e.target.value))}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
-                            />
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Standard Night Price</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>$</span>
+                                        <input
+                                            type="number"
+                                            value={pricing.monthlyRates[selectedMonthIndex].basePrice || 0}
+                                            onChange={(e) => handleMonthlyChange(selectedMonthIndex, 'basePrice', parseFloat(e.target.value) || 0)}
+                                            style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Your default price for Sunday-Thursday nights.</p>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Weekend Night Price</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>$</span>
+                                        <input
+                                            type="number"
+                                            value={pricing.monthlyRates[selectedMonthIndex].weekendPrice || 0}
+                                            onChange={(e) => handleMonthlyChange(selectedMonthIndex, 'weekendPrice', parseFloat(e.target.value) || 0)}
+                                            style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Premium applied automatically to Friday and Saturday.</p>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Default Minimum Stay (Nights)</label>
+                                    <input
+                                        type="number"
+                                        value={pricing.monthlyRates[selectedMonthIndex].minStay || 0}
+                                        onChange={(e) => handleMonthlyChange(selectedMonthIndex, 'minStay', parseInt(e.target.value) || 0)}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
