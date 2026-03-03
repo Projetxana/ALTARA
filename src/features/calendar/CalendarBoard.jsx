@@ -188,7 +188,7 @@ const CalendarBoard = () => {
         const [y, m, d] = dateStr.split('-');
         const localDate = new Date(y, m - 1, d);
         const dayOfWeek = localDate.getDay();
-        if ((dayOfWeek === 5 || dayOfWeek === 6) && pricing.weekendPrice) {
+        if ((dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) && pricing.weekendPrice) {
             return pricing.weekendPrice;
         }
 

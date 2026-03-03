@@ -235,7 +235,7 @@ const PricingModule = ({ chalet }) => {
                                             style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
                                         />
                                     </div>
-                                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Your default price for Sunday-Thursday nights.</p>
+                                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Tarif par défaut pour les nuits du lundi au jeudi.</p>
                                 </div>
 
                                 <div>
@@ -249,7 +249,7 @@ const PricingModule = ({ chalet }) => {
                                             style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
                                         />
                                     </div>
-                                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Premium applied automatically to Friday and Saturday.</p>
+                                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Appliqué automatiquement du vendredi au dimanche inclus.</p>
                                 </div>
 
                                 <div>
