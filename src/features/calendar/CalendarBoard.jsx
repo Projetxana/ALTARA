@@ -173,7 +173,21 @@ const CalendarBoard = () => {
     const getDailyPrice = (dateStr) => {
         if (!currentChalet || !currentChalet.pricingInfo) return currentChalet?.baseNightPrice || 0;
         const pricing = currentChalet.pricingInfo;
-        let currentPrice = pricing.basePrice || currentChalet.baseNightPrice || 0;
+
+        const [y, m, d] = dateStr.split('-');
+        const localDate = new Date(y, m - 1, d);
+        const monthIndex = localDate.getMonth();
+
+        let currentPrice = currentChalet.baseNightPrice || 0;
+        let weekendPrice = null;
+
+        if (pricing.monthlyRates && pricing.monthlyRates[monthIndex]) {
+            currentPrice = pricing.monthlyRates[monthIndex].basePrice || currentPrice;
+            weekendPrice = pricing.monthlyRates[monthIndex].weekendPrice;
+        } else {
+            currentPrice = pricing.basePrice || currentPrice;
+            weekendPrice = pricing.weekendPrice;
+        }
 
         // Custom rules
         if (pricing.customRules && pricing.customRules.length > 0) {
@@ -185,11 +199,9 @@ const CalendarBoard = () => {
         }
 
         // Weekend price
-        const [y, m, d] = dateStr.split('-');
-        const localDate = new Date(y, m - 1, d);
         const dayOfWeek = localDate.getDay();
-        if ((dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) && pricing.weekendPrice) {
-            return pricing.weekendPrice;
+        if ((dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) && weekendPrice) {
+            return weekendPrice;
         }
 
         return currentPrice;

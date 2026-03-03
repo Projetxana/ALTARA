@@ -47,6 +47,52 @@ const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => 
         return true;
     };
 
+    const getDailyPrice = (dateObj) => {
+        if (!chalet || !chalet.pricingInfo) return chalet?.base_night_price || chalet?.baseNightPrice || 0;
+        const pricing = chalet.pricingInfo;
+
+        const monthIndex = dateObj.getMonth();
+        let currentPrice = chalet?.base_night_price || chalet?.baseNightPrice || 0;
+        let weekendPrice = null;
+
+        if (pricing.monthlyRates && pricing.monthlyRates[monthIndex]) {
+            currentPrice = pricing.monthlyRates[monthIndex].basePrice || currentPrice;
+            weekendPrice = pricing.monthlyRates[monthIndex].weekendPrice;
+        } else {
+            currentPrice = pricing.basePrice || currentPrice;
+            weekendPrice = pricing.weekendPrice;
+        }
+
+        // Custom rules
+        if (pricing.customRules && pricing.customRules.length > 0) {
+            const dateStr = format(dateObj, 'yyyy-MM-dd');
+            const activeRule = pricing.customRules.find(rule => {
+                if (!rule.startDate || !rule.endDate) return false;
+                return dateStr >= rule.startDate && dateStr <= rule.endDate;
+            });
+            if (activeRule && activeRule.price) return activeRule.price;
+        }
+
+        // Weekend price
+        const dayOfWeek = dateObj.getDay();
+        if ((dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) && weekendPrice) {
+            return weekendPrice;
+        }
+
+        return currentPrice;
+    };
+
+    const calculateTotalPrice = () => {
+        if (!checkIn || !checkOut) return 0;
+        let total = 0;
+        const days = eachDayOfInterval({ start: checkIn, end: checkOut });
+        // Exclude the checkout day for pricing nights
+        for (let i = 0; i < days.length - 1; i++) {
+            total += getDailyPrice(days[i]);
+        }
+        return total;
+    };
+
     const handleDateClick = (date) => {
         if (isDateBlocked(date)) return;
 
@@ -194,7 +240,7 @@ const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => 
 
                                 {!(blocked || isPast) && (
                                     <span style={{ fontSize: '0.8rem', color: priceColor, fontWeight: isSelected ? 500 : 400 }}>
-                                        {chalet?.base_night_price}$ CAD
+                                        {getDailyPrice(date)}$ CAD
                                     </span>
                                 )}
                             </button>
@@ -226,8 +272,8 @@ const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                     {checkIn && checkOut && (
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>{(nights * (chalet?.base_night_price || 0))}$ CAD</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--ayana-muted)' }}>{nights} nuits à {chalet?.base_night_price}$</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>{calculateTotalPrice()}$ CAD</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--ayana-muted)' }}>{nights} nuits</div>
                         </div>
                     )}
                     <button
