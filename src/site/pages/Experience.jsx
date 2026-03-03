@@ -49,10 +49,10 @@ const Experience = () => {
             </section>
 
             <div style={{ textAlign: 'center', padding: '6rem 2rem' }}>
-                <Link to="/gallery" className="btn-primary" style={{ textDecoration: 'none', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-main)' }}>
+                <Link to="/ayana/gallery" className="btn-primary" style={{ textDecoration: 'none', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-main)' }}>
                     Voir la Galerie
                 </Link>
-                <Link to="/book" className="btn-primary" style={{ textDecoration: 'none', marginLeft: '1rem' }}>
+                <Link to="/ayana/book" className="btn-primary" style={{ textDecoration: 'none', marginLeft: '1rem' }}>
                     Réserver
                 </Link>
             </div>

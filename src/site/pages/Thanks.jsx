@@ -19,7 +19,7 @@ const Thanks = () => {
                     </div>
                 )}
 
-                <Link to="/" className="btn-primary" style={{ textDecoration: 'none', padding: '1rem 3rem' }}>
+                <Link to="/ayana" className="btn-primary" style={{ textDecoration: 'none', padding: '1rem 3rem' }}>
                     Retour à l'accueil
                 </Link>
             </div>

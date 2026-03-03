@@ -17,7 +17,7 @@ const Home = () => {
                     <p style={{ color: '#f8fafc', fontSize: 'clamp(1rem, 2vw, 1.25rem)', maxWidth: '600px', marginBottom: '2.5rem', textShadow: '0 2px 10px rgba(0,0,0,0.5)', opacity: 0.9 }}>
                         Découvrez le Chalet Ayana. Une architecture minimaliste, un confort sans compromis, une immersion totale dans la nature.
                     </p>
-                    <Link to="/book" className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', textDecoration: 'none' }}>
+                    <Link to="/ayana/book" className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', textDecoration: 'none' }}>
                         Réserver votre séjour
                     </Link>
                 </div>
@@ -54,7 +54,7 @@ const Home = () => {
             {/* CTA Section */}
             <section style={{ padding: '8rem 2rem', textAlign: 'center', backgroundColor: 'var(--color-bg-card)' }}>
                 <h2 style={{ fontSize: '3rem', fontFamily: 'var(--font-heading)', marginBottom: '1.5rem' }}>Prêt pour l'expérience ?</h2>
-                <Link to="/book" className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', display: 'inline-block', textDecoration: 'none' }}>Vérifier les disponibilités</Link>
+                <Link to="/ayana/book" className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', display: 'inline-block', textDecoration: 'none' }}>Vérifier les disponibilités</Link>
             </section>
         </div>
     );

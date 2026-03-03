@@ -83,13 +83,13 @@ function App() {
               <BrowserRouter>
                 <Routes>
                   {/* Public Site Routes */}
-                  <Route element={<PublicLayout />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/gallery" element={<Gallery />} />
-                    <Route path="/experience" element={<Experience />} />
-                    <Route path="/location" element={<Location />} />
-                    <Route path="/book" element={<Book />} />
-                    <Route path="/thanks" element={<Thanks />} />
+                  <Route path="/ayana" element={<PublicLayout />}>
+                    <Route index element={<Home />} />
+                    <Route path="gallery" element={<Gallery />} />
+                    <Route path="experience" element={<Experience />} />
+                    <Route path="location" element={<Location />} />
+                    <Route path="book" element={<Book />} />
+                    <Route path="thanks" element={<Thanks />} />
                   </Route>
 
                   <Route path="/auth" element={<AuthPage />} />
@@ -97,6 +97,7 @@ function App() {
 
                   {/* Admin Routes */}
                   <Route element={<RequireAuth />}>
+                    <Route path="/" element={<Navigate to="/planning" replace />} />
                     <Route path="/planning" element={<CalendarBoard />} />
                     <Route path="/properties" element={<PropertiesPage />} />
                     <Route path="/properties/:id" element={<PropertyDetail />} />

@@ -40,7 +40,7 @@ const Location = () => {
                 </div>
 
                 <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-                    <Link to="/book" className="btn-primary" style={{ textDecoration: 'none', padding: '1rem 3rem', fontSize: '1.1rem' }}>
+                    <Link to="/ayana/book" className="btn-primary" style={{ textDecoration: 'none', padding: '1rem 3rem', fontSize: '1.1rem' }}>
                         Voir les Dates Disponibles
                     </Link>
                 </div>

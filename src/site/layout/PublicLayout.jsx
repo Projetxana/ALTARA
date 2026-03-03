@@ -30,18 +30,18 @@ const PublicLayout = () => {
                 WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
                 borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid transparent'
             }}>
-                <Link to="/" style={{ textDecoration: 'none', color: 'inherit', fontFamily: 'var(--font-heading)', fontSize: '1.8rem', fontWeight: '600', letterSpacing: '2px' }}>
+                <Link to="/ayana" style={{ textDecoration: 'none', color: 'inherit', fontFamily: 'var(--font-heading)', fontSize: '1.8rem', fontWeight: '600', letterSpacing: '2px' }}>
                     AYANA
                 </Link>
 
                 <nav style={{ display: 'none', gap: '2rem' }} className="desktop-nav">
-                    <Link to="/gallery" style={navLinkStyle}>Galerie</Link>
-                    <Link to="/experience" style={navLinkStyle}>Expérience</Link>
-                    <Link to="/location" style={navLinkStyle}>Localisation</Link>
+                    <Link to="/ayana/gallery" style={navLinkStyle}>Galerie</Link>
+                    <Link to="/ayana/experience" style={navLinkStyle}>Expérience</Link>
+                    <Link to="/ayana/location" style={navLinkStyle}>Localisation</Link>
                 </nav>
 
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <Link to="/book" className="btn-primary" style={{ textDecoration: 'none' }}>Réserver</Link>
+                    <Link to="/ayana/book" className="btn-primary" style={{ textDecoration: 'none' }}>Réserver</Link>
                 </div>
             </header>
 
@@ -60,9 +60,9 @@ const PublicLayout = () => {
                     <div>
                         <h4 style={{ marginBottom: '1rem' }}>Menu</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <Link to="/" style={footerLinkStyle}>Accueil</Link>
-                            <Link to="/gallery" style={footerLinkStyle}>Galerie</Link>
-                            <Link to="/experience" style={footerLinkStyle}>Expérience</Link>
+                            <Link to="/ayana" style={footerLinkStyle}>Accueil</Link>
+                            <Link to="/ayana/gallery" style={footerLinkStyle}>Galerie</Link>
+                            <Link to="/ayana/experience" style={footerLinkStyle}>Expérience</Link>
                         </div>
                     </div>
                     <div>

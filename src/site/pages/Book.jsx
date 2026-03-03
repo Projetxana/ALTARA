@@ -112,7 +112,7 @@ const Book = () => {
                 throw new Error(data.error || 'Erreur lors de la réservation.');
             }
 
-            navigate(`/thanks?bookingId=${data.bookingId}`);
+            navigate(`/ayana/thanks?bookingId=${data.bookingId}`);
         } catch (err) {
             setError(err.message);
         } finally {
