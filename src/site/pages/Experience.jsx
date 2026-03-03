@@ -3,57 +3,68 @@ import { Link } from 'react-router-dom';
 
 const Experience = () => {
     return (
-        <div style={{ paddingTop: '80px', minHeight: '100vh', backgroundColor: 'var(--color-bg-main)' }}>
+        <div style={{ backgroundColor: 'var(--ayana-bg)' }}>
             {/* Header */}
-            <div style={{ padding: '6rem 2rem', textAlign: 'center', backgroundColor: 'var(--color-bg-card)', borderBottom: '1px solid var(--color-border)' }}>
-                <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '3.5rem', marginBottom: '1rem' }}>L'Expérience Ayana</h1>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-                    Rechargez vos batteries. Reposez votre esprit. Reconnectez-vous à la nature.
+            <div style={{ padding: '10rem 2rem 6rem', textAlign: 'center', backgroundColor: 'var(--ayana-surface)', borderBottom: '1px solid var(--ayana-border)' }}>
+                <h1 className="ayana-animate" style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(3rem, 5vw, 4.5rem)', marginBottom: '1.5rem', fontWeight: 300, color: 'var(--ayana-text)' }}>L'Expérience Thermale</h1>
+                <p className="ayana-animate ayana-delay-1" style={{ color: 'var(--ayana-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto', lineHeight: 1.8 }}>
+                    Rechargez vos batteries. Reposez votre esprit. Reconnectez-vous à la nature au travers de nos installations privées.
                 </p>
             </div>
 
             {/* Thermal Experience */}
-            <section style={{ padding: '6rem 2rem' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4rem' }}>
-                    <div style={{ flex: '1 1 400px' }}>
-                        <img src="/ayana/photos/spa.jpg" alt="Spa et Hammam" style={{ width: '100%', borderRadius: '12px', boxShadow: 'var(--shadow-lg)' }} />
+            <section style={{ padding: '8rem 2rem' }}>
+                <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', alignItems: 'center', gap: '6rem' }}>
+                    <div className="ayana-animate ayana-delay-2" style={{ position: 'relative', borderRadius: 'var(--ayana-radius-lg)', overflow: 'hidden', aspectRatio: '4/5' }}>
+                        <img src="/ayana/photos/hammam.jpg" alt="Hammam et Spa" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
-                    <div style={{ flex: '1 1 400px' }}>
-                        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.5rem', marginBottom: '1.5rem' }}>Parcours Thermal Privé</h2>
-                        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <li style={listItemStyle}><strong>Sauna Sec :</strong> Chaleur enveloppante pour détoxifier le corps.</li>
-                            <li style={listItemStyle}><strong>Hammam :</strong> Vapeur douce à l'eucalyptus pour les voies respiratoires.</li>
-                            <li style={listItemStyle}><strong>Bain Froid :</strong> Immersion vivifiante (Cold Plunge) pour relancer la circulation.</li>
-                            <li style={listItemStyle}><strong>Jacuzzi :</strong> Détente ultime sous les étoiles.</li>
+                    <div className="ayana-animate ayana-delay-3">
+                        <h2 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2.5rem', marginBottom: '2rem', color: 'var(--ayana-text)', fontWeight: 400 }}>Le Cycle du Chaud et du Froid</h2>
+                        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <li style={listItemStyle}>
+                                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🔥</div>
+                                <strong style={{ display: 'block', fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--ayana-text)' }}>Chaleur Enveloppante</strong>
+                                Alterner entre la chaleur sèche du sauna vitré face à la forêt et la vapeur purifiante à l'eucalyptus du hammam.
+                            </li>
+                            <li style={listItemStyle}>
+                                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>❄️</div>
+                                <strong style={{ display: 'block', fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--ayana-text)' }}>Choc Thermique</strong>
+                                L'immersion rapide dans le bassin d'eau froide resserre les pores et relance activement la circulation sanguine.
+                            </li>
+                            <li style={listItemStyle}>
+                                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌿</div>
+                                <strong style={{ display: 'block', fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--ayana-text)' }}>Relaxation Ultime</strong>
+                                Terminer le cycle dans le jacuzzi chauffé sous les étoiles, pour un profond relâchement musculaire et nerveux.
+                            </li>
                         </ul>
                     </div>
                 </div>
             </section>
 
             {/* Living Experience */}
-            <section style={{ padding: '6rem 2rem', backgroundColor: 'var(--color-bg-card)' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap-reverse', alignItems: 'center', gap: '4rem' }}>
-                    <div style={{ flex: '1 1 400px' }}>
-                        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.5rem', marginBottom: '1.5rem' }}>Vivre au Chalet</h2>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', marginBottom: '1.5rem', lineHeight: 1.8 }}>
-                            Le Chalet Ayana dispose d'une cuisine entièrement équipée haut de gamme, pensée pour les moments de convivialité. Le grand salon baigné de lumière naturelle est axé autour d'un foyer central qui réchauffe les soirées d'hiver.
+            <section style={{ padding: '8rem 2rem', backgroundColor: 'var(--ayana-surface)' }}>
+                <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', alignItems: 'center', gap: '6rem' }}>
+                    <div>
+                        <h2 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2.5rem', marginBottom: '2rem', color: 'var(--ayana-text)', fontWeight: 400 }}>L'Art de Vivre au Chalet</h2>
+                        <p style={{ color: 'var(--ayana-muted)', fontSize: '1.1rem', marginBottom: '1.5rem', lineHeight: 1.8 }}>
+                            Au-delà du spa, Ayana propose une cuisine de chef entièrement équipée, pensée pour que la préparation des repas devienne un moment de pleine conscience et de convivialité.
                         </p>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', lineHeight: 1.8 }}>
-                            Nos chambres offrent une literie premium pour des nuits réparatrices. Chaque espace de nuit est conçu comme un cocon privé, isolé et apaisant.
+                        <p style={{ color: 'var(--ayana-muted)', fontSize: '1.1rem', lineHeight: 1.8 }}>
+                            Le grand salon lumineux, tourné vers le foyer central et les immenses baies vitrées, vous invite à la lecture et à la déconnexion totale. Nos chambres sont des cocons isolés, dotés de literie premium.
                         </p>
                     </div>
-                    <div style={{ flex: '1 1 400px' }}>
-                        <img src="/ayana/photos/living.jpg" alt="Salon" style={{ width: '100%', borderRadius: '12px', boxShadow: 'var(--shadow-lg)' }} />
+                    <div style={{ position: 'relative', borderRadius: 'var(--ayana-radius-lg)', overflow: 'hidden', aspectRatio: '4/5' }}>
+                        <img src="/ayana/photos/living.jpg" alt="Salon" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                 </div>
             </section>
 
-            <div style={{ textAlign: 'center', padding: '6rem 2rem' }}>
-                <Link to="/ayana/gallery" className="btn-primary" style={{ textDecoration: 'none', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-main)' }}>
-                    Voir la Galerie
+            <div style={{ textAlign: 'center', padding: '8rem 2rem' }}>
+                <Link to="/ayana/gallery" className="ayana-btn-outline" style={{ display: 'inline-block', marginRight: '1rem', padding: '1rem 3rem' }}>
+                    Découvrir les lieux
                 </Link>
-                <Link to="/ayana/book" className="btn-primary" style={{ textDecoration: 'none', marginLeft: '1rem' }}>
-                    Réserver
+                <Link to="/ayana/book" className="ayana-btn" style={{ display: 'inline-block', padding: '1rem 3rem' }}>
+                    Vérifier les disponibilités
                 </Link>
             </div>
         </div>
@@ -61,12 +72,11 @@ const Experience = () => {
 };
 
 const listItemStyle = {
-    padding: '1rem',
-    backgroundColor: 'var(--color-bg-main)',
-    border: '1px solid var(--color-border)',
-    borderRadius: '8px',
-    color: 'var(--color-text-muted)',
-    fontSize: '1.1rem'
+    color: 'var(--ayana-muted)',
+    fontSize: '1.05rem',
+    lineHeight: 1.6,
+    borderLeft: '2px solid var(--ayana-border)',
+    paddingLeft: '1.5rem'
 };
 
 export default Experience;

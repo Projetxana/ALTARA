@@ -1,0 +1,141 @@
+/* Google Fonts: Cormorant Garamond for Headings, Inter for Body */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+    /* JAPANDI LIGHT THEME */
+    --ayana-bg: #F6F2EA;
+    /* Warm off-white */
+    --ayana-surface: #FFFFFF;
+    /* Pure white */
+
+    --ayana-text: #1F2328;
+    /* Soft black */
+    --ayana-muted: #6B7280;
+    /* Gray muted */
+
+    --ayana-border: rgba(31, 35, 40, 0.12);
+    /* Subtle line */
+
+    --ayana-accent: #8A9B86;
+    /* Sage/Olive */
+    --ayana-accent-light: #C0CBB8;
+
+    --ayana-accent2: #D8CBB6;
+    /* Sand/Warm beige */
+
+    --ayana-cta: #1F2328;
+    /* Primary button */
+    --ayana-cta-hover: #111418;
+
+    --ayana-radius: 14px;
+    --ayana-radius-lg: 24px;
+
+    --ayana-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    --ayana-shadow-hover: 0 10px 40px rgba(0, 0, 0, 0.06);
+
+    /* Typography */
+    --ayana-font-heading: 'Cormorant Garamond', serif;
+    --ayana-font-body: 'Inter', sans-serif;
+}
+
+/* Base Styles applied inside .ayana-wrap to not break admin Altara */
+.ayana-wrap {
+    font-family: var(--ayana-font-body);
+    background-color: var(--ayana-bg);
+    color: var(--ayana-text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+}
+
+.ayana-wrap h1,
+.ayana-wrap h2,
+.ayana-wrap h3,
+.ayana-wrap h4 {
+    font-family: var(--ayana-font-heading);
+    color: var(--ayana-text);
+    font-weight: 400;
+}
+
+/* Reusable Utilities */
+.ayana-btn {
+    display: inline-block;
+    background: var(--ayana-cta);
+    color: #fff;
+    padding: 1rem 2.5rem;
+    border-radius: var(--ayana-radius);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid var(--ayana-cta);
+    cursor: pointer;
+}
+
+.ayana-btn:hover {
+    background: var(--ayana-cta-hover);
+    transform: translateY(-2px);
+}
+
+.ayana-btn-outline {
+    background: transparent;
+    color: var(--ayana-text);
+    border: 1px solid var(--ayana-border);
+}
+
+.ayana-btn-outline:hover {
+    background: rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+}
+
+.ayana-card {
+    background: var(--ayana-surface);
+    border-radius: var(--ayana-radius);
+    border: 1px solid var(--ayana-border);
+    padding: 2rem;
+    box-shadow: var(--ayana-shadow);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.ayana-card:hover {
+    box-shadow: var(--ayana-shadow-hover);
+}
+
+/* Animations */
+@keyframes ayanaFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ayana-animate {
+    animation: ayanaFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.ayana-delay-1 {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.ayana-delay-2 {
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+.ayana-delay-3 {
+    animation-delay: 0.6s;
+    opacity: 0;
+}
+
+/* Desktop Max Width Constraint */
+.ayana-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}

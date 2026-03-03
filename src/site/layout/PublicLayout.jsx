@@ -19,29 +19,29 @@ const PublicLayout = () => {
     }, [location.pathname]);
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-main)', color: 'var(--color-text-main)' }}>
+        <div className="ayana-wrap" style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
             <header style={{
                 position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
                 padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                transition: 'all 0.3s ease',
-                backgroundColor: scrolled ? 'var(--color-bg-glass)' : 'transparent',
+                transition: 'all 0.4s ease',
+                backgroundColor: scrolled ? 'rgba(246, 242, 234, 0.9)' : 'transparent',
                 backdropFilter: scrolled ? 'blur(12px)' : 'none',
                 WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
-                borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid transparent'
+                borderBottom: scrolled ? '1px solid var(--ayana-border)' : '1px solid transparent'
             }}>
-                <Link to="/ayana" style={{ textDecoration: 'none', color: 'inherit', fontFamily: 'var(--font-heading)', fontSize: '1.8rem', fontWeight: '600', letterSpacing: '2px' }}>
+                <Link to="/ayana" style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
                     AYANA
                 </Link>
 
-                <nav style={{ display: 'none', gap: '2rem' }} className="desktop-nav">
-                    <Link to="/ayana/gallery" style={navLinkStyle}>Galerie</Link>
-                    <Link to="/ayana/experience" style={navLinkStyle}>Expérience</Link>
-                    <Link to="/ayana/location" style={navLinkStyle}>Localisation</Link>
+                <nav style={{ display: 'flex', gap: '3rem' }} className="desktop-nav">
+                    <Link to="/ayana/gallery" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Galerie</Link>
+                    <Link to="/ayana/experience" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Expérience</Link>
+                    <Link to="/ayana/location" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Accès</Link>
                 </nav>
 
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <Link to="/ayana/book" className="btn-primary" style={{ textDecoration: 'none' }}>Réserver</Link>
+                    <Link to="/ayana/book" className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem' }}>Réserver</Link>
                 </div>
             </header>
 
@@ -50,29 +50,40 @@ const PublicLayout = () => {
                 <Outlet />
             </main>
 
-            {/* Footer */}
-            <footer style={{ padding: '4rem 2rem', backgroundColor: 'var(--color-bg-card)', borderTop: '1px solid var(--color-border)' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+            {/* Premium Footer */}
+            <footer style={{ padding: '6rem 2rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)' }}>
+                <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem', marginBottom: '4rem' }}>
                     <div>
-                        <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1rem' }}>AYANA</h3>
-                        <p style={{ color: 'var(--color-text-muted)' }}>Un sanctuaire entre forêt et rivière. L'élégance naturelle à l'état pur.</p>
+                        <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2rem', marginBottom: '1.5rem', letterSpacing: '2px', textTransform: 'uppercase' }}>AYANA</h3>
+                        <p style={{ color: 'var(--ayana-muted)', lineHeight: 1.8, fontSize: '0.95rem' }}>
+                            Un sanctuaire minimaliste entre forêt et rivière.<br />
+                            L'élégance naturelle à l'état pur dans les Laurentides.
+                        </p>
                     </div>
                     <div>
-                        <h4 style={{ marginBottom: '1rem' }}>Menu</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <h4 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--ayana-muted)' }}>Découvrir</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <Link to="/ayana" style={footerLinkStyle}>Accueil</Link>
+                            <Link to="/ayana/experience" style={footerLinkStyle}>Circuit Thermal</Link>
                             <Link to="/ayana/gallery" style={footerLinkStyle}>Galerie</Link>
-                            <Link to="/ayana/experience" style={footerLinkStyle}>Expérience</Link>
                         </div>
                     </div>
                     <div>
-                        <h4 style={{ marginBottom: '1rem' }}>Contact</h4>
-                        <p style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>contact@ayana-chalet.com</p>
-                        <p style={{ color: 'var(--color-text-muted)' }}>+1 (555) 123-4567</p>
+                        <h4 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--ayana-muted)' }}>Contact</h4>
+                        <a href="mailto:contact@ayana-chalet.com" style={footerLinkStyle}>contact@ayana-chalet.com</a>
+                        <p style={{ color: 'var(--ayana-text)', marginTop: '0.5rem', fontSize: '0.95rem' }}>+1 (555) 123-4567</p>
+                        <p style={{ color: 'var(--ayana-text)', marginTop: '1.5rem', fontSize: '0.95rem' }}>
+                            Chemin de la Rivière<br />
+                            Laurentides, QC
+                        </p>
                     </div>
                 </div>
-                <div style={{ maxWidth: '1200px', margin: '2rem auto 0', paddingTop: '2rem', borderTop: '1px solid var(--color-border)', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                    © {new Date().getFullYear()} Ayana Chalet. Tous droits réservés.
+                <div style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '2rem', borderTop: '1px solid var(--ayana-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--ayana-muted)', fontSize: '0.85rem' }}>
+                    <p>© {new Date().getFullYear()} Ayana Chalet. Tous droits réservés.</p>
+                    <div style={{ display: 'flex', gap: '2rem' }}>
+                        <Link to="/ayana" style={footerLinkStyle}>Mentions légales</Link>
+                        <Link to="/ayana" style={footerLinkStyle}>Politique de confidentialité</Link>
+                    </div>
                 </div>
             </footer>
         </div>
@@ -81,17 +92,18 @@ const PublicLayout = () => {
 
 const navLinkStyle = {
     textDecoration: 'none',
-    color: 'inherit',
-    fontSize: '0.95rem',
-    fontWeight: '500',
-    transition: 'color 0.2s ease',
-    opacity: 0.9
+    fontSize: '0.9rem',
+    fontWeight: '400',
+    letterSpacing: '0.5px',
+    transition: 'color 0.3s ease',
+    textTransform: 'uppercase'
 };
 
 const footerLinkStyle = {
     textDecoration: 'none',
-    color: 'var(--color-text-muted)',
-    transition: 'color 0.2s ease'
+    color: 'var(--ayana-text)',
+    fontSize: '0.95rem',
+    transition: 'color 0.3s ease'
 };
 
 export default PublicLayout;
