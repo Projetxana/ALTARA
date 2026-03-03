@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import BookingCalendar from '../components/BookingCalendar';
 
 const Book = () => {
     const navigate = useNavigate();
@@ -9,6 +10,7 @@ const Book = () => {
     const [blockedDates, setBlockedDates] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const [showCalendar, setShowCalendar] = useState(false);
 
     const [formData, setFormData] = useState({
         checkIn: '',
@@ -161,25 +163,40 @@ const Book = () => {
                             )}
 
                             <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--ayana-text)', fontWeight: 400 }}>Dates du Séjour</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                                <div>
-                                    <label style={labelStyle}>Arrivée (16h00)</label>
-                                    <input
-                                        type="date" name="checkIn" required
-                                        value={formData.checkIn} onChange={handleChange}
-                                        min={new Date().toISOString().split('T')[0]}
-                                        style={inputStyle}
-                                    />
-                                </div>
-                                <div>
-                                    <label style={labelStyle}>Départ (11h00)</label>
-                                    <input
-                                        type="date" name="checkOut" required
-                                        value={formData.checkOut} onChange={handleChange}
-                                        min={formData.checkIn || new Date().toISOString().split('T')[0]}
-                                        style={inputStyle}
-                                    />
-                                </div>
+
+                            {/* Custom Date Selection Trigger */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                {formData.checkIn && formData.checkOut ? (
+                                    <div
+                                        onClick={() => setShowCalendar(true)}
+                                        style={{
+                                            padding: '1.5rem',
+                                            border: '1px solid var(--ayana-text)',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            backgroundColor: 'var(--ayana-surface)'
+                                        }}
+                                    >
+                                        <div>
+                                            <div style={{ fontSize: '0.9rem', color: 'var(--ayana-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Séjour sélectionné</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: 500 }}>Du {formData.checkIn} au {formData.checkOut}</div>
+                                        </div>
+                                        <button type="button" style={{ background: 'none', border: 'none', color: 'var(--ayana-muted)', textDecoration: 'underline', cursor: 'pointer', fontStyle: 'italic' }}>Modifier</button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCalendar(true)}
+                                        className="ayana-btn-outline"
+                                        style={{ width: '100%', padding: '1.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', border: '1px solid var(--ayana-border)', cursor: 'pointer', transition: 'border-color 0.3s', backgroundColor: 'var(--ayana-surface)' }}
+                                    >
+                                        <span style={{ fontSize: '1.1rem' }}>Voir les disponibilités</span>
+                                        <span style={{ fontSize: '1.4rem' }}>→</span>
+                                    </button>
+                                )}
                             </div>
 
                             <div style={{ marginBottom: '3rem' }}>
@@ -195,54 +212,59 @@ const Book = () => {
                                 </select>
                             </div>
 
-                            <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', marginBottom: '2rem', marginTop: '1rem', borderTop: '1px solid var(--ayana-border)', paddingTop: '3rem', color: 'var(--ayana-text)', fontWeight: 400 }}>
-                                Vos Informations
-                            </h3>
+                            {/* Show personal info form only when dates are selected */}
+                            {formData.checkIn && formData.checkOut && (
+                                <div className="ayana-animate" style={{ animationDuration: '0.6s' }}>
+                                    <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', marginBottom: '2rem', borderTop: '1px solid var(--ayana-border)', paddingTop: '3rem', color: 'var(--ayana-text)', fontWeight: 400 }}>
+                                        Vos Informations
+                                    </h3>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                                <div>
-                                    <label style={labelStyle}>Prénom et Nom *</label>
-                                    <input
-                                        type="text" name="fullName" required
-                                        value={formData.fullName} onChange={handleChange}
-                                        style={inputStyle} placeholder="Entrez votre nom"
-                                    />
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                        <div>
+                                            <label style={labelStyle}>Prénom et Nom *</label>
+                                            <input
+                                                type="text" name="fullName" required
+                                                value={formData.fullName} onChange={handleChange}
+                                                style={inputStyle} placeholder="Entrez votre nom"
+                                            />
+                                        </div>
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={labelStyle}>Courriel *</label>
+                                            <input
+                                                type="email" name="email" required
+                                                value={formData.email} onChange={handleChange}
+                                                style={inputStyle} placeholder="Entrez votre courriel"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <label style={labelStyle}>Téléphone (optionnel)</label>
+                                        <input
+                                            type="tel" name="phone"
+                                            value={formData.phone} onChange={handleChange}
+                                            style={inputStyle} placeholder="+1 555 123 4567"
+                                        />
+                                    </div>
+
+                                    <div style={{ marginBottom: '3rem' }}>
+                                        <label style={labelStyle}>Une occasion spéciale ? (optionnel)</label>
+                                        <textarea
+                                            name="note" rows="3"
+                                            value={formData.note} onChange={handleChange}
+                                            style={{ ...inputStyle, resize: 'vertical' }} placeholder="Faites-nous part de vos besoins particuliers..."
+                                        />
+                                    </div>
+
+                                    <button type="submit" disabled={submitting} className="ayana-btn" style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', opacity: submitting ? 0.7 : 1 }}>
+                                        {submitting ? 'Traitement en cours...' : 'Soumettre la demande'}
+                                    </button>
+
+                                    <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--ayana-muted)', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                        Aucun paiement immédiat • Confirmation sous 24h
+                                    </p>
                                 </div>
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <label style={labelStyle}>Courriel *</label>
-                                    <input
-                                        type="email" name="email" required
-                                        value={formData.email} onChange={handleChange}
-                                        style={inputStyle} placeholder="Entrez votre courriel"
-                                    />
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={labelStyle}>Téléphone (optionnel)</label>
-                                <input
-                                    type="tel" name="phone"
-                                    value={formData.phone} onChange={handleChange}
-                                    style={inputStyle} placeholder="+1 555 123 4567"
-                                />
-                            </div>
-
-                            <div style={{ marginBottom: '3rem' }}>
-                                <label style={labelStyle}>Une occasion spéciale ? (optionnel)</label>
-                                <textarea
-                                    name="note" rows="3"
-                                    value={formData.note} onChange={handleChange}
-                                    style={{ ...inputStyle, resize: 'vertical' }} placeholder="Faites-nous part de vos besoins particuliers..."
-                                />
-                            </div>
-
-                            <button type="submit" disabled={submitting} className="ayana-btn" style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', opacity: submitting ? 0.7 : 1 }}>
-                                {submitting ? 'Traitement en cours...' : 'Soumettre la demande'}
-                            </button>
-
-                            <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--ayana-muted)', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                                Aucun paiement immédiat • Confirmation sous 24h
-                            </p>
+                            )}
                         </form>
                     </div>
 
@@ -290,6 +312,16 @@ const Book = () => {
 
                 </div>
             </div>
+
+            {/* Calendar Modal */}
+            {showCalendar && (
+                <BookingCalendar
+                    chalet={chalet}
+                    blockedDates={blockedDates}
+                    onDatesSelected={(inDate, outDate) => setFormData(prev => ({ ...prev, checkIn: inDate, checkOut: outDate }))}
+                    onClose={() => setShowCalendar(false)}
+                />
+            )}
         </div>
     );
 };
