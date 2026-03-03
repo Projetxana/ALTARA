@@ -2,7 +2,7 @@ import React from 'react';
 
 const Gallery = () => {
     // Generate array for all gallery images available
-    const images = Array.from({ length: 19 }, (_, i) => `/ayana/photos/gallery-${String(i + 1).padStart(2, '0')}.jpg`);
+    const images = Array.from({ length: 21 }, (_, i) => `/ayana/photos/gallery-${String(i + 1).padStart(2, '0')}.jpg`);
 
     // Add specific highlight images
     const allImages = [
