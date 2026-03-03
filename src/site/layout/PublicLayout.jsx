@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import WhatsAppButton from '../components/WhatsAppButton';
 
 const PublicLayout = () => {
     const [scrolled, setScrolled] = useState(false);
@@ -96,6 +97,8 @@ const PublicLayout = () => {
                     <p>© {new Date().getFullYear()} Ayana Chalet. Tous droits réservés.</p>
                 </div>
             </footer>
+
+            <WhatsAppButton />
         </div>
     );
 };
