@@ -31,10 +31,7 @@ import { ThemeProvider } from './context/ThemeContext'
 // Public Site Imports
 import PublicLayout from './site/layout/PublicLayout'
 import Home from './site/pages/Home'
-import Gallery from './site/pages/Gallery'
-import Experience from './site/pages/Experience'
-import Location from './site/pages/Location'
-import Book from './site/pages/Book'
+// Removing multi-page routes for ultra-premium one-page design
 import Thanks from './site/pages/Thanks'
 
 const DashboardLayout = () => {
@@ -82,13 +79,9 @@ function App() {
             <SanctuumProvider>
               <BrowserRouter>
                 <Routes>
-                  {/* Public Site Routes */}
+                  {/* Public Site Routes - ONE PAGE DESIGN */}
                   <Route path="/ayana" element={<PublicLayout />}>
                     <Route index element={<Home />} />
-                    <Route path="gallery" element={<Gallery />} />
-                    <Route path="experience" element={<Experience />} />
-                    <Route path="location" element={<Location />} />
-                    <Route path="book" element={<Book />} />
                     <Route path="thanks" element={<Thanks />} />
                   </Route>
 

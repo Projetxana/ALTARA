@@ -8,7 +8,7 @@ const Thanks = () => {
     return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--ayana-bg)', padding: '6rem 2rem' }}>
             <div className="ayana-card ayana-animate" style={{ textAlign: 'center', maxWidth: '600px', width: '100%', padding: '5rem 4rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.8 }}>🌿</div>
+                <div style={{ height: '2px', width: '40px', backgroundColor: 'var(--ayana-accent)', margin: '0 auto 2rem' }}></div>
                 <h1 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2.5rem', marginBottom: '1.5rem', color: 'var(--ayana-text)', fontWeight: 400 }}>Demande Envoyée</h1>
                 <p style={{ color: 'var(--ayana-muted)', fontSize: '1.1rem', marginBottom: '2.5rem', lineHeight: 1.8 }}>
                     Merci pour votre intérêt envers le Chalet Ayana. Notre équipe vient de recevoir votre demande et traitera votre dossier dans les plus brefs délais pour confirmer vos dates.

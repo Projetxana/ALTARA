@@ -240,8 +240,8 @@ const Book = () => {
                                 {submitting ? 'Traitement en cours...' : 'Soumettre la demande'}
                             </button>
 
-                            <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--ayana-accent)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                <span>🛡️</span> Aucun paiement immédiat. Confirmation sous 24h.
+                            <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--ayana-muted)', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                Aucun paiement immédiat • Confirmation sous 24h
                             </p>
                         </form>
                     </div>

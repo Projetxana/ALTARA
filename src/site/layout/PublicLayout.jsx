@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 const PublicLayout = () => {
     const [scrolled, setScrolled] = useState(false);
@@ -13,10 +13,14 @@ const PublicLayout = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Scroll to top on route change
+    // Scroll to top on route change (like navigating to /ayana/thanks)
     useEffect(() => {
-        window.scrollTo(0, 0);
+        if (!location.hash) {
+            window.scrollTo(0, 0);
+        }
     }, [location.pathname]);
+
+    const isHome = location.pathname === '/ayana' || location.pathname === '/ayana/';
 
     return (
         <div className="ayana-wrap" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -25,23 +29,29 @@ const PublicLayout = () => {
                 position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
                 padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 transition: 'all 0.4s ease',
-                backgroundColor: scrolled ? 'rgba(246, 242, 234, 0.9)' : 'transparent',
+                backgroundColor: scrolled ? 'rgba(246, 242, 234, 0.98)' : 'transparent',
                 backdropFilter: scrolled ? 'blur(12px)' : 'none',
                 WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
                 borderBottom: scrolled ? '1px solid var(--ayana-border)' : '1px solid transparent'
             }}>
-                <Link to="/ayana" style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
+                <a href="/ayana" style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
                     AYANA
-                </Link>
+                </a>
 
-                <nav style={{ display: 'flex', gap: '3rem' }} className="desktop-nav">
-                    <Link to="/ayana/gallery" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Galerie</Link>
-                    <Link to="/ayana/experience" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Expérience</Link>
-                    <Link to="/ayana/location" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Accès</Link>
-                </nav>
+                {isHome && (
+                    <nav style={{ display: 'flex', gap: '3rem' }} className="desktop-nav">
+                        <a href="#lieux" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Le Lieu</a>
+                        <a href="#chambres" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Chambres</a>
+                        <a href="#spa" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Spa Thermal</a>
+                    </nav>
+                )}
 
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <Link to="/ayana/book" className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem' }}>Réserver</Link>
+                    {isHome ? (
+                        <a href="#reserver" className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', textDecoration: 'none' }}>Réserver</a>
+                    ) : (
+                        <a href="/ayana" className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', textDecoration: 'none' }}>Retour au site</a>
+                    )}
                 </div>
             </header>
 
@@ -63,9 +73,9 @@ const PublicLayout = () => {
                     <div>
                         <h4 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--ayana-muted)' }}>Découvrir</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <Link to="/ayana" style={footerLinkStyle}>Accueil</Link>
-                            <Link to="/ayana/experience" style={footerLinkStyle}>Circuit Thermal</Link>
-                            <Link to="/ayana/gallery" style={footerLinkStyle}>Galerie</Link>
+                            <a href="/ayana" style={footerLinkStyle}>Accueil</a>
+                            <a href="/ayana#spa" style={footerLinkStyle}>Circuit Thermal</a>
+                            <a href="/ayana#chambres" style={footerLinkStyle}>Espace de Vie</a>
                         </div>
                     </div>
                     <div>
@@ -80,10 +90,6 @@ const PublicLayout = () => {
                 </div>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '2rem', borderTop: '1px solid var(--ayana-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--ayana-muted)', fontSize: '0.85rem' }}>
                     <p>© {new Date().getFullYear()} Ayana Chalet. Tous droits réservés.</p>
-                    <div style={{ display: 'flex', gap: '2rem' }}>
-                        <Link to="/ayana" style={footerLinkStyle}>Mentions légales</Link>
-                        <Link to="/ayana" style={footerLinkStyle}>Politique de confidentialité</Link>
-                    </div>
                 </div>
             </footer>
         </div>
