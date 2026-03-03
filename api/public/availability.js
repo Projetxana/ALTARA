@@ -8,10 +8,6 @@ export default async function handler(req, res) {
     try {
         const { chaletId, from, to } = req.query;
 
-        if (!chaletId) {
-            return res.status(400).json({ error: 'Missing chaletId' });
-        }
-
         const supabaseUrl = process.env.VITE_SUPABASE_URL;
         // Use SERVICE_ROLE for backend queries to bypass RLS safely
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -25,8 +21,13 @@ export default async function handler(req, res) {
         let query = supabase
             .from('booking')
             .select('start_date, end_date, status')
-            .eq('chalet_id', chaletId)
             .in('status', ['confirmed', 'pending']);
+
+        // If a specific chaletId was passed, filter by it. Otherwise, fetch all bookings
+        // (suitable for a single-chalet site).
+        if (chaletId) {
+            query = query.eq('chalet_id', chaletId);
+        }
 
         // If date boundaries provided, filter
         if (from) {
