@@ -7,7 +7,7 @@ const Home = () => {
         <div style={{ backgroundColor: 'var(--ayana-bg)' }}>
             {/* 1. HERO SECTION */}
             <section id="hero" style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}>
-                <img src="/ayana/photos/v2/hero.jpg" alt="AYANA Extérieur" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/ayana/photos/v2/hero-main.jpg" alt="AYANA Extérieur" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(31,35,40,0.2), rgba(31,35,40,0.5))' }}></div>
 
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '0 2rem' }}>
