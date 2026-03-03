@@ -39,10 +39,12 @@ const PublicLayout = () => {
                 </a>
 
                 {isHome && (
-                    <nav style={{ display: 'flex', gap: '3rem' }} className="desktop-nav">
-                        <a href="#lieux" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Le Lieu</a>
-                        <a href="#chambres" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Chambres</a>
-                        <a href="#spa" style={{ ...navLinkStyle, color: scrolled ? 'var(--ayana-muted)' : 'rgba(255,255,255,0.8)' }}>Spa Thermal</a>
+                    <nav style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
+                        <a href="#lieux" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Lieux</a>
+                        <a href="#chambres" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Chambres</a>
+                        <a href="#services" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Services</a>
+                        <a href="#spa" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Spa</a>
+                        <a href="#galerie" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Galerie</a>
                     </nav>
                 )}
 
@@ -71,11 +73,13 @@ const PublicLayout = () => {
                         </p>
                     </div>
                     <div>
-                        <h4 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--ayana-muted)' }}>Découvrir</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <a href="/ayana" style={footerLinkStyle}>Accueil</a>
-                            <a href="/ayana#spa" style={footerLinkStyle}>Circuit Thermal</a>
-                            <a href="/ayana#chambres" style={footerLinkStyle}>Espace de Vie</a>
+                            <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--ayana-text)', marginBottom: '1rem' }}>Découvrir</h4>
+                            <a href="#lieux" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Lieu</a>
+                            <a href="#chambres" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Les Chambres</a>
+                            <a href="#services" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Services</a>
+                            <a href="#spa" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Spa Thermal</a>
+                            <a href="#galerie" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Galerie</a>
                         </div>
                     </div>
                     <div>
