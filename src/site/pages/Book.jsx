@@ -171,10 +171,10 @@ const Book = () => {
     return (
         <div style={{ backgroundColor: 'var(--ayana-bg)', minHeight: '100vh' }}>
             {/* Header */}
-            <div style={{ padding: '8rem 2rem 4rem', textAlign: 'center', borderBottom: '1px solid var(--ayana-border)' }}>
-                <h1 className="ayana-animate" style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem', fontWeight: 300, color: 'var(--ayana-text)' }}>Demande de Séjour</h1>
+            <div style={{ padding: '0 2rem 4rem', textAlign: 'center', borderBottom: '1px solid var(--ayana-border)' }}>
+                <h1 className="ayana-animate" style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem', fontWeight: 300, color: 'var(--ayana-text)' }}>Planifiez votre moment de détente</h1>
                 <p className="ayana-animate ayana-delay-1" style={{ color: 'var(--ayana-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-                    Plongez dans l'expérience Ayana. Saisissez vos dates pour vérifier la disponibilité.
+                    Découvrez l'expérience AYANA et arrêtez le temps pour prendre soin de vous.
                 </p>
             </div>
 
