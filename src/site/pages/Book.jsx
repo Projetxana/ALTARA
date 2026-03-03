@@ -11,6 +11,7 @@ const Book = () => {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [showCalendar, setShowCalendar] = useState(false);
+    const [isDatesValidated, setIsDatesValidated] = useState(false);
 
     const [formData, setFormData] = useState({
         checkIn: '',
@@ -58,6 +59,7 @@ const Book = () => {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setError(''); // Reset error on change
+        setIsDatesValidated(false); // Reset validation on any change
     };
 
     const isDateBlocked = (dateStr) => {
@@ -82,6 +84,32 @@ const Book = () => {
             }
         }
         return false;
+    };
+
+    const handleVerifyDates = () => {
+        setError('');
+
+        if (!formData.checkIn || !formData.checkOut) {
+            return setError("Veuillez sélectionner une date d'arrivée et de départ.");
+        }
+
+        if (new Date(formData.checkIn) >= new Date(formData.checkOut)) {
+            return setError("La date de départ doit être ultérieure à la date d'arrivée.");
+        }
+
+        if (checkOverlap(formData.checkIn, formData.checkOut)) {
+            return setError('Ces dates ne sont plus disponibles. Veuillez sélectionner une autre période.');
+        }
+
+        // Check against past dates
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (new Date(formData.checkIn) < today) {
+            return setError('La date d\'arrivée ne peut pas être dans le passé.');
+        }
+
+        // If valid
+        setIsDatesValidated(true);
     };
 
     const handleSubmit = async (e) => {
@@ -162,41 +190,37 @@ const Book = () => {
                                 </div>
                             )}
 
-                            <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--ayana-text)', fontWeight: 400 }}>Dates du Séjour</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', color: 'var(--ayana-text)', fontWeight: 400, margin: 0 }}>Dates du Séjour</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCalendar(true)}
+                                    style={{ background: 'none', border: 'none', color: 'var(--ayana-text)', textDecoration: 'none', borderBottom: '1px solid var(--ayana-text)', cursor: 'pointer', fontSize: '0.9rem', paddingBottom: '2px' }}
+                                >
+                                    Voir les disponibilités →
+                                </button>
+                            </div>
 
-                            {/* Custom Date Selection Trigger */}
-                            <div style={{ marginBottom: '2rem' }}>
-                                {formData.checkIn && formData.checkOut ? (
-                                    <div
-                                        onClick={() => setShowCalendar(true)}
-                                        style={{
-                                            padding: '1.5rem',
-                                            border: '1px solid var(--ayana-text)',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            backgroundColor: 'var(--ayana-surface)'
-                                        }}
-                                    >
-                                        <div>
-                                            <div style={{ fontSize: '0.9rem', color: 'var(--ayana-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Séjour sélectionné</div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 500 }}>Du {formData.checkIn} au {formData.checkOut}</div>
-                                        </div>
-                                        <button type="button" style={{ background: 'none', border: 'none', color: 'var(--ayana-muted)', textDecoration: 'underline', cursor: 'pointer', fontStyle: 'italic' }}>Modifier</button>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCalendar(true)}
-                                        className="ayana-btn-outline"
-                                        style={{ width: '100%', padding: '1.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', border: '1px solid var(--ayana-border)', cursor: 'pointer', transition: 'border-color 0.3s', backgroundColor: 'var(--ayana-surface)' }}
-                                    >
-                                        <span style={{ fontSize: '1.1rem' }}>Voir les disponibilités</span>
-                                        <span style={{ fontSize: '1.4rem' }}>→</span>
-                                    </button>
-                                )}
+                            {/* Native Date Inputs */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                                <div>
+                                    <label style={labelStyle}>Arrivée (16h00)</label>
+                                    <input
+                                        type="date" name="checkIn" required
+                                        value={formData.checkIn} onChange={handleChange}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        style={inputStyle}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>Départ (11h00)</label>
+                                    <input
+                                        type="date" name="checkOut" required
+                                        value={formData.checkOut} onChange={handleChange}
+                                        min={formData.checkIn || new Date().toISOString().split('T')[0]}
+                                        style={inputStyle}
+                                    />
+                                </div>
                             </div>
 
                             <div style={{ marginBottom: '3rem' }}>
@@ -212,8 +236,19 @@ const Book = () => {
                                 </select>
                             </div>
 
-                            {/* Show personal info form only when dates are selected */}
-                            {formData.checkIn && formData.checkOut && (
+                            {!isDatesValidated && (
+                                <button
+                                    type="button"
+                                    onClick={handleVerifyDates}
+                                    className="ayana-btn-outline"
+                                    style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', border: '1px solid var(--ayana-text)' }}
+                                >
+                                    Vérifier les disponibilités
+                                </button>
+                            )}
+
+                            {/* Show personal info form only when dates are validated */}
+                            {isDatesValidated && (
                                 <div className="ayana-animate" style={{ animationDuration: '0.6s' }}>
                                     <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', marginBottom: '2rem', borderTop: '1px solid var(--ayana-border)', paddingTop: '3rem', color: 'var(--ayana-text)', fontWeight: 400 }}>
                                         Vos Informations
@@ -318,7 +353,10 @@ const Book = () => {
                 <BookingCalendar
                     chalet={chalet}
                     blockedDates={blockedDates}
-                    onDatesSelected={(inDate, outDate) => setFormData(prev => ({ ...prev, checkIn: inDate, checkOut: outDate }))}
+                    onDatesSelected={(inDate, outDate) => {
+                        setFormData(prev => ({ ...prev, checkIn: inDate, checkOut: outDate }));
+                        setIsDatesValidated(false); // Force re-validation
+                    }}
                     onClose={() => setShowCalendar(false)}
                 />
             )}

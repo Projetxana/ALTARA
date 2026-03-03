@@ -122,45 +122,6 @@ const Home = () => {
                 <GalleryCarousel />
             </section>
 
-            {/* 6. CONTACT & ACCÈS */}
-            <section id="contact" style={{ padding: '8rem 0 0 0', backgroundColor: 'var(--ayana-surface)', borderTop: '1px solid var(--ayana-border)' }}>
-                <div className="ayana-container" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                    <SectionTitle>Contact</SectionTitle>
-
-                    {/* Contact Info Row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', marginTop: '3rem', color: 'var(--ayana-muted)', fontStyle: 'italic', fontSize: '1.05rem' }}>
-                        <div>ayana@ayana.com</div>
-                        <div style={{ borderLeft: '1px solid var(--ayana-border)', borderRight: '1px solid var(--ayana-border)' }}>
-                            5135 rue de la Tortille, Sainte-Adèle
-                        </div>
-                        <div>Tél : +1 (514) 776-7361</div>
-                    </div>
-
-                    {/* Minimalist Contact Form */}
-                    <form style={{ maxWidth: '800px', margin: '4rem auto 0' }} onSubmit={(e) => e.preventDefault()}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                            <input type="text" placeholder="Prénom" style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem' }} />
-                            <input type="tel" placeholder="Téléphone" style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem' }} />
-                        </div>
-                        <input type="email" placeholder="E-mail" style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem', marginBottom: '1rem' }} />
-                        <textarea placeholder="Rédigez votre message ici..." rows={6} style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem', resize: 'vertical', marginBottom: '2rem' }}></textarea>
-
-                        <button type="submit" style={{ background: 'none', border: 'none', color: 'var(--ayana-text)', fontStyle: 'italic', fontSize: '1.2rem', cursor: 'pointer', fontFamily: 'var(--ayana-font-heading)' }}>
-                            Envoyer
-                        </button>
-                    </form>
-                </div>
-
-                {/* Google Maps Embed (Grayscale) */}
-                <div style={{ width: '100%', height: '500px', marginTop: '6rem' }}>
-                    <iframe
-                        title="Localisation Chalet Ayana"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d177309.7319985223!2d-74.34148419614441!3d46.035417435850935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4ccf7cb9344c2115%3A0xe5fcff2ce9c09930!2sLaurentides%2C%20QC!5e0!3m2!1sfr!2sca!4v1700000000000!5m2!1sfr!2sca"
-                        width="100%" height="100%" style={{ border: 0, filter: 'grayscale(100%) opacity(0.8)' }} allowFullScreen="" loading="lazy">
-                    </iframe>
-                </div>
-            </section>
-
             {/* 4. SPA THERMAL */}
             <section id="spa" style={{ padding: '10rem 2rem', backgroundColor: 'var(--ayana-surface)' }}>
                 <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '8rem', alignItems: 'center' }}>
@@ -234,6 +195,45 @@ const Home = () => {
                 {/* The Book component defines its own layout, so we just mount it here. */}
                 <div className="ayana-animate">
                     <Book />
+                </div>
+            </section>
+
+            {/* 6. CONTACT & ACCÈS */}
+            <section id="contact" style={{ padding: '8rem 0 0 0', backgroundColor: 'var(--ayana-surface)', borderTop: '1px solid var(--ayana-border)' }}>
+                <div className="ayana-container" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                    <SectionTitle>Contact</SectionTitle>
+
+                    {/* Contact Info Row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', marginTop: '3rem', color: 'var(--ayana-muted)', fontStyle: 'italic', fontSize: '1.05rem' }}>
+                        <div>ayana@ayana.com</div>
+                        <div style={{ borderLeft: '1px solid var(--ayana-border)', borderRight: '1px solid var(--ayana-border)' }}>
+                            5135 rue de la Tortille, Sainte-Adèle
+                        </div>
+                        <div>Tél : +1 (514) 776-7361</div>
+                    </div>
+
+                    {/* Minimalist Contact Form */}
+                    <form style={{ maxWidth: '800px', margin: '4rem auto 0' }} onSubmit={(e) => e.preventDefault()}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                            <input type="text" placeholder="Prénom" style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem' }} />
+                            <input type="tel" placeholder="Téléphone" style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem' }} />
+                        </div>
+                        <input type="email" placeholder="E-mail" style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem', marginBottom: '1rem' }} />
+                        <textarea placeholder="Rédigez votre message ici..." rows={6} style={{ width: '100%', padding: '1rem', border: '1px solid var(--ayana-border)', backgroundColor: 'transparent', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '1rem', resize: 'vertical', marginBottom: '2rem' }}></textarea>
+
+                        <button type="submit" style={{ background: 'none', border: 'none', color: 'var(--ayana-text)', fontStyle: 'italic', fontSize: '1.2rem', cursor: 'pointer', fontFamily: 'var(--ayana-font-heading)' }}>
+                            Envoyer
+                        </button>
+                    </form>
+                </div>
+
+                {/* Google Maps Embed (Grayscale) */}
+                <div style={{ width: '100%', height: '500px', marginTop: '6rem' }}>
+                    <iframe
+                        title="Localisation Chalet Ayana"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d177309.7319985223!2d-74.34148419614441!3d46.035417435850935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4ccf7cb9344c2115%3A0xe5fcff2ce9c09930!2sLaurentides%2C%20QC!5e0!3m2!1sfr!2sca!4v1700000000000!5m2!1sfr!2sca"
+                        width="100%" height="100%" style={{ border: 0, filter: 'grayscale(100%) opacity(0.8)' }} allowFullScreen="" loading="lazy">
+                    </iframe>
                 </div>
             </section>
         </div>
