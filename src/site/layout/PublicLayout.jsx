@@ -20,7 +20,9 @@ const PublicLayout = () => {
         }
     }, [location.pathname]);
 
-    const isHome = location.pathname === '/ayana' || location.pathname === '/ayana/';
+    const isHome = ['/ayana', '/ayana/', '/', ''].includes(location.pathname);
+
+    const homeUrl = window.location.hostname.includes('chaletayana.ca') ? '/' : '/ayana';
 
     return (
         <div className="ayana-wrap" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -34,7 +36,7 @@ const PublicLayout = () => {
                 WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
                 borderBottom: scrolled ? '1px solid var(--ayana-border)' : '1px solid transparent'
             }}>
-                <a href="/ayana" style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
+                <a href={homeUrl} style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
                     AYANA
                 </a>
 
@@ -52,7 +54,7 @@ const PublicLayout = () => {
                     {isHome ? (
                         <a href="#reserver" className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', textDecoration: 'none' }}>Réserver</a>
                     ) : (
-                        <a href="/ayana" className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', textDecoration: 'none' }}>Retour au site</a>
+                        <a href={homeUrl} className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', textDecoration: 'none' }}>Retour au site</a>
                     )}
                 </div>
             </header>

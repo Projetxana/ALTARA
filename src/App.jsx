@@ -71,6 +71,30 @@ const RequireAuth = () => {
 }
 
 function App() {
+  const hostname = window.location.hostname || '';
+  const isAyanaDomain = hostname.includes('chaletayana.ca');
+
+  if (isAyanaDomain) {
+    return (
+      <NotificationProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Isolate Ayana Site to Root for Custom Domain */}
+                <Route path="/" element={<PublicLayout />}>
+                  <Route index element={<Home />} />
+                  <Route path="thanks" element={<Thanks />} />
+                </Route>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </BrowserRouter>
+          </ThemeProvider>
+        </LanguageProvider>
+      </NotificationProvider>
+    );
+  }
+
   return (
     <NotificationProvider>
       <LanguageProvider>
@@ -79,7 +103,7 @@ function App() {
             <SanctuumProvider>
               <BrowserRouter>
                 <Routes>
-                  {/* Public Site Routes - ONE PAGE DESIGN */}
+                  {/* Public Site Routes - Kept for fallback on altara domain */}
                   <Route path="/ayana" element={<PublicLayout />}>
                     <Route index element={<Home />} />
                     <Route path="thanks" element={<Thanks />} />
