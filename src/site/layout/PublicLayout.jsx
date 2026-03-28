@@ -82,6 +82,7 @@ const PublicLayout = () => {
                             <a href="#services" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Services</a>
                             <a href="#spa" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Spa Thermal</a>
                             <a href="#galerie" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Galerie</a>
+                            <a href="/regles" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease', marginTop: '0.5rem' }}>Règlement & Sécurité</a>
                         </div>
                     </div>
                     <div>

@@ -33,6 +33,7 @@ import PublicLayout from './site/layout/PublicLayout'
 import Home from './site/pages/Home'
 // Removing multi-page routes for ultra-premium one-page design
 import Thanks from './site/pages/Thanks'
+import Terms from './site/pages/Terms'
 
 const DashboardLayout = () => {
   const isConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_KEY;
@@ -85,6 +86,7 @@ function App() {
                 <Route path="/" element={<PublicLayout />}>
                   <Route index element={<Home />} />
                   <Route path="thanks" element={<Thanks />} />
+                  <Route path="regles" element={<Terms />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
@@ -107,6 +109,7 @@ function App() {
                   <Route path="/ayana" element={<PublicLayout />}>
                     <Route index element={<Home />} />
                     <Route path="thanks" element={<Thanks />} />
+                    <Route path="regles" element={<Terms />} />
                   </Route>
 
                   <Route path="/auth" element={<AuthPage />} />
