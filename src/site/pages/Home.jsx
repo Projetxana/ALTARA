@@ -1,9 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bath, TreePine, Utensils, Wifi, Mountain, Leaf } from 'lucide-react';
 import Book from './Book';
 import WellnessSanctuarySection from '../components/WellnessSanctuarySection';
-
+import BookingCalendar from '../components/BookingCalendar';
 const Home = () => {
+    const [showHeroCalendar, setShowHeroCalendar] = useState(false);
+    const [heroCheckIn, setHeroCheckIn] = useState('');
+    const [heroCheckOut, setHeroCheckOut] = useState('');
+    const [heroGuests, setHeroGuests] = useState(2);
+    const [blockedDates, setBlockedDates] = useState([]);
+
+    useEffect(() => {
+        const fetchAvailability = async () => {
+            try {
+                const res = await fetch(`/api/public/availability`);
+                const availData = await res.json();
+                if (availData.success && availData.blocked) {
+                    setBlockedDates(availData.blocked);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchAvailability();
+    }, []);
+
+    const handleHeroReserve = (e) => {
+        // Naturel scroll down using href="#reserver" avoids routing issues
+    };
+
+    const formatDisplayDate = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        // Force l'utilisation du timezone UTC pour éviter un décalage d'un jour lié au fuseau local
+        return new Date(d.getTime() + d.getTimezoneOffset() * 60000).toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' });
+    };
+
     return (
         <div style={{ backgroundColor: 'var(--ayana-bg)' }}>
             {/* 1. HERO SECTION */}
@@ -19,46 +51,66 @@ const Home = () => {
                         <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(1rem, 2vw, 1.2rem)', marginBottom: '3rem', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' }}>
                             Sanctuaire Thermal • Laurentides
                         </p>
-                        <div style={{ 
-                            display: 'flex', 
-                            background: '#fff', 
-                            borderRadius: '4px',
-                            overflow: 'hidden',
-                            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
-                            marginTop: '4rem', /* Décalée vers le bas */
-                            color: 'var(--ayana-text)'
-                        }}>
-                            {/* Dates */}
-                            <a href="#reserver" style={{ display: 'flex', flex: 1, padding: '1.2rem 1.5rem', alignItems: 'center', borderRight: '1px solid var(--ayana-border)', textDecoration: 'none', color: 'inherit' }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ayana-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '1rem' }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                <div style={{ display: 'flex', alignItems: 'center', color: 'var(--ayana-muted)', fontSize: '1rem', fontStyle: 'italic', fontWeight: 300 }}>
-                                    <span>arrivée</span>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 1rem', opacity: 0.5 }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                                    <span>départ</span>
-                                </div>
-                            </a>
-
-                            {/* Guests */}
-                            <div style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 1.5rem', borderRight: '1px solid var(--ayana-border)' }}>
-                                <select style={{ border: 'none', background: 'transparent', color: 'var(--ayana-text)', fontSize: '1rem', outline: 'none', cursor: 'pointer', appearance: 'none', paddingRight: '1.5rem', WebkitAppearance: 'none' }}>
-                                    <option>1 convive</option>
-                                    <option>2 convives</option>
-                                    <option>3 convives</option>
-                                    <option>4 convives</option>
-                                    <option>5 convives</option>
-                                    <option>6 convives</option>
-                                </select>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '-1rem', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </div>
-
-                            {/* Submit Button */}
-                            <a href="#reserver" style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 3rem', backgroundColor: '#A1ABA1', color: '#fff', textDecoration: 'none', fontSize: '1rem', transition: 'background 0.3s ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor='#8A9B86'} onMouseOut={(e) => e.currentTarget.style.backgroundColor='#A1ABA1'}>
-                                réserver
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '1rem' }}><polyline points="9 18 15 12 9 6"></polyline></svg>
-                            </a>
-                        </div>
                     </div>
                 </div>
+
+                {/* Hero Quick Booking Bar - Lowered to bottom */}
+                <div style={{ 
+                    position: 'absolute',
+                    bottom: '3rem',
+                    left: '0', right: '0',
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    padding: '0 2rem',
+                    zIndex: 20
+                }}>
+                    <div style={{
+                        display: 'flex', 
+                        background: '#fff', 
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        boxShadow: '0 15px 40px rgba(0,0,0,0.2)',
+                        color: 'var(--ayana-text)'
+                    }}>
+                        {/* Dates */}
+                        <button type="button" onClick={() => setShowHeroCalendar(true)} style={{ display: 'flex', flex: 1, padding: '1.2rem 1.5rem', alignItems: 'center', background: 'none', border: 'none', borderRight: '1px solid var(--ayana-border)', cursor: 'pointer' }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ayana-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '1rem' }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <div style={{ display: 'flex', alignItems: 'center', color: (heroCheckIn || heroCheckOut) ? 'var(--ayana-text)' : 'var(--ayana-muted)', fontSize: '1rem', fontStyle: (heroCheckIn || heroCheckOut) ? 'normal' : 'italic', fontWeight: 300 }}>
+                                <span>{heroCheckIn ? formatDisplayDate(heroCheckIn) : 'arrivée'}</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 1rem', opacity: 0.5 }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                <span>{heroCheckOut ? formatDisplayDate(heroCheckOut) : 'départ'}</span>
+                            </div>
+                        </button>
+
+                        {/* Guests */}
+                        <div style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 1.5rem', borderRight: '1px solid var(--ayana-border)' }}>
+                            <select value={heroGuests} onChange={(e) => setHeroGuests(Number(e.target.value))} style={{ border: 'none', background: 'transparent', color: 'var(--ayana-text)', fontSize: '1rem', outline: 'none', cursor: 'pointer', appearance: 'none', paddingRight: '1.5rem', WebkitAppearance: 'none' }}>
+                                {[...Array(6)].map((_, i) => (
+                                    <option key={i+1} value={i+1}>{i+1} {i === 0 ? 'convive' : 'convives'}</option>
+                                ))}
+                            </select>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '-1rem', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+
+                        {/* Submit Button */}
+                        <a href="#reserver" onClick={handleHeroReserve} style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 3rem', backgroundColor: '#A1ABA1', color: '#fff', textDecoration: 'none', fontSize: '1rem', transition: 'background 0.3s ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor='#8A9B86'} onMouseOut={(e) => e.currentTarget.style.backgroundColor='#A1ABA1'}>
+                            réserver
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '1rem' }}><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                    </div>
+                </div>
+
+                {showHeroCalendar && (
+                    <BookingCalendar
+                        chalet={{ base_night_price: 405 }}
+                        blockedDates={blockedDates}
+                        onDatesSelected={(inDate, outDate) => {
+                            setHeroCheckIn(inDate);
+                            setHeroCheckOut(outDate);
+                        }}
+                        onClose={() => setShowHeroCalendar(false)}
+                    />
+                )}
             </section>
 
             {/* 2. LE LIEU (LOCATION / CONCEPT) */}
@@ -196,7 +248,7 @@ const Home = () => {
             <section id="reserver" style={{ padding: '8rem 0 4rem', backgroundColor: 'var(--ayana-bg)' }}>
                 {/* The Book component defines its own layout, so we just mount it here. */}
                 <div className="ayana-animate">
-                    <Book />
+                    <Book initialCheckIn={heroCheckIn} initialCheckOut={heroCheckOut} initialGuests={heroGuests} />
                 </div>
             </section>
 

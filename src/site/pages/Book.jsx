@@ -5,7 +5,7 @@ import BookingCalendar from '../components/BookingCalendar';
 import { useCurrency } from '../../context/CurrencyContext';
 import CurrencySelector from '../components/CurrencySelector';
 
-const Book = () => {
+const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) => {
     const navigate = useNavigate();
     // Default chalet data for display since pricing is static in UI
     const chalet = {
@@ -23,11 +23,22 @@ const Book = () => {
     const [showPromo, setShowPromo] = useState(false);
 
     const [formData, setFormData] = useState({
-        checkIn: '',
-        checkOut: '',
-        guests: 2,
+        checkIn: initialCheckIn,
+        checkOut: initialCheckOut,
+        guests: initialGuests,
         pets: 0
     });
+
+    useEffect(() => {
+        if (initialCheckIn || initialCheckOut || initialGuests) {
+            setFormData(prev => ({
+                ...prev,
+                checkIn: initialCheckIn || prev.checkIn,
+                checkOut: initialCheckOut || prev.checkOut,
+                guests: initialGuests || prev.guests
+            }));
+        }
+    }, [initialCheckIn, initialCheckOut, initialGuests]);
 
     useEffect(() => {
         const fetchAvailability = async () => {
