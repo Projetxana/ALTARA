@@ -13,12 +13,13 @@ const Book = () => {
         capacity: 6
     };
 
-    const { formatPrice } = useCurrency();
+    const { formatPrice, currency } = useCurrency();
 
     const [loading, setLoading] = useState(true);
     const [blockedDates, setBlockedDates] = useState([]);
     const [error, setError] = useState('');
     const [showCalendar, setShowCalendar] = useState(false);
+    const [showPromo, setShowPromo] = useState(false);
 
     const [formData, setFormData] = useState({
         checkIn: '',
@@ -191,42 +192,51 @@ const Book = () => {
 
                     {/* Colonne Droite: Récapitulatif (Sticky) */}
                     <div className="ayana-animate ayana-delay-3" style={{ position: 'sticky', top: '100px' }}>
-                        <div className="ayana-card" style={{ padding: 0, overflow: 'hidden' }}>
-                            <div style={{ height: '250px', position: 'relative' }}>
-                                <img src="/ayana/photos/exterior.jpg" alt="Chalet Ayana" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ padding: '2.5rem', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid var(--ayana-border)' }}>
+                            <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.4rem', fontWeight: 600, marginBottom: '2rem', color: 'var(--ayana-text)' }}>Résumé de la réservation</h3>
+                            
+                            {/* Property Mini-Info */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--ayana-border)' }}>
+                                <img src="/ayana/photos/exterior.jpg" alt="Chalet Ayana" style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} />
+                                <div style={{ flex: 1 }}>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--ayana-text)', fontWeight: 400 }}>Chalet Ayana</h4>
+                                    <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: 'var(--ayana-muted)' }}>Sainte-Adèle, QC</p>
+                                </div>
+                                <a href="#lieux" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', border: '1px solid var(--ayana-border)', borderRadius: '4px', textDecoration: 'none', color: 'var(--ayana-text)', transition: 'background 0.3s' }}>
+                                    Détails
+                                </a>
                             </div>
-                            <div style={{ padding: '2.5rem' }}>
-                                <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', marginBottom: '0.5rem', color: 'var(--ayana-text)' }}>Chalet Ayana</h3>
-                                <p style={{ color: 'var(--ayana-muted)', marginBottom: '2rem', fontSize: '0.95rem' }}>La Conception, Laurentides QC</p>
 
-                                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', color: 'var(--ayana-text)', fontSize: '0.95rem' }}>
-                                    <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed var(--ayana-border)' }}>
-                                        <span style={{ color: 'var(--ayana-muted)' }}>Capacité</span>
-                                        <span>Jusqu'à 6 personnes</span>
-                                    </li>
-                                    <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed var(--ayana-border)' }}>
-                                        <span style={{ color: 'var(--ayana-muted)' }}>Expérience</span>
-                                        <span>Circuit thermal inclus</span>
-                                    </li>
-                                </ul>
-
-                                {nights > 0 ? (
-                                    <div style={{ backgroundColor: 'var(--ayana-bg)', padding: '1.5rem', borderRadius: '8px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', color: 'var(--ayana-muted)' }}>
-                                            <span>{nights} {nights > 1 ? 'nuits' : 'nuit'} à {formatPrice(chalet?.base_night_price || 0)}</span>
-                                            <span>{formatPrice(estimatedTotal)}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 600, borderTop: '1px solid var(--ayana-border)', paddingTop: '1rem', color: 'var(--ayana-text)' }}>
-                                            <span>Total Estimé</span>
-                                            <span>{formatPrice(estimatedTotal)}</span>
-                                        </div>
-                                        <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--ayana-muted)', marginTop: '0.5rem' }}>*Avant taxes et frais de ménage</div>
-                                    </div>
-                                ) : (
-                                    <div style={{ backgroundColor: 'var(--ayana-bg)', padding: '1.5rem', borderRadius: '8px', textAlign: 'center', color: 'var(--ayana-muted)', fontSize: '0.95rem' }}>
-                                        Sélectionnez vos dates pour obtenir une estimation du tarif.
+                            {/* Promo section */}
+                            <div style={{ padding: '1.5rem 0', borderBottom: '1px solid var(--ayana-border)' }}>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowPromo(!showPromo)} 
+                                    style={{ background: 'none', border: 'none', padding: 0, color: 'var(--ayana-text)', fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                >
+                                    Ajouter un code promo
+                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: showPromo ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }}>
+                                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                {showPromo && (
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                                        <input type="text" placeholder="Code promo" style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--ayana-border)', borderRadius: '4px', backgroundColor: 'rgba(0,0,0,0.02)' }} />
+                                        <button type="button" style={{ padding: '0.75rem 1.5rem', backgroundColor: 'var(--ayana-text)', color: 'var(--ayana-bg)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Appliquer</button>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Pricing summary */}
+                            <div style={{ padding: '1.5rem 0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', color: 'var(--ayana-text)', fontSize: '1rem' }}>
+                                    <span>Location {nights > 0 ? `(${nights} ${nights > 1 ? 'nuits' : 'nuit'})` : ''}</span>
+                                    <span>{nights > 0 ? formatPrice(estimatedTotal) : formatPrice(0)}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', fontWeight: 600, color: 'var(--ayana-text)' }}>
+                                    <span>Total ({currency})</span>
+                                    <span>{nights > 0 ? formatPrice(estimatedTotal) : formatPrice(0)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
