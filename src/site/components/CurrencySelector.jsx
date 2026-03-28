@@ -9,7 +9,7 @@ const CURRENCIES = [
     { code: 'CHF', name: 'Swiss franc' }
 ];
 
-const CurrencySelector = () => {
+const CurrencySelector = ({ direction = 'up' }) => {
     const { currency, changeCurrency } = useCurrency();
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
@@ -51,9 +51,11 @@ const CurrencySelector = () => {
             {isOpen && (
                 <div style={{
                     position: 'absolute',
-                    bottom: '100%',
+                    bottom: direction === 'up' ? '100%' : 'auto',
+                    top: direction === 'down' ? '100%' : 'auto',
                     left: '0',
-                    marginBottom: '0.5rem',
+                    marginBottom: direction === 'up' ? '0.5rem' : '0',
+                    marginTop: direction === 'down' ? '0.5rem' : '0',
                     backgroundColor: '#fff',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                     borderRadius: '4px',

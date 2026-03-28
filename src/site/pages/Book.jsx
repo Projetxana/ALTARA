@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import BookingCalendar from '../components/BookingCalendar';
 import { useCurrency } from '../../context/CurrencyContext';
+import CurrencySelector from '../components/CurrencySelector';
 
 const Book = () => {
     const navigate = useNavigate();
@@ -193,7 +194,12 @@ const Book = () => {
                     {/* Colonne Droite: Récapitulatif (Sticky) */}
                     <div className="ayana-animate ayana-delay-3" style={{ position: 'sticky', top: '100px' }}>
                         <div style={{ padding: '2.5rem', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid var(--ayana-border)' }}>
-                            <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.4rem', fontWeight: 600, marginBottom: '2rem', color: 'var(--ayana-text)' }}>Résumé de la réservation</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                                <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.4rem', fontWeight: 600, margin: 0, color: 'var(--ayana-text)' }}>Résumé de la réservation</h3>
+                                <div style={{ marginTop: '-0.5rem', marginRight: '-0.5rem', zIndex: 50 }}>
+                                    <CurrencySelector direction="down" />
+                                </div>
+                            </div>
                             
                             {/* Property Mini-Info */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--ayana-border)' }}>
