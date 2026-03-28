@@ -247,18 +247,26 @@ const ServiceItem = ({ icon, text }) => (
 
 const GalleryCarousel = () => {
     const images = [
+        "/ayana/photos/v2/carousel-new-1.jpg",
+        "/ayana/photos/v2/carousel-new-2.jpg",
+        "/ayana/photos/v2/carousel-new-4.jpg",
+        "/ayana/photos/v2/carousel-new-5.jpg",
+        "/ayana/photos/v2/carousel-new-3.jpg",
         "/ayana/photos/gallery-01.jpg",
-        "/ayana/photos/gallery-06.jpg",
-        "/ayana/photos/gallery-07.jpg",
-        "/ayana/photos/gallery-13.jpg",
-        "/ayana/photos/gallery-16.jpg",
-        "/ayana/photos/gallery-10.jpg"
+        "/ayana/photos/gallery-06.jpg"
     ];
 
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % images.length);
     const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % images.length);
+        }, 5000);
+        return () => clearInterval(timer);
+    }, [images.length]);
 
     return (
         <div style={{ position: 'relative', width: '100%', maxWidth: '1200px', margin: '0 auto', px: '1rem' }}>
@@ -277,7 +285,8 @@ const GalleryCarousel = () => {
                             height: '100%',
                             objectFit: 'cover',
                             opacity: idx === currentIndex ? 1 : 0,
-                            transition: 'opacity 0.8s ease-in-out',
+                            transform: idx === currentIndex ? 'scale(1.04)' : 'scale(1)',
+                            transition: 'opacity 1s ease-in-out, transform 6s ease-out',
                             zIndex: idx === currentIndex ? 1 : 0
                         }}
                     />
