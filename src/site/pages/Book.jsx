@@ -25,7 +25,8 @@ const Book = () => {
     const [formData, setFormData] = useState({
         checkIn: '',
         checkOut: '',
-        guests: 2
+        guests: 2,
+        pets: 0
     });
 
     useEffect(() => {
@@ -167,16 +168,30 @@ const Book = () => {
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '3rem' }}>
-                                <label style={labelStyle}>Nombre de convives (Max: 6)</label>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={labelStyle}>Nombre de voyageurs (Max: 6)</label>
                                 <select
                                     name="guests"
                                     value={formData.guests} onChange={handleChange}
                                     style={inputStyle}
                                 >
                                     {[...Array(6)].map((_, i) => (
-                                        <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? 'convive' : 'convives'}</option>
+                                        <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? 'voyageur' : 'voyageurs'}</option>
                                     ))}
+                                </select>
+                            </div>
+
+                            <div style={{ marginBottom: '3rem' }}>
+                                <label style={labelStyle}>Animaux de compagnie</label>
+                                <select
+                                    name="pets"
+                                    value={formData.pets} onChange={handleChange}
+                                    style={inputStyle}
+                                >
+                                    <option value={0}>Aucun animal</option>
+                                    <option value={1}>1 animal</option>
+                                    <option value={2}>2 animaux</option>
+                                    <option value={3}>3 animaux ou plus</option>
                                 </select>
                             </div>
 
