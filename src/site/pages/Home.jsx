@@ -388,6 +388,12 @@ const GalleryCarousel = () => {
 /* REVIEWS DATA AND COMPONENTS */
 const REVIEWS_DATA = [
     {
+        name: "Sarah",
+        location: "Toronto, Canada",
+        date: "Il y a 1 semaine • Séjour avec enfants",
+        text: "La maison de Nadia et Jerome était incroyable. Le meilleur Airbnb dans lequel nous ayons séjourné. Commodités fantastiques. Propre, moderne et bien équipé. Nous avons passé une semaine merveilleuse."
+    },
+    {
         name: "Tim",
         location: "Montréal, Canada",
         date: "Il y a 4 jours • Séjour de quelques nuits",
