@@ -189,9 +189,7 @@ const Book = () => {
                                     style={inputStyle}
                                 >
                                     <option value={0}>Aucun animal</option>
-                                    <option value={1}>1 animal</option>
-                                    <option value={2}>2 animaux</option>
-                                    <option value={3}>3 animaux ou plus</option>
+                                    <option value={1}>1 animal (Maximum autorisé)</option>
                                 </select>
                             </div>
 
