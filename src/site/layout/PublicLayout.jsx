@@ -65,7 +65,30 @@ const PublicLayout = () => {
             </main>
 
             {/* Premium Footer */}
-            <footer style={{ padding: '6rem 2rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)' }}>
+            <footer style={{ padding: '4rem 2rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)' }}>
+                {/* Newsletter Sub */}
+                <div className="ayana-container" style={{ marginBottom: '5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '2rem', paddingBottom: '4rem', borderBottom: '1px solid var(--ayana-border)' }}>
+                    <h4 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.2rem', color: 'var(--ayana-text)', margin: 0, fontWeight: 500, letterSpacing: '0.5px' }}>
+                        S'inscrire aux offres et promotions
+                    </h4>
+                    <form style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }} onSubmit={(e) => e.preventDefault()}>
+                        <input 
+                            type="email" 
+                            placeholder="votre adresse e-mail" 
+                            style={{ padding: '0.8rem 1.2rem', width: '280px', border: 'none', backgroundColor: 'rgba(0,0,0,0.03)', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '0.95rem', borderRadius: '2px' }} 
+                            required 
+                        />
+                        <button 
+                            type="submit" 
+                            style={{ padding: '0.8rem 2.5rem', border: 'none', backgroundColor: '#A1ABA1', color: '#fff', fontSize: '0.95rem', letterSpacing: '1px', cursor: 'pointer', transition: 'background 0.3s ease', borderRadius: '2px', textTransform: 'lowercase' }}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#899389'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#A1ABA1'}
+                        >
+                            s'inscrire
+                        </button>
+                    </form>
+                </div>
+
                 <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem', marginBottom: '4rem' }}>
                     <div>
                         <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2rem', marginBottom: '1.5rem', letterSpacing: '2px', textTransform: 'uppercase' }}>AYANA</h3>
