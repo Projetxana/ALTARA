@@ -6,7 +6,7 @@ const WellnessSanctuarySection = () => {
         "/ayana/photos/v2/spa-nouveau-2.jpg",
         "/ayana/photos/v2/japandi-towels.png",
         "/ayana/photos/v2/spa-nouveau-3.jpg",
-        "/ayana/photos/v2/japandi-sauna.png",
+        "/ayana/photos/v2/spa-sauna-benches.jpg",
         "/ayana/photos/v2/spa-nouveau-1.jpg",
         "/ayana/photos/v2/spa-nouveau-4.jpg"
     ];
