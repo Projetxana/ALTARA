@@ -173,11 +173,11 @@ const Home = () => {
 
                     {/* Contact Info Row */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', marginTop: '3rem', color: 'var(--ayana-muted)', fontStyle: 'italic', fontSize: '1.05rem' }}>
-                        <div>ayana@ayana.com</div>
+                        <div>chalet.ayana@gmail.com</div>
                         <div style={{ borderLeft: '1px solid var(--ayana-border)', borderRight: '1px solid var(--ayana-border)' }}>
                             5135 rue de la Tortille, Sainte-Adèle
                         </div>
-                        <div>Tél : +1 (514) 776-7361</div>
+                        <div>Tél : 514-979-3103</div>
                     </div>
 
                     {/* Minimalist Contact Form */}

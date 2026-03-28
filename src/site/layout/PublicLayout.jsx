@@ -86,8 +86,8 @@ const PublicLayout = () => {
                     </div>
                     <div>
                         <h4 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--ayana-muted)' }}>Contact</h4>
-                        <a href="mailto:contact@ayana-chalet.com" style={footerLinkStyle}>contact@ayana-chalet.com</a>
-                        <p style={{ color: 'var(--ayana-text)', marginTop: '0.5rem', fontSize: '0.95rem' }}>+1 (555) 123-4567</p>
+                        <a href="mailto:chalet.ayana@gmail.com" style={footerLinkStyle}>chalet.ayana@gmail.com</a>
+                        <p style={{ color: 'var(--ayana-text)', marginTop: '0.5rem', fontSize: '0.95rem' }}>514-979-3103</p>
                         <p style={{ color: 'var(--ayana-text)', marginTop: '1.5rem', fontSize: '0.95rem' }}>
                             Chemin de la Rivière<br />
                             Laurentides, QC
