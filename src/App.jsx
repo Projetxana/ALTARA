@@ -25,6 +25,7 @@ import AuthPage from './features/auth/AuthPage'
 import { SanctuumProvider } from './context/SanctuumContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { LanguageProvider } from './context/LanguageContext'
+import { CurrencyProvider } from './context/CurrencyContext'
 import { GuideProvider } from './context/GuideContext'
 import { ThemeProvider } from './context/ThemeContext'
 
@@ -80,17 +81,19 @@ function App() {
       <NotificationProvider>
         <LanguageProvider>
           <ThemeProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* Isolate Ayana Site to Root for Custom Domain */}
-                <Route path="/" element={<PublicLayout />}>
-                  <Route index element={<Home />} />
-                  <Route path="thanks" element={<Thanks />} />
-                  <Route path="regles" element={<Terms />} />
-                </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
+            <CurrencyProvider>
+              <BrowserRouter>
+                <Routes>
+                  {/* Isolate Ayana Site to Root for Custom Domain */}
+                  <Route path="/" element={<PublicLayout />}>
+                    <Route index element={<Home />} />
+                    <Route path="thanks" element={<Thanks />} />
+                    <Route path="regles" element={<Terms />} />
+                  </Route>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </CurrencyProvider>
           </ThemeProvider>
         </LanguageProvider>
       </NotificationProvider>
@@ -103,38 +106,40 @@ function App() {
         <ThemeProvider>
           <GuideProvider>
             <SanctuumProvider>
-              <BrowserRouter>
-                <Routes>
-                  {/* Public Site Routes - Kept for fallback on altara domain */}
-                  <Route path="/ayana" element={<PublicLayout />}>
-                    <Route index element={<Home />} />
-                    <Route path="thanks" element={<Thanks />} />
-                    <Route path="regles" element={<Terms />} />
-                  </Route>
+              <CurrencyProvider>
+                <BrowserRouter>
+                  <Routes>
+                    {/* Public Site Routes - Kept for fallback on altara domain */}
+                    <Route path="/ayana" element={<PublicLayout />}>
+                      <Route index element={<Home />} />
+                      <Route path="thanks" element={<Thanks />} />
+                      <Route path="regles" element={<Terms />} />
+                    </Route>
 
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/guide" element={<TravelerGuide />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/guide" element={<TravelerGuide />} />
 
-                  {/* Admin Routes */}
-                  <Route element={<RequireAuth />}>
-                    <Route path="/" element={<Navigate to="/planning" replace />} />
-                    <Route path="/planning" element={<CalendarBoard />} />
-                    <Route path="/properties" element={<PropertiesPage />} />
-                    <Route path="/properties/:id" element={<PropertyDetail />} />
-                    <Route path="/housekeeping" element={<HousekeepingPage />} />
-                    <Route path="/experiences" element={<ExperiencesPage />} />
-                    <Route path="/analytics" element={<AnalyticsDashboard />} />
-                    <Route path="/pricing" element={<PricingPage />} />
-                    <Route path="/soul" element={<SoulDashboard />} />
-                    <Route path="/finance" element={<FinancePage />} />
-                    <Route path="/book/:id" element={<BookingPage />} />
-                    <Route path="/guests" element={<GuestsPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/settings/guide-editor" element={<GuideEditor />} />
-                    <Route path="/editor" element={<GuideEditor />} />
-                  </Route>
-                </Routes>
-              </BrowserRouter>
+                    {/* Admin Routes */}
+                    <Route element={<RequireAuth />}>
+                      <Route path="/" element={<Navigate to="/planning" replace />} />
+                      <Route path="/planning" element={<CalendarBoard />} />
+                      <Route path="/properties" element={<PropertiesPage />} />
+                      <Route path="/properties/:id" element={<PropertyDetail />} />
+                      <Route path="/housekeeping" element={<HousekeepingPage />} />
+                      <Route path="/experiences" element={<ExperiencesPage />} />
+                      <Route path="/analytics" element={<AnalyticsDashboard />} />
+                      <Route path="/pricing" element={<PricingPage />} />
+                      <Route path="/soul" element={<SoulDashboard />} />
+                      <Route path="/finance" element={<FinancePage />} />
+                      <Route path="/book/:id" element={<BookingPage />} />
+                      <Route path="/guests" element={<GuestsPage />} />
+                      <Route path="/settings" element={<SettingsPage />} />
+                      <Route path="/settings/guide-editor" element={<GuideEditor />} />
+                      <Route path="/editor" element={<GuideEditor />} />
+                    </Route>
+                  </Routes>
+                </BrowserRouter>
+              </CurrencyProvider>
             </SanctuumProvider>
           </GuideProvider>
         </ThemeProvider>

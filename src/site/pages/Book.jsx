@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import BookingCalendar from '../components/BookingCalendar';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const Book = () => {
     const navigate = useNavigate();
@@ -11,6 +12,8 @@ const Book = () => {
         base_night_price: 405, // Extracted from DB previously
         capacity: 6
     };
+
+    const { formatPrice } = useCurrency();
 
     const [loading, setLoading] = useState(true);
     const [blockedDates, setBlockedDates] = useState([]);
@@ -210,12 +213,12 @@ const Book = () => {
                                 {nights > 0 ? (
                                     <div style={{ backgroundColor: 'var(--ayana-bg)', padding: '1.5rem', borderRadius: '8px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', color: 'var(--ayana-muted)' }}>
-                                            <span>{nights} {nights > 1 ? 'nuits' : 'nuit'} à ${chalet?.base_night_price || 0}</span>
-                                            <span>${estimatedTotal.toFixed(2)}</span>
+                                            <span>{nights} {nights > 1 ? 'nuits' : 'nuit'} à {formatPrice(chalet?.base_night_price || 0)}</span>
+                                            <span>{formatPrice(estimatedTotal)}</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 600, borderTop: '1px solid var(--ayana-border)', paddingTop: '1rem', color: 'var(--ayana-text)' }}>
                                             <span>Total Estimé</span>
-                                            <span>${estimatedTotal.toFixed(2)}</span>
+                                            <span>{formatPrice(estimatedTotal)}</span>
                                         </div>
                                         <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--ayana-muted)', marginTop: '0.5rem' }}>*Avant taxes et frais de ménage</div>
                                     </div>

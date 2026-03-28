@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import CurrencySelector from '../components/CurrencySelector';
 
 const PublicLayout = () => {
     const [scrolled, setScrolled] = useState(false);
@@ -119,7 +120,12 @@ const PublicLayout = () => {
                     </div>
                 </div>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '2rem', borderTop: '1px solid var(--ayana-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--ayana-muted)', fontSize: '0.85rem' }}>
-                    <p>© {new Date().getFullYear()} Ayana Chalet. Tous droits réservés.</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                        <p>© {new Date().getFullYear()} Ayana Chalet. Tous droits réservés.</p>
+                    </div>
+                    <div>
+                        <CurrencySelector />
+                    </div>
                 </div>
             </footer>
         </div>
