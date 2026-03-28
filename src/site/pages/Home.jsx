@@ -213,36 +213,7 @@ const Home = () => {
             <WellnessSanctuarySection />
 
             {/* 4.5 AVIS (REVIEWS) */}
-            <section id="avis" style={{ padding: '8rem 2rem', backgroundColor: 'var(--ayana-surface)', borderTop: '1px solid var(--ayana-border)' }}>
-                <div className="ayana-container">
-                    <div style={{ textAlign: 'center', marginBottom: '5rem' }} className="ayana-animate">
-                        <SectionSubtitle>Témoignages</SectionSubtitle>
-                        <SectionTitle>L'Expérience de nos Invités</SectionTitle>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
-                        <ReviewCard
-                            name="Derek"
-                            rating={5}
-                            date="Hiver 2024"
-                            text="Réservez-le immédiatement! Dès le moment où j'ai réservé jusqu'au moment où je suis parti, c'était tout ce que j'espérais. Le logement est absolument magnifique avec un décor bien pensé, de belles vues et toutes les commodités dont vous avez besoin pour le bien-être mental et physique. Je reviendrai !"
-                        />
-                        <ReviewCard
-                            name="Céline"
-                            rating={5}
-                            date="Hiver 2024"
-                            text="L'appartement de Nadia était impeccable et l'endroit idéal pour une escapade de fin de semaine et se détendre. Elle était communicative et tout était très fluide. Je recommanderais définitivement cet endroit à tout le monde."
-                        />
-                        <ReviewCard
-                            name="Cindy N."
-                            rating={10}
-                            date="Février 2026"
-                            text="Nous avons passé un excellent séjour au chalet! Nous avons été formidablement bien accueilli avec un petit mot de Nadia et Jérôme ainsi que de petites attentions. [...] Le chalet est propre, très confortable avec des installations de grande qualité. La vue est magnifique ! Tous les ingrédients étaient réunis pour décrocher le temps d'une fin de semaine ! Nous y reviendrons avec plaisir !"
-                            maxRating={10}
-                        />
-                    </div>
-                </div>
-            </section>
+            <ReviewsSection />
 
             {/* 5. RESERVATION (Embedded Book.jsx) */}
             <section id="reserver" style={{ padding: '8rem 0 4rem', backgroundColor: 'var(--ayana-bg)' }}>
@@ -414,24 +385,134 @@ const GalleryCarousel = () => {
     );
 };
 
-const ReviewCard = ({ name, rating, maxRating = 5, date, text }) => {
-    // Generate star or rating string
-    const ratingDisplay = maxRating === 5
-        ? '★'.repeat(rating) + '☆'.repeat(maxRating - rating)
-        : `${rating}/${maxRating}`;
+/* REVIEWS DATA AND COMPONENTS */
+const REVIEWS_DATA = [
+    {
+        name: "Tim",
+        location: "Montréal, Canada",
+        date: "Il y a 4 jours • Séjour de quelques nuits",
+        text: "Vous devez séjourner chez Nadia! Les vues sont exceptionnelles de partout dans le chalet, et il est équipé de tout ce dont vous avez besoin, mais ce qui fait vraiment la différence, c’est l’espace spa ! Le spa, le sauna sec et le hammam sont incroyables et offrent une expérience de spa à domicile inégalée. En plus de tout ça, Nadia a été très serviable et réactive. Je recommande à tout le monde de séjourner au chalet de Nadia!"
+    },
+    {
+        name: "Gen",
+        location: "Saint-Jean-de-l'Île-d'Orléans, Canada",
+        date: "Il y a 1 semaine • Séjour avec un animal",
+        text: "Nous avons eu un séjour merveilleux. L’expérience SPA est unique et vraiment bien pensé. Nous avons adoré la déco, le calme, la belle lumière le matin et la tranquillité de l’espace. Les hôtes sont attentifs à nos besoins et répondent très rapidement. Nous allons fort probablement y retourner!"
+    },
+    {
+        name: "Shilan",
+        location: "Ottawa, Canada",
+        date: "Il y a 2 semaines • Séjour de quelques nuits",
+        text: "Magnifique et très bien décoré - je ne pense pas que les photos lui rendent justice. C'est très pratique et un endroit idéal pour s'évader et se reposer. La cuisine est bien approvisionnée, vous pouvez donc facilement préparer des repas pendant votre séjour. Sa proximité avec Sainte-Adèle et Saint-Sauveur est un énorme avantage pour profiter des différents magasins, boulangeries et restaurants."
+    },
+    {
+        name: "Christine",
+        location: "L'Ange-Gardien, Canada",
+        date: "Il y a 3 semaines • Séjour avec un animal",
+        text: "Nous avons passé un excellent séjour. L’endroit est très tranquille, sur le toit de la montagne et avec le vent dans les arbres en fond sonore qui crée une ambiance presque musicale et extrêmement relaxante. Tout était parfait pour se reposer et décrocher. De plus, la propreté des lieux était tout simplement immaculée."
+    },
+    {
+        name: "Cindy N.",
+        location: "Canada",
+        date: "Février 2026",
+        text: "Nous avons passé un excellent séjour au chalet! Nous avons été formidablement bien accueilli avec un petit mot de Nadia et Jérôme ainsi que de petites attentions. [...] Le chalet est propre, très confortable avec des installations de grande qualité. La vue est magnifique ! Tous les ingrédients étaient réunis pour décrocher le temps d'une fin de semaine ! Nous y reviendrons avec plaisir !"
+    },
+    {
+        name: "Derek",
+        location: "Canada",
+        date: "Hiver 2024",
+        text: "Réservez-le immédiatement! Dès le moment où j'ai réservé jusqu'au moment où je suis parti, c'était tout ce que j'espérais. Le logement est absolument magnifique avec un décor bien pensé, de belles vues et toutes les commodités dont vous avez besoin pour le bien-être mental et physique. Je reviendrai !"
+    },
+    {
+        name: "Céline",
+        location: "Canada",
+        date: "Hiver 2024",
+        text: "L'appartement de Nadia était impeccable et l'endroit idéal pour une escapade de fin de semaine et se détendre. Elle était communicative et tout était très fluide. Je recommanderais définitivement cet endroit à tout le monde."
+    }
+];
+
+const ReviewsSection = () => {
+    const [showAll, setShowAll] = useState(false);
+    const visibleReviews = showAll ? REVIEWS_DATA : REVIEWS_DATA.slice(0, 3);
 
     return (
-        <div className="ayana-animate" style={{ backgroundColor: 'var(--ayana-bg)', padding: '3rem 2rem', border: '1px solid var(--ayana-border)', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
+        <section id="avis" style={{ padding: '8rem 2rem', backgroundColor: 'var(--ayana-surface)', borderTop: '1px solid var(--ayana-border)' }}>
+            <div className="ayana-container">
+                {/* Badge Coup de cœur voyageurs */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5rem' }} className="ayana-animate">
+                    <div style={{ textAlign: 'center', maxWidth: '350px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                            {/* Branche Laurier Gauche (Approximation CSS vectorielle simple) */}
+                            <svg width="40" height="50" viewBox="0 0 32 40" fill="none" stroke="var(--ayana-text)" strokeWidth="1.2">
+                                <path d="M26 38 C 10 32, 2 18, 14 4 C 14 4, 10 10, 10 16 C 10 22, 16 26, 26 38" />
+                                <path d="M20 30 C 14 28, 10 24, 8 20" />
+                                <path d="M16 22 C 10 18, 8 12, 12 8" />
+                            </svg>
+                            <div>
+                                <div style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2rem', lineHeight: 1.1, letterSpacing: '1px' }}>Coup de cœur</div>
+                                <div style={{ fontSize: '0.9rem', letterSpacing: '4px', textTransform: 'uppercase', marginTop: '0.6rem' }}>voyageurs</div>
+                            </div>
+                            {/* Branche Laurier Droite */}
+                            <svg width="40" height="50" viewBox="0 0 32 40" fill="none" stroke="var(--ayana-text)" strokeWidth="1.2" style={{ transform: 'scaleX(-1)' }}>
+                                <path d="M26 38 C 10 32, 2 18, 14 4 C 14 4, 10 10, 10 16 C 10 22, 16 26, 26 38" />
+                                <path d="M20 30 C 14 28, 10 24, 8 20" />
+                                <path d="M16 22 C 10 18, 8 12, 12 8" />
+                            </svg>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', fontSize: '1.3rem', fontWeight: 500, borderTop: '1px solid var(--ayana-border)', paddingTop: '1.5rem', borderBottom: '1px solid var(--ayana-border)', paddingBottom: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                5,0 <span style={{ fontSize: '0.9rem', color: 'var(--ayana-text)' }}>★</span>
+                            </div>
+                            <div style={{ color: 'var(--ayana-border)', fontSize: '1.5rem' }}>|</div>
+                            <div style={{ fontSize: '1.1rem' }}>Sublime</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Titre standard optionnel */}
+                <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="ayana-animate">
+                    <SectionSubtitle>Témoignages</SectionSubtitle>
+                    <SectionTitle>L'Expérience de nos Invités</SectionTitle>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem', marginBottom: '4rem' }}>
+                    {visibleReviews.map((rev, idx) => (
+                        <ReviewCard key={idx} {...rev} />
+                    ))}
+                </div>
+
+                {!showAll && (
+                    <div style={{ textAlign: 'center' }} className="ayana-animate">
+                        <button 
+                            onClick={() => setShowAll(true)}
+                            className="ayana-btn-outline" 
+                            style={{ padding: '1rem 3rem', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.95rem', background: 'transparent', transition: 'all 0.3s ease' }}
+                        >
+                            Voir plus de commentaires
+                        </button>
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
+const ReviewCard = ({ name, location, date, text }) => {
+    return (
+        <div className="ayana-animate" style={{ backgroundColor: 'var(--ayana-bg)', padding: '2.5rem 2rem', border: '1px solid var(--ayana-border)', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                    <h4 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.4rem', color: 'var(--ayana-text)', marginBottom: '0.2rem' }}>{name}</h4>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--ayana-muted)' }}>{date}</span>
+                    <h4 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.3rem', color: 'var(--ayana-text)', marginBottom: '0.3rem' }}>{name}</h4>
+                    {location && <div style={{ fontSize: '0.9rem', color: 'var(--ayana-muted)' }}>{location}</div>}
                 </div>
-                <div style={{ color: 'var(--ayana-accent)', fontSize: '1.2rem', letterSpacing: '2px' }}>
-                    {ratingDisplay}
+                <div style={{ color: 'var(--ayana-text)', fontSize: '1rem', letterSpacing: '2px' }}>
+                    ★★★★★
                 </div>
             </div>
-            <p style={{ color: 'var(--ayana-text)', lineHeight: 1.8, fontSize: '1.05rem', fontStyle: 'italic', opacity: 0.9 }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--ayana-muted)' }}>
+                {date}
+            </div>
+            <p style={{ color: 'var(--ayana-text)', lineHeight: 1.7, fontSize: '0.95rem', opacity: 0.9 }}>
                 "{text}"
             </p>
         </div>
