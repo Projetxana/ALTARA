@@ -115,19 +115,26 @@ const Home = () => {
 
             {/* 2. LE LIEU (LOCATION / CONCEPT) */}
             <section id="lieux" style={{ padding: '10rem 2rem', backgroundColor: 'var(--ayana-surface)' }}>
-                <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '8rem', alignItems: 'center' }}>
-                    <div className="ayana-animate">
+                <div className="ayana-container">
+                    <div className="ayana-animate" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 6rem' }}>
                         <SectionSubtitle>L'Essence</SectionSubtitle>
                         <SectionTitle>Retrait en Haute Altitude</SectionTitle>
                         <p style={{ color: 'var(--ayana-muted)', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '2rem' }}>
                             Niché au sommet, Ayana est un refuge pensé pour l'introspection et la contemplation. L'architecture minimaliste s'efface devant l'immensité de la nature, créant un espace où le temps suspend son vol.
                         </p>
                         <p style={{ color: 'var(--ayana-muted)', fontSize: '1.1rem', lineHeight: 1.8 }}>
-                            Le design épuré libère l'esprit. Les matériaux bruts ancrent le corps. Un équilibre parfait entre l'esthétique scandinave et la philosophie japonaise du Wabi-Sabi.
+                            S'inspirant silencieusement de l'esprit <strong>Japandi</strong>, l’intérieur fusionne la chaleur scandinave et la grâce minimaliste japonaise. L'harmonie entre les matériaux bruts, la lumière naturelle et la douceur des textures claires invite à un retour à l'essentiel. Chaque détail est pensé pour éveiller un profond sentiment de sérénité et réconforter l'âme au cœur de la montagne.
                         </p>
                     </div>
-                    <div className="ayana-animate ayana-delay-1" style={{ position: 'relative', overflow: 'hidden', aspectRatio: '4/5' }}>
-                        <img src="/ayana/photos/v2/hero.jpg" alt="Extérieur Chalet" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+
+                    {/* Galerie Minimaliste à 2 photos */}
+                    <div className="ayana-animate ayana-delay-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                        <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '4/3', borderRadius: '4px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+                            <img src="/ayana/photos/v2/japandi-salon.jpg" alt="Salon Japandi avec foyer" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.03)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                        </div>
+                        <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '4/3', borderRadius: '4px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+                            <img src="/ayana/photos/v2/japandi-chambre.jpg" alt="Chambre Japandi enneigée" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.03)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
+                        </div>
                     </div>
                 </div>
             </section>
