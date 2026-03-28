@@ -42,11 +42,11 @@ const PublicLayout = () => {
 
                 {isHome && (
                     <nav style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-                        <a href="#lieux" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Lieux</a>
-                        <a href="#chambres" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Chambres</a>
-                        <a href="#services" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Services</a>
-                        <a href="#spa" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Spa</a>
-                        <a href="#galerie" style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Galerie</a>
+                        <a href={homeUrl + '#lieux'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Lieux</a>
+                        <a href={homeUrl + '#chambres'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Chambres</a>
+                        <a href={homeUrl + '#services'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Services</a>
+                        <a href={homeUrl + '#spa'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Spa</a>
+                        <a href={homeUrl + '#galerie'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Galerie</a>
                     </nav>
                 )}
 
@@ -77,11 +77,11 @@ const PublicLayout = () => {
                     <div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--ayana-text)', marginBottom: '1rem' }}>Découvrir</h4>
-                            <a href="#lieux" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Lieu</a>
-                            <a href="#chambres" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Les Chambres</a>
-                            <a href="#services" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Services</a>
-                            <a href="#spa" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Spa Thermal</a>
-                            <a href="#galerie" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Galerie</a>
+                            <a href={homeUrl + '#lieux'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Lieu</a>
+                            <a href={homeUrl + '#chambres'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Les Chambres</a>
+                            <a href={homeUrl + '#services'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Services</a>
+                            <a href={homeUrl + '#spa'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Spa Thermal</a>
+                            <a href={homeUrl + '#galerie'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Galerie</a>
                             <a href="/regles" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease', marginTop: '0.5rem' }}>Règlement & Sécurité</a>
                         </div>
                     </div>
