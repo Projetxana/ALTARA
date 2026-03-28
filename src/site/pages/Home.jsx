@@ -487,17 +487,15 @@ const ReviewsSection = () => {
                     ))}
                 </div>
 
-                {!showAll && (
-                    <div style={{ textAlign: 'center' }} className="ayana-animate">
-                        <button 
-                            onClick={() => setShowAll(true)}
-                            className="ayana-btn-outline" 
-                            style={{ padding: '1rem 3rem', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.95rem', background: 'transparent', transition: 'all 0.3s ease' }}
-                        >
-                            Voir plus de commentaires
-                        </button>
-                    </div>
-                )}
+                <div style={{ textAlign: 'center' }} className="ayana-animate">
+                    <button 
+                        onClick={() => setShowAll(!showAll)}
+                        className="ayana-btn-outline" 
+                        style={{ padding: '1rem 3rem', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.95rem', background: 'transparent', transition: 'all 0.3s ease' }}
+                    >
+                        {showAll ? "Réduire les commentaires" : "Voir plus de commentaires"}
+                    </button>
+                </div>
             </div>
         </section>
     );
