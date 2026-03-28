@@ -19,9 +19,43 @@ const Home = () => {
                         <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(1rem, 2vw, 1.2rem)', marginBottom: '3rem', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' }}>
                             Sanctuaire Thermal • Laurentides
                         </p>
-                        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <a href="#lieux" className="ayana-btn-outline" style={{ padding: '1.2rem 3rem', color: '#fff', border: '1px solid rgba(255,255,255,0.5)', textDecoration: 'none', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.85rem' }}>Découvrir</a>
-                            <a href="#reserver" className="ayana-btn" style={{ padding: '1.2rem 3rem', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.85rem' }}>Réserver</a>
+                        <div style={{ 
+                            display: 'flex', 
+                            background: '#fff', 
+                            borderRadius: '4px',
+                            overflow: 'hidden',
+                            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+                            marginTop: '4rem', /* Décalée vers le bas */
+                            color: 'var(--ayana-text)'
+                        }}>
+                            {/* Dates */}
+                            <a href="#reserver" style={{ display: 'flex', flex: 1, padding: '1.2rem 1.5rem', alignItems: 'center', borderRight: '1px solid var(--ayana-border)', textDecoration: 'none', color: 'inherit' }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ayana-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '1rem' }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <div style={{ display: 'flex', alignItems: 'center', color: 'var(--ayana-muted)', fontSize: '1rem', fontStyle: 'italic', fontWeight: 300 }}>
+                                    <span>arrivée</span>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 1rem', opacity: 0.5 }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                    <span>départ</span>
+                                </div>
+                            </a>
+
+                            {/* Guests */}
+                            <div style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 1.5rem', borderRight: '1px solid var(--ayana-border)' }}>
+                                <select style={{ border: 'none', background: 'transparent', color: 'var(--ayana-text)', fontSize: '1rem', outline: 'none', cursor: 'pointer', appearance: 'none', paddingRight: '1.5rem', WebkitAppearance: 'none' }}>
+                                    <option>1 convive</option>
+                                    <option>2 convives</option>
+                                    <option>3 convives</option>
+                                    <option>4 convives</option>
+                                    <option>5 convives</option>
+                                    <option>6 convives</option>
+                                </select>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '-1rem', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+
+                            {/* Submit Button */}
+                            <a href="#reserver" style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 3rem', backgroundColor: '#A1ABA1', color: '#fff', textDecoration: 'none', fontSize: '1rem', transition: 'background 0.3s ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor='#8A9B86'} onMouseOut={(e) => e.currentTarget.style.backgroundColor='#A1ABA1'}>
+                                réserver
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '1rem' }}><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
                         </div>
                     </div>
                 </div>

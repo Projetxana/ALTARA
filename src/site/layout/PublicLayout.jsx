@@ -61,34 +61,13 @@ const PublicLayout = () => {
             </header>
 
             {/* Main Content */}
-            <main style={{ flex: 1 }}>
+            <main style={{ flex: 1, paddingBottom: scrolled ? '80px' : '0', transition: 'padding-bottom 0.5s ease' }}>
                 <Outlet />
             </main>
 
             {/* Premium Footer */}
             <footer style={{ padding: '4rem 2rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)' }}>
-                {/* Newsletter Sub */}
-                <div className="ayana-container" style={{ marginBottom: '5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '2rem', paddingBottom: '4rem', borderBottom: '1px solid var(--ayana-border)' }}>
-                    <h4 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.2rem', color: 'var(--ayana-text)', margin: 0, fontWeight: 500, letterSpacing: '0.5px' }}>
-                        S'inscrire aux offres et promotions
-                    </h4>
-                    <form style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }} onSubmit={(e) => e.preventDefault()}>
-                        <input 
-                            type="email" 
-                            placeholder="votre adresse e-mail" 
-                            style={{ padding: '0.8rem 1.2rem', width: '280px', border: 'none', backgroundColor: 'rgba(0,0,0,0.03)', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '0.95rem', borderRadius: '2px' }} 
-                            required 
-                        />
-                        <button 
-                            type="submit" 
-                            style={{ padding: '0.8rem 2.5rem', border: 'none', backgroundColor: '#A1ABA1', color: '#fff', fontSize: '0.95rem', letterSpacing: '1px', cursor: 'pointer', transition: 'background 0.3s ease', borderRadius: '2px', textTransform: 'lowercase' }}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#899389'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#A1ABA1'}
-                        >
-                            s'inscrire
-                        </button>
-                    </form>
-                </div>
+                {/* (Newsletter déplacée dans la barre sticky) */}
 
                 <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem', marginBottom: '4rem' }}>
                     <div>
@@ -128,6 +107,44 @@ const PublicLayout = () => {
                     </div>
                 </div>
             </footer>
+
+            {/* Sticky/Fixed Newsletter Bar */}
+            <div style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                backgroundColor: 'var(--ayana-bg)',
+                borderTop: '1px solid var(--ayana-border)',
+                padding: '1rem 2rem',
+                transform: scrolled ? 'translateY(0)' : 'translateY(100%)',
+                opacity: scrolled ? 1 : 0,
+                transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease',
+                zIndex: 90,
+                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '3rem',
+                boxShadow: '0 -4px 20px rgba(0,0,0,0.05)',
+                flexWrap: 'wrap'
+            }}>
+                <h4 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.2rem', color: 'var(--ayana-text)', margin: 0, fontWeight: 500 }}>
+                    S'inscrire aux offres et promotions
+                </h4>
+                <form style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} onSubmit={(e) => e.preventDefault()}>
+                    <input 
+                        type="email" 
+                        placeholder="votre adresse e-mail" 
+                        style={{ padding: '0.8rem 1.2rem', width: '280px', border: 'none', backgroundColor: 'rgba(0,0,0,0.03)', color: 'var(--ayana-text)', fontFamily: 'var(--ayana-font-body)', fontSize: '0.95rem', borderRadius: '2px' }} 
+                        required 
+                    />
+                    <button 
+                        type="submit" 
+                        style={{ padding: '0.8rem 2.5rem', border: 'none', backgroundColor: '#A1ABA1', color: '#fff', fontSize: '0.95rem', letterSpacing: '1px', cursor: 'pointer', transition: 'background 0.3s ease', borderRadius: '2px', textTransform: 'lowercase' }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#899389'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = '#A1ABA1'}
+                    >
+                        s'inscrire
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };
