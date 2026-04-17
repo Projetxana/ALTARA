@@ -3,31 +3,31 @@
 
 :root {
     /* JAPANDI LIGHT THEME */
-    --ayana-bg: #F6F2EA;
-    /* Warm off-white */
-    --ayana-surface: #FFFFFF;
-    /* Pure white */
+    --ayana-bg: #F5F1EB;
+    /* Beige Warm */
+    --ayana-surface: #FAFAFA;
+    /* Blanc cassé */
 
-    --ayana-text: #1F2328;
+    --ayana-text: #1A1A1A;
     /* Soft black */
     --ayana-muted: #6B7280;
     /* Gray muted */
 
-    --ayana-border: rgba(31, 35, 40, 0.12);
+    --ayana-border: rgba(26, 26, 26, 0.1);
     /* Subtle line */
 
-    --ayana-accent: #8A9B86;
-    /* Sage/Olive */
-    --ayana-accent-light: #C0CBB8;
+    --ayana-accent: #A8B5A2;
+    /* Vert sauge */
+    --ayana-accent-light: #C4CEC0;
 
-    --ayana-accent2: #D8CBB6;
+    --ayana-accent2: #E8E0D5;
     /* Sand/Warm beige */
 
-    --ayana-cta: #1F2328;
+    --ayana-cta: #1A1A1A;
     /* Primary button */
-    --ayana-cta-hover: #111418;
+    --ayana-cta-hover: #333333;
 
-    --ayana-radius: 14px;
+    --ayana-radius: 4px;
     --ayana-radius-lg: 24px;
 
     --ayana-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);

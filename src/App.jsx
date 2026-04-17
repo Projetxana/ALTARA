@@ -32,7 +32,12 @@ import { ThemeProvider } from './context/ThemeContext'
 // Public Site Imports
 import PublicLayout from './site/layout/PublicLayout'
 import Home from './site/pages/Home'
-// Removing multi-page routes for ultra-premium one-page design
+// Removing multi-page routes for ultra-premium one-page design -> Restoring multi-page design for SEO
+import Chalet from './site/pages/Chalet'
+import Wellness from './site/pages/Wellness'
+import Location from './site/pages/Location'
+import Reservation from './site/pages/Reservation'
+import Experience from './site/pages/Experience'
 import Thanks from './site/pages/Thanks'
 import Terms from './site/pages/Terms'
 
@@ -87,6 +92,11 @@ function App() {
                   {/* Isolate Ayana Site to Root for Custom Domain */}
                   <Route path="/" element={<PublicLayout />}>
                     <Route index element={<Home />} />
+                    <Route path="chalet" element={<Chalet />} />
+                    <Route path="bien-etre" element={<Wellness />} />
+                    <Route path="localisation" element={<Location />} />
+                    <Route path="reservation" element={<Reservation />} />
+                    <Route path="experience" element={<Experience />} />
                     <Route path="thanks" element={<Thanks />} />
                     <Route path="regles" element={<Terms />} />
                   </Route>
@@ -112,6 +122,11 @@ function App() {
                     {/* Public Site Routes - Kept for fallback on altara domain */}
                     <Route path="/ayana" element={<PublicLayout />}>
                       <Route index element={<Home />} />
+                      <Route path="chalet" element={<Chalet />} />
+                      <Route path="bien-etre" element={<Wellness />} />
+                      <Route path="localisation" element={<Location />} />
+                      <Route path="reservation" element={<Reservation />} />
+                      <Route path="experience" element={<Experience />} />
                       <Route path="thanks" element={<Thanks />} />
                       <Route path="regles" element={<Terms />} />
                     </Route>

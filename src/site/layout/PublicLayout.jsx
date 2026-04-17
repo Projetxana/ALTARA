@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import CurrencySelector from '../components/CurrencySelector';
 
 const PublicLayout = () => {
     const [scrolled, setScrolled] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -14,14 +15,12 @@ const PublicLayout = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Scroll to top on route change (like navigating to /ayana/thanks)
+    // Scroll to top on route change
     useEffect(() => {
         if (!location.hash) {
             window.scrollTo(0, 0);
         }
     }, [location.pathname]);
-
-    const isHome = ['/ayana', '/ayana/', '/', ''].includes(location.pathname);
 
     const homeUrl = window.location.hostname.includes('chaletayana.ca') ? '/' : '/ayana';
 
@@ -37,38 +36,31 @@ const PublicLayout = () => {
                 WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
                 borderBottom: scrolled ? '1px solid var(--ayana-border)' : '1px solid transparent'
             }}>
-                <a href={homeUrl} style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
+                <Link to={homeUrl} style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
                     AYANA
-                </a>
+                </Link>
 
-                {isHome && (
-                    <nav style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-                        <a href={homeUrl + '#lieux'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Lieux</a>
-                        <a href={homeUrl + '#chambres'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Chambres</a>
-                        <a href={homeUrl + '#services'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Services</a>
-                        <a href={homeUrl + '#spa'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Spa</a>
-                        <a href={homeUrl + '#galerie'} style={{ color: 'var(--ayana-text)', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Galerie</a>
-                    </nav>
-                )}
+                <nav style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
+                    <Link to={homeUrl} style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Accueil</Link>
+                    <Link to="/chalet" style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Chalet</Link>
+                    <Link to="/bien-etre" style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Bien-être</Link>
+                    <Link to="/localisation" style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Localisation</Link>
+                </nav>
 
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    {isHome ? (
-                        <a href="#reserver" className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', textDecoration: 'none' }}>Réserver</a>
-                    ) : (
-                        <a href={homeUrl} className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.9rem', textDecoration: 'none' }}>Retour au site</a>
-                    )}
+                    <button onClick={() => navigate('/reservation')} className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.95rem', textDecoration: 'none', cursor: 'pointer', backgroundColor: scrolled ? 'var(--ayana-cta)' : 'rgba(255,255,255,0.1)', color: '#fff', border: scrolled ? '1px solid var(--ayana-cta)' : '1px solid rgba(255,255,255,0.5)', transition: 'all 0.3s ease' }} onMouseOver={(e) => { e.target.style.backgroundColor = scrolled ? 'var(--ayana-cta-hover)' : 'rgba(255,255,255,0.2)' }} onMouseOut={(e) => { e.target.style.backgroundColor = scrolled ? 'var(--ayana-cta)' : 'rgba(255,255,255,0.1)' }}>
+                        Réserver
+                    </button>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main style={{ flex: 1, paddingBottom: scrolled ? '80px' : '0', transition: 'padding-bottom 0.5s ease' }}>
+            <main style={{ flex: 1, paddingBottom: scrolled ? '80px' : '0', transition: 'padding-bottom 0.5s ease', minHeight: '100vh' }}>
                 <Outlet />
             </main>
 
             {/* Premium Footer */}
             <footer style={{ padding: '4rem 2rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)' }}>
-                {/* (Newsletter déplacée dans la barre sticky) */}
-
                 <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem', marginBottom: '4rem' }}>
                     <div>
                         <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2rem', marginBottom: '1.5rem', letterSpacing: '2px', textTransform: 'uppercase' }}>AYANA</h3>
@@ -80,17 +72,16 @@ const PublicLayout = () => {
                     <div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--ayana-text)', marginBottom: '1rem' }}>Découvrir</h4>
-                            <a href={homeUrl + '#lieux'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Lieu</a>
-                            <a href={homeUrl + '#chambres'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Les Chambres</a>
-                            <a href={homeUrl + '#services'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Services</a>
-                            <a href={homeUrl + '#spa'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Spa Thermal</a>
-                            <a href={homeUrl + '#galerie'} style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Galerie</a>
-                            <a href="/regles" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease', marginTop: '0.5rem' }}>Règlement & Sécurité</a>
+                            <Link to="/chalet" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Chalet</Link>
+                            <Link to="/bien-etre" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Spa Thermal</Link>
+                            <Link to="/localisation" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Localisation</Link>
+                            <Link to="/experience" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease' }}>Le Journal</Link>
+                            <Link to="/regles" style={{ color: 'var(--ayana-muted)', textDecoration: 'none', transition: 'color 0.3s ease', marginTop: '0.5rem' }}>Règlement & Sécurité</Link>
                         </div>
                     </div>
                     <div>
                         <h4 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--ayana-muted)' }}>Contact</h4>
-                        <a href="mailto:chalet.ayana@gmail.com" style={footerLinkStyle}>chalet.ayana@gmail.com</a>
+                        <a href="mailto:chalet.ayana@gmail.com" style={{ textDecoration: 'none', color: 'var(--ayana-text)', fontSize: '0.95rem', transition: 'color 0.3s ease' }}>chalet.ayana@gmail.com</a>
                         <p style={{ color: 'var(--ayana-text)', marginTop: '0.5rem', fontSize: '0.95rem' }}>514-979-3103</p>
                         <p style={{ color: 'var(--ayana-text)', marginTop: '1.5rem', fontSize: '0.95rem' }}>
                             Chemin de la Rivière<br />
@@ -128,7 +119,7 @@ const PublicLayout = () => {
                 <h4 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.2rem', color: 'var(--ayana-text)', margin: 0, fontWeight: 500 }}>
                     S'inscrire aux offres et promotions
                 </h4>
-                <form style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} onSubmit={(e) => e.preventDefault()}>
+                <form style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} onSubmit={(e) => { e.preventDefault(); alert("Merci d'avoir rejoint le Journal AYANA."); }}>
                     <input 
                         type="email" 
                         placeholder="votre adresse e-mail" 
@@ -147,22 +138,6 @@ const PublicLayout = () => {
             </div>
         </div>
     );
-};
-
-const navLinkStyle = {
-    textDecoration: 'none',
-    fontSize: '0.9rem',
-    fontWeight: '400',
-    letterSpacing: '0.5px',
-    transition: 'color 0.3s ease',
-    textTransform: 'uppercase'
-};
-
-const footerLinkStyle = {
-    textDecoration: 'none',
-    color: 'var(--ayana-text)',
-    fontSize: '0.95rem',
-    transition: 'color 0.3s ease'
 };
 
 export default PublicLayout;
