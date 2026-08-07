@@ -1,21 +1,3 @@
-/**
- * @deprecated — ALTARA Phase 1
- * 
- * Cette Edge Function est NON FONCTIONNELLE et n'est plus utilisée.
- * 
- * Problèmes identifiés par l'audit :
- * - Écrit dans la table 'bookings' (avec "s") alors que le code actif utilise 'booking'
- * - Utilise des colonnes 'start'/'end' qui n'existent pas dans le schéma
- * - Omet user_id et chalet_id (NOT NULL)
- * - Source hardcodée à 'airbnb'
- * - Parse iCal par regex au lieu de node-ical
- * 
- * Le moteur de synchronisation actif est : api/lib/sync-engine.js
- * via le point d'entrée : api/sync.js
- * 
- * À supprimer dans une phase ultérieure après confirmation qu'elle
- * n'est déployée/invoquée nulle part.
- */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 export default async (req) => {

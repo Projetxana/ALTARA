@@ -27,40 +27,30 @@ const PlatformConnectionPanel = ({ chalet }) => {
 
     const handleManualSync = async () => {
         setSyncing(true);
-        setProgress('Starting sync...');
+        setProgress('Starting sync...'); // Init progress
         addNotification('info', 'Sync Started', 'Fetching latest calendars...');
 
         try {
+            // Pass setProgress as callback
             const stats = await SyncEngine.syncNow(chalet.id, connections, (msg) => setProgress(msg));
 
             setSyncing(false);
             setProgress('');
 
-            // Build detailed summary from new engine result
-            const created = stats?.created || 0;
-            const updated = stats?.updated || 0;
-            const cancelled = stats?.cancelled || 0;
-            const unchanged = stats?.unchanged || 0;
-            const total = created + updated + cancelled;
-
-            if (total > 0) {
-                const parts = [];
-                if (created > 0) parts.push(`+${created} new`);
-                if (updated > 0) parts.push(`~${updated} updated`);
-                if (cancelled > 0) parts.push(`-${cancelled} cancelled`);
-                addNotification('success', 'Sync Complete', parts.join(', ') + ` (${unchanged} unchanged)`);
-                // Refresh to reflect changes
-                setTimeout(() => window.location.reload(), 1500);
+            if (stats && stats.imported > 0) {
+                addNotification('success', 'Sync Complete', `Imported ${stats.imported} bookings.`);
+                // Refresh to fetch new data from Supabase
+                setTimeout(() => window.location.reload(), 1000);
             } else if (stats && stats.errors > 0) {
                 addNotification('warning', 'Sync Issue', `Completed with ${stats.errors} errors.`);
             } else {
-                addNotification('success', 'Up to Date', `All ${unchanged || 0} bookings are current.`);
+                addNotification('success', 'Up to Date', 'No new bookings found.');
             }
         } catch (err) {
             setSyncing(false);
             setProgress('');
             console.error(err);
-            addNotification('error', 'Sync Failed', err.message || 'Could not connect to sync engine.');
+            addNotification('error', 'Sync Failed', err.message || 'Could not connect to calendar proxy.');
         }
     };
 

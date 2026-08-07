@@ -1,12 +1,3 @@
-/**
- * @deprecated — ALTARA Phase 1
- * 
- * Proxy iCal simplifié — remplacé par api/ical-sync.js (proxy)
- * et api/lib/sync-engine.js (moteur de réconciliation).
- * 
- * Non référencé dans le frontend actuel.
- * Conservé pour compatibilité. À supprimer dans une phase ultérieure.
- */
 export default async function handler(req, res) {
     // Only allow GET requests
     if (req.method !== 'GET') {

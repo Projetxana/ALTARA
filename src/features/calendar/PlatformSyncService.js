@@ -1,126 +1,88 @@
-/**
- * ALTARA Phase 1 — PlatformSyncService
- * 
- * REFACTORISÉ : Le frontend ne fait plus la réconciliation.
- * Il appelle POST /api/sync avec le JWT utilisateur et reçoit le résultat structuré.
- * 
- * Authentification :
- * - Récupère le JWT Supabase de la session utilisateur courante
- * - L'envoie dans Authorization: Bearer <jwt>
- * - Le backend valide le JWT, vérifie la propriété du chalet,
- *   puis utilise SERVICE_ROLE_KEY pour les opérations de sync
- */
+import { supabase } from '../../lib/supabase';
 
-import { createClient } from '@supabase/supabase-js';
-
-/**
- * Get the current user's JWT from the Supabase session.
- * @returns {string|null} The access token or null
- */
-async function getUserJwt() {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseAnonKey) return null;
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { session } } = await supabase.auth.getSession();
-
-    return session?.access_token || null;
-}
-
-/**
- * Synchronise un chalet spécifique via une plateforme donnée.
- * 
- * @param {string} icalUrl - (legacy param, ignored — URL is read from calendar_sources)
- * @param {string} chaletId - UUID du chalet
- * @param {string} platform - Provider (airbnb, booking, vrbo...)
- * @returns {object} Résultat structuré du moteur de sync
- */
 export async function syncPlatformCalendar(icalUrl, chaletId, platform) {
-    const jwt = await getUserJwt();
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
 
-    if (!jwt) {
-        throw new Error('Not authenticated. Please log in to sync calendars.');
+    if (!userId) {
+        throw new Error("User must be logged in to sync calendar.");
     }
 
-    const res = await fetch('/api/sync', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`
-        },
-        body: JSON.stringify({
-            chaletId,
-            source: platform
-        })
-    });
-
-    if (res.status === 401) {
-        throw new Error('Authentication expired. Please log in again.');
-    }
-
-    if (res.status === 403) {
-        throw new Error('You do not have access to this chalet.');
-    }
+    // 1. Fetch normalized proxy data from backend
+    const res = await fetch(
+        `/api/ical-sync`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ url: icalUrl, chaletId, platform, userId }), // Keeping userId for the payload structure although it's mostly returned
+        }
+    );
 
     if (!res.ok) {
         const errText = await res.text();
-        throw new Error(`Sync failed: ${res.status} ${res.statusText} - ${errText}`);
+        throw new Error(`Proxy Parse failed: ${res.status} ${res.statusText} - ${errText}`);
     }
 
-    const result = await res.json();
+    const { success, count, events, error: apiError } = await res.json();
 
-    if (!result.success) {
-        throw new Error(result.error || 'Sync engine returned an error.');
+    if (!success) {
+        throw new Error(`Sync API Error: ${apiError}`);
     }
 
-    // Return in a format compatible with the existing SyncEngine consumer
-    return {
-        imported: (result.created || 0) + (result.updated || 0),
-        created: result.created || 0,
-        updated: result.updated || 0,
-        cancelled: result.cancelled || 0,
-        unchanged: result.unchanged || 0,
-        reactivated: result.reactivated || 0,
-        eventsReceived: result.eventsReceived || 0,
-        source: result.source || platform
-    };
-}
-
-/**
- * Synchronise toutes les sources d'un chalet.
- */
-export async function syncAllSources(chaletId) {
-    const jwt = await getUserJwt();
-
-    if (!jwt) {
-        throw new Error('Not authenticated. Please log in to sync calendars.');
+    if (!events || events.length === 0) {
+        return { imported: 0, bookings: [] };
     }
 
-    const res = await fetch('/api/sync', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`
-        },
-        body: JSON.stringify({ chaletId })
-    });
+    // 2. Safely Upsert into Supabase from FrontEnd (Has active User Session, bypasses missing Vercel Env Vars)
+    const { data: result, error } = await supabase
+        .from('booking')
+        .upsert(events, { onConflict: 'external_uid' })
+        .select();
 
-    if (res.status === 401) {
-        throw new Error('Authentication expired. Please log in again.');
+    if (error) {
+        console.error('[PlatformSyncService] Supabase Upsert Error:', error);
+        throw error;
     }
 
-    if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Sync failed: ${res.status} ${res.statusText} - ${errText}`);
+    // 3. Auto-generate cleaning tasks for new bookings
+    if (result && result.length > 0) {
+        try {
+            // Get existing cleaning tasks for these bookings to avoid duplicates
+            const bookingIds = result.map(b => b.id);
+            const { data: existingTasks } = await supabase
+                .from('cleaning_tasks')
+                .select('booking_id')
+                .in('booking_id', bookingIds);
+
+            const existingBookingIds = new Set((existingTasks || []).map(t => t.booking_id));
+
+            const newTasks = result
+                .filter(b => !existingBookingIds.has(b.id))
+                .map(b => ({
+                    chalet_id: b.chalet_id,
+                    booking_id: b.id,
+                    date: b.end_date || b.end,
+                    status: 'pending',
+                    auto_generated: true
+                }));
+
+            if (newTasks.length > 0) {
+                const { error: taskError } = await supabase
+                    .from('cleaning_tasks')
+                    .insert(newTasks);
+
+                if (taskError) {
+                    console.error('[PlatformSyncService] Error generating cleaning tasks:', taskError);
+                } else {
+                    console.log(`[PlatformSyncService] Generated ${newTasks.length} cleaning tasks.`);
+                }
+            }
+        } catch (err) {
+            console.error('[PlatformSyncService] Failed to auto-generate cleaning tasks:', err);
+        }
     }
 
-    const result = await res.json();
-
-    if (!result.success) {
-        throw new Error(result.error || 'Sync engine returned an error.');
-    }
-
-    return result;
+    return { imported: events.length, bookings: result };
 }
