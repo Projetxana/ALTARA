@@ -350,8 +350,9 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
                 result.existingBookingsModified = true;
                 result.details.push({ action: 'created', uid: event.external_uid, dates: `${event.start_date} → ${event.end_date}` });
 
-                // Auto-generate cleaning task for this new booking
-                if (insertedBooking) {
+                // Auto-generate cleaning only for actual confirmed stays.
+                // Blocked periods are availability constraints, not guest stays.
+                if (insertedBooking && event.status === 'confirmed') {
                     const taskCreated = await ensureCleaningTaskForBooking(supabase, insertedBooking, trackError);
                     if (taskCreated) {
                         result.cleaningTasksCreated++;
