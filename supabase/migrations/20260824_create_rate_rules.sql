@@ -16,6 +16,12 @@ CREATE TABLE IF NOT EXISTS public.rate_rules (
     start_date date,
     end_date date,
 
+    month_of_year integer
+        CHECK (
+            month_of_year IS NULL
+            OR month_of_year BETWEEN 1 AND 12
+        ),
+
     nightly_rate numeric(10,2) NOT NULL
         CHECK (nightly_rate >= 0),
 
@@ -48,6 +54,11 @@ ON public.rate_rules (chalet_id, enabled);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_rate_rules_one_base_per_chalet
 ON public.rate_rules (chalet_id)
 WHERE rule_type = 'base';
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_rate_rules_one_month_per_chalet
+ON public.rate_rules (chalet_id, month_of_year)
+WHERE rule_type = 'seasonal'
+  AND month_of_year IS NOT NULL;
 
 
 CREATE OR REPLACE FUNCTION public.set_rate_rules_updated_at()

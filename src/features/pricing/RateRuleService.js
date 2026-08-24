@@ -22,6 +22,7 @@ export const RateRuleService = {
                 rule_type,
                 start_date,
                 end_date,
+                month_of_year,
                 nightly_rate,
                 weekend_rate,
                 min_stay,

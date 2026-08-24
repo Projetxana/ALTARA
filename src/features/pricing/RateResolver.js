@@ -42,6 +42,16 @@ function matchesDate(rule, dateString) {
         return false;
     }
 
+    const month = Number(dateString.slice(5, 7));
+
+    if (
+        rule.rule_type === 'seasonal' &&
+        rule.month_of_year !== null &&
+        rule.month_of_year !== undefined
+    ) {
+        return Number(rule.month_of_year) === month;
+    }
+
     if (rule.start_date && dateString < rule.start_date) {
         return false;
     }
