@@ -232,6 +232,96 @@ async function ensureCleaningTaskForBooking(supabase, booking, trackError) {
     return true;
 }
 
+
+/**
+ * Keeps the cleaning task aligned with the current booking state.
+ *
+ * Rules:
+ * - confirmed: ensure a task exists; update its date if auto-generated
+ * - blocked: remove only auto-generated tasks
+ * - manual tasks are never modified or deleted automatically
+ */
+async function reconcileCleaningTaskForBooking(supabase, booking, desiredStatus, trackError) {
+    const bookingId = booking.id;
+    const cleaningDate = booking.end_date || booking.check_out;
+
+    if (!bookingId) {
+        trackError('CLEANING_TASK_RECONCILE', 'unknown', 'Missing booking id');
+        return false;
+    }
+
+    const { data: existingTask, error: fetchError } = await supabase
+        .from('cleaning_tasks')
+        .select('id, date, auto_generated')
+        .eq('booking_id', bookingId)
+        .maybeSingle();
+
+    if (fetchError) {
+        trackError('CLEANING_TASK_RECONCILE_CHECK', bookingId, fetchError.message);
+        return false;
+    }
+
+    if (desiredStatus === 'blocked') {
+        if (existingTask?.auto_generated === true) {
+            const { error: deleteError } = await supabase
+                .from('cleaning_tasks')
+                .delete()
+                .eq('id', existingTask.id);
+
+            if (deleteError) {
+                trackError('CLEANING_TASK_DELETE', bookingId, deleteError.message);
+                return false;
+            }
+
+            console.log(`[SyncEngine] Removed auto-generated cleaning task for blocked booking ${bookingId}`);
+        }
+
+        return true;
+    }
+
+    if (desiredStatus !== 'confirmed') {
+        return true;
+    }
+
+    if (!cleaningDate) {
+        trackError('CLEANING_TASK_DATE', bookingId, 'Confirmed booking has no cleaning date');
+        return false;
+    }
+
+    if (!existingTask) {
+        return ensureCleaningTaskForBooking(
+            supabase,
+            {
+                id: bookingId,
+                chalet_id: booking.chalet_id,
+                end_date: cleaningDate
+            },
+            trackError
+        );
+    }
+
+    // Never modify a manually managed task.
+    if (existingTask.auto_generated !== true) {
+        return true;
+    }
+
+    if (existingTask.date !== cleaningDate) {
+        const { error: updateError } = await supabase
+            .from('cleaning_tasks')
+            .update({ date: cleaningDate })
+            .eq('id', existingTask.id);
+
+        if (updateError) {
+            trackError('CLEANING_TASK_DATE_UPDATE', bookingId, updateError.message);
+            return false;
+        }
+
+        console.log(`[SyncEngine] Updated cleaning date for booking ${bookingId} to ${cleaningDate}`);
+    }
+
+    return true;
+}
+
 // ===========================================================================
 // RECONCILIATION ENGINE
 // ===========================================================================
@@ -387,6 +477,17 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
                     result.reactivated++;
                     result.existingBookingsModified = true;
                     result.details.push({ action: 'reactivated', uid: event.external_uid });
+
+                    await reconcileCleaningTaskForBooking(
+                        supabase,
+                        {
+                            id: existing.id,
+                            chalet_id: chaletId,
+                            end_date: event.end_date
+                        },
+                        event.status,
+                        trackError
+                    );
                 }
             } else if (datesChanged || nameChanged || statusChanged) {
                 // UPDATE — Dates or name changed
@@ -409,6 +510,17 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
                     result.updated++;
                     result.existingBookingsModified = true;
                     result.details.push({ action: 'updated', uid: event.external_uid, changes: { datesChanged, nameChanged, statusChanged } });
+
+                    await reconcileCleaningTaskForBooking(
+                        supabase,
+                        {
+                            id: existing.id,
+                            chalet_id: chaletId,
+                            end_date: event.end_date
+                        },
+                        event.status,
+                        trackError
+                    );
                 }
             } else {
                 // UNCHANGED
