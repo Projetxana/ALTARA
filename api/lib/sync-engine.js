@@ -9,14 +9,14 @@
  * 3. Réconciliation scopée (chalet_id + source) :
  *    - INSERT nouveaux événements
  *    - UPDATE événements modifiés
- *    - CANCEL événements disparus (status='cancelled', jamais DELETE)
+ *    - PRESERVE événements absents du snapshot iCal courant
  *    - REACTIVATE événements réapparus
  * 4. Enregistrement dans sync_runs
  * 5. Mise à jour de calendar_sources
  * 
  * CONTRAINTES :
  * - Un fetch iCal échoué ne modifie JAMAIS les réservations existantes (fail-safe)
- * - Un feed vide avec des réservations actives en base = warning, pas d'annulation
+ * - L'absence d'un événement dans un snapshot iCal ne provoque jamais d'annulation
  * - La réconciliation est toujours scopée par chalet_id + source
  * - Idempotent : deux runs identiques = 0 changements
  */
@@ -416,23 +416,27 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
         }
     }
 
-    // 3. Cancel bookings that are in DB but NOT in feed
-    //    (scoped to this chalet + source only)
+    // 3. Missing-from-feed safety
+    //
+    // IMPORTANT:
+    // Absence from an iCal snapshot is NOT sufficient evidence that a booking
+    // was cancelled. Providers may return partial or windowed feeds.
+    //
+    // Therefore we never cancel an existing booking solely because its UID is
+    // missing from the current feed. Explicit status changes received from the
+    // provider are still handled above during normal event reconciliation.
+    const missingFromFeed = [];
+
     for (const [uid, booking] of existingByUid) {
         if (!feedUids.has(uid) && booking.status !== 'cancelled') {
-            const { error: cancelError } = await supabase
-                .from('booking')
-                .update({ status: 'cancelled' })
-                .eq('id', booking.id);
-
-            if (cancelError) {
-                trackError('CANCEL', uid, cancelError.message);
-            } else {
-                result.cancelled++;
-                result.existingBookingsModified = true;
-                result.details.push({ action: 'cancelled', uid, dates: `${booking.start_date} → ${booking.end_date}` });
-            }
+            missingFromFeed.push(uid);
         }
+    }
+
+    if (missingFromFeed.length > 0) {
+        console.warn(
+            `[SyncEngine] ${missingFromFeed.length} existing ${source} booking(s) absent from current feed — preserved (missing-from-feed safety).`
+        );
     }
 
     return result;
