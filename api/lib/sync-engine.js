@@ -161,6 +161,78 @@ async function parseIcalEvents(rawText, provider) {
 }
 
 // ===========================================================================
+// CLEANING TASK HELPER
+// ===========================================================================
+
+/**
+ * Ensures a cleaning_task exists for a newly created booking.
+ * 
+ * Anti-duplicate: checks if a cleaning_task with this booking_id already exists.
+ * Errors are tracked but do NOT prevent the booking from being counted as created.
+ * However, they DO mark the sync as having errors (hasErrors = true).
+ * 
+ * @param {object} supabase - Supabase admin client
+ * @param {object} booking - The newly created booking { id, chalet_id, end_date, check_out }
+ * @param {function} trackError - Error tracking function from reconcile
+ * @returns {boolean} true if task was created or already existed, false on error
+ */
+async function ensureCleaningTaskForBooking(supabase, booking, trackError) {
+    const bookingId = booking.id;
+    const cleaningDate = booking.end_date || booking.check_out;
+
+    if (!bookingId) {
+        trackError('CLEANING_TASK', 'unknown', 'No booking id available after INSERT');
+        return false;
+    }
+
+    if (!cleaningDate) {
+        trackError('CLEANING_TASK_DATE', bookingId, 'No end_date or check_out available — cannot assign cleaning date');
+        return false;
+    }
+
+    // Anti-duplicate check
+    const { data: existing, error: checkError } = await supabase
+        .from('cleaning_tasks')
+        .select('id')
+        .eq('booking_id', bookingId)
+        .maybeSingle();
+
+    if (checkError) {
+        trackError('CLEANING_TASK_CHECK', bookingId, checkError.message);
+        return false;
+    }
+
+    if (existing) {
+        // Already exists — idempotent, no action needed
+        return true;
+    }
+
+    // Create the cleaning task
+    const { error: insertError } = await supabase
+        .from('cleaning_tasks')
+        .insert({
+            chalet_id: booking.chalet_id,
+            booking_id: bookingId,
+            date: cleaningDate,
+            status: 'pending',
+            auto_generated: true
+        });
+
+    if (insertError) {
+        // Race condition: another sync created the task between our SELECT and INSERT
+        if (insertError.code === '23505') {
+            console.warn(`[SyncEngine] Cleaning task for booking ${bookingId} already created by concurrent sync — OK`);
+            return true;
+        }
+        trackError('CLEANING_TASK_INSERT', bookingId, insertError.message);
+        return false;
+    }
+
+    console.log(`[SyncEngine] Created cleaning task for booking ${bookingId} on ${cleaningDate}`);
+    return true;
+}
+
+// ===========================================================================
 // RECONCILIATION ENGINE
 // ===========================================================================
 
@@ -174,7 +246,7 @@ async function parseIcalEvents(rawText, provider) {
  * @param {string} userId - Owner user UUID
  * @param {string} source - Platform provider (e.g., 'airbnb')
  * @param {Array} feedEvents - Parsed events from iCal feed
- * @returns {object} { created, updated, cancelled, unchanged, reactivated, details }
+ * @returns {object} { created, updated, cancelled, unchanged, reactivated, cleaningTasksCreated, details }
  */
 async function reconcile(supabase, chaletId, userId, source, feedEvents) {
     const result = {
@@ -187,6 +259,7 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
         hasErrors: false,
         errorMessages: [],
         existingBookingsModified: false,
+        cleaningTasksCreated: 0,
         details: []
     };
 
@@ -225,8 +298,8 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
         const existing = existingByUid.get(event.external_uid);
 
         if (!existing) {
-            // NEW — Insert
-            const { error: insertError } = await supabase
+            // NEW — Insert (with .select() to get the id back for cleaning_task)
+            const { data: insertedBooking, error: insertError } = await supabase
                 .from('booking')
                 .insert({
                     user_id: userId,
@@ -240,7 +313,9 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
                     status: event.status,
                     check_in: event.start_date,
                     check_out: event.end_date
-                });
+                })
+                .select('id, chalet_id, end_date, check_out')
+                .single();
 
             if (insertError) {
                 // If it's a unique constraint violation, try update instead
@@ -274,6 +349,14 @@ async function reconcile(supabase, chaletId, userId, source, feedEvents) {
                 result.created++;
                 result.existingBookingsModified = true;
                 result.details.push({ action: 'created', uid: event.external_uid, dates: `${event.start_date} → ${event.end_date}` });
+
+                // Auto-generate cleaning task for this new booking
+                if (insertedBooking) {
+                    const taskCreated = await ensureCleaningTaskForBooking(supabase, insertedBooking, trackError);
+                    if (taskCreated) {
+                        result.cleaningTasksCreated++;
+                    }
+                }
             }
         } else {
             // EXISTS — Check if update needed
@@ -486,6 +569,7 @@ async function syncOneSource(supabase, calendarSource, userId) {
                 dbErrors: reconcileResult.dbErrors,
                 error: `Reconciliation completed with ${reconcileResult.dbErrors} DB error(s): ${errorSummary}`,
                 existingBookingsModified: reconcileResult.existingBookingsModified,
+                cleaningTasksCreated: reconcileResult.cleaningTasksCreated,
                 syncedAt: new Date().toISOString()
             };
         }
@@ -502,6 +586,7 @@ async function syncOneSource(supabase, calendarSource, userId) {
             unchanged: reconcileResult.unchanged,
             reactivated: reconcileResult.reactivated,
             existingBookingsModified: reconcileResult.existingBookingsModified,
+            cleaningTasksCreated: reconcileResult.cleaningTasksCreated,
             syncedAt: new Date().toISOString()
         };
 
