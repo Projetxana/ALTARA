@@ -1,88 +1,86 @@
 import { supabase } from '../../lib/supabase';
 
-export async function syncPlatformCalendar(icalUrl, chaletId, platform) {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
-
-    if (!userId) {
-        throw new Error("User must be logged in to sync calendar.");
-    }
-
-    // 1. Fetch normalized proxy data from backend
-    const res = await fetch(
-        `/api/ical-sync`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ url: icalUrl, chaletId, platform, userId }), // Keeping userId for the payload structure although it's mostly returned
-        }
-    );
-
-    if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Proxy Parse failed: ${res.status} ${res.statusText} - ${errText}`);
-    }
-
-    const { success, count, events, error: apiError } = await res.json();
-
-    if (!success) {
-        throw new Error(`Sync API Error: ${apiError}`);
-    }
-
-    if (!events || events.length === 0) {
-        return { imported: 0, bookings: [] };
-    }
-
-    // 2. Safely Upsert into Supabase from FrontEnd (Has active User Session, bypasses missing Vercel Env Vars)
-    const { data: result, error } = await supabase
-        .from('booking')
-        .upsert(events, { onConflict: 'external_uid' })
-        .select();
+/**
+ * Returns the JWT from the existing ALTARA Supabase singleton.
+ *
+ * IMPORTANT:
+ * Never create another Supabase client here.
+ * Multiple browser auth clients previously caused session/refresh contention.
+ */
+async function getUserJwt() {
+    const {
+        data: { session },
+        error
+    } = await supabase.auth.getSession();
 
     if (error) {
-        console.error('[PlatformSyncService] Supabase Upsert Error:', error);
         throw error;
     }
 
-    // 3. Auto-generate cleaning tasks for new bookings
-    if (result && result.length > 0) {
-        try {
-            // Get existing cleaning tasks for these bookings to avoid duplicates
-            const bookingIds = result.map(b => b.id);
-            const { data: existingTasks } = await supabase
-                .from('cleaning_tasks')
-                .select('booking_id')
-                .in('booking_id', bookingIds);
+    return session?.access_token || null;
+}
 
-            const existingBookingIds = new Set((existingTasks || []).map(t => t.booking_id));
+/**
+ * Synchronize one external calendar source through the server-side sync engine.
+ *
+ * icalUrl is retained for backwards compatibility with SyncEngine,
+ * but the backend resolves the source URL from calendar_sources /
+ * chalets.connections.
+ */
+export async function syncPlatformCalendar(icalUrl, chaletId, platform) {
+    const jwt = await getUserJwt();
 
-            const newTasks = result
-                .filter(b => !existingBookingIds.has(b.id))
-                .map(b => ({
-                    chalet_id: b.chalet_id,
-                    booking_id: b.id,
-                    date: b.end_date || b.end,
-                    status: 'pending',
-                    auto_generated: true
-                }));
-
-            if (newTasks.length > 0) {
-                const { error: taskError } = await supabase
-                    .from('cleaning_tasks')
-                    .insert(newTasks);
-
-                if (taskError) {
-                    console.error('[PlatformSyncService] Error generating cleaning tasks:', taskError);
-                } else {
-                    console.log(`[PlatformSyncService] Generated ${newTasks.length} cleaning tasks.`);
-                }
-            }
-        } catch (err) {
-            console.error('[PlatformSyncService] Failed to auto-generate cleaning tasks:', err);
-        }
+    if (!jwt) {
+        throw new Error('Not authenticated. Please log in to sync calendars.');
     }
 
-    return { imported: events.length, bookings: result };
+    const response = await fetch('/api/sync', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwt}`
+        },
+        body: JSON.stringify({
+            chaletId,
+            source: platform
+        })
+    });
+
+    let result = null;
+
+    try {
+        result = await response.json();
+    } catch {
+        // Keep result null; HTTP handling below will return a useful error.
+    }
+
+    if (response.status === 401) {
+        throw new Error('Authentication expired. Please log in again.');
+    }
+
+    if (response.status === 403) {
+        throw new Error('You do not have access to this chalet.');
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            result?.error ||
+            `Sync failed: ${response.status} ${response.statusText}`
+        );
+    }
+
+    if (!result?.success) {
+        throw new Error(result?.error || 'Sync engine returned an error.');
+    }
+
+    return {
+        imported: (result.created || 0) + (result.updated || 0),
+        created: result.created || 0,
+        updated: result.updated || 0,
+        cancelled: result.cancelled || 0,
+        unchanged: result.unchanged || 0,
+        reactivated: result.reactivated || 0,
+        eventsReceived: result.eventsReceived || 0,
+        source: result.source || platform
+    };
 }

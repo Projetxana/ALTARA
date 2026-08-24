@@ -18,11 +18,11 @@ export const SyncEngine = {
 
             try {
                 onProgress(`Syncing ${platform}...`);
-                await syncPlatformCalendar(url, chaletId, platform);
+                const result = await syncPlatformCalendar(url, chaletId, platform);
 
-                console.log(`[${platform}] Sync OK via PlatformSyncService.`);
+                console.log(`[${platform}] Sync OK via PlatformSyncService.`, result);
                 onProgress(`${platform} synced successfully.`);
-                stats.imported += 1;
+                stats.imported += result?.imported || 0;
             } catch (error) {
                 console.error(`[${platform}] Sync Error:`, error);
                 onProgress(`Error syncing ${platform}: ${error.message}`);
