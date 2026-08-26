@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Settings, Calendar, Percent, Plus, Trash2, Save, Info } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSanctuum } from '../../context/SanctuumContext';
+import RateRuleService from './RateRuleService';
 
 const PricingModule = ({ chalet }) => {
     const { t } = useLanguage();
@@ -50,33 +51,164 @@ const PricingModule = ({ chalet }) => {
     const [activeTab, setActiveTab] = useState('base');
     const [selectedMonthIndex, setSelectedMonthIndex] = useState(new Date().getMonth());
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [ratesLoaded, setRatesLoaded] = useState(false);
+    const [ratesError, setRatesError] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const savedPricingRef = useRef(null);
 
     const monthsNames = [
         'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
         'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
     ];
 
-    // Track changes
+    // Load canonical nightly pricing from rate_rules.
     useEffect(() => {
-        if (JSON.stringify(pricing) !== JSON.stringify(buildInitialPricing())) {
-            setHasUnsavedChanges(true);
-        } else {
-            setHasUnsavedChanges(false);
+        let cancelled = false;
+
+        const loadRates = async () => {
+            if (!chalet?.id) return;
+
+            try {
+                setRatesError(null);
+
+                const rules = await RateRuleService.getRulesForChalet(chalet.id);
+
+                if (cancelled) return;
+
+                // No canonical rules yet: keep legacy pricing as migration fallback.
+                if (!rules.length) {
+                    setRatesLoaded(true);
+                    return;
+                }
+
+                const baseRule = rules.find(rule => rule.rule_type === 'base');
+                const monthlyRules = rules.filter(
+                    rule =>
+                        rule.rule_type === 'seasonal' &&
+                        rule.month_of_year >= 1 &&
+                        rule.month_of_year <= 12
+                );
+
+                const specialRules = rules.filter(rule => rule.rule_type === 'special');
+
+                setPricing(previous => {
+                    const monthlyRates = Array.from({ length: 12 }, (_, index) => {
+                        const rule = monthlyRules.find(
+                            candidate => Number(candidate.month_of_year) === index + 1
+                        );
+
+                        if (!rule) {
+                            return previous.monthlyRates[index];
+                        }
+
+                        return {
+                            basePrice: Number(rule.nightly_rate),
+                            weekendPrice: Number(rule.weekend_rate ?? rule.nightly_rate),
+                            minStay: Number(rule.min_stay ?? 1)
+                        };
+                    });
+
+                    const nextPricing = {
+                        ...previous,
+                        basePrice: baseRule
+                            ? Number(baseRule.nightly_rate)
+                            : previous.basePrice,
+                        weekendPrice: baseRule
+                            ? Number(baseRule.weekend_rate ?? baseRule.nightly_rate)
+                            : previous.weekendPrice,
+                        defaultMinStay: baseRule
+                            ? Number(baseRule.min_stay ?? 1)
+                            : previous.defaultMinStay,
+                        monthlyRates,
+                        customRules: specialRules.map(rule => ({
+                            id: rule.id,
+                            name: rule.name,
+                            startDate: rule.start_date || '',
+                            endDate: rule.end_date || '',
+                            price: Number(rule.nightly_rate),
+                            minStay: Number(rule.min_stay ?? 1)
+                        }))
+                    };
+
+                    savedPricingRef.current = JSON.stringify(nextPricing);
+                    return nextPricing;
+                });
+
+                setRatesLoaded(true);
+            } catch (error) {
+                console.error('[PricingModule] Unable to load rate rules:', error);
+                if (!cancelled) {
+                    setRatesError(error.message);
+                    setRatesLoaded(true);
+                }
+            }
+        };
+
+        loadRates();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [chalet?.id]);
+
+    // Track changes against the last successfully loaded/saved state.
+    useEffect(() => {
+        if (!ratesLoaded) {
+            return;
         }
-    }, [pricing, chalet.pricingInfo]);
 
-    const handleSave = () => {
-        // Find standard baseNightPrice to save on the root chalet object for backward compatibility
-        // We can just use the current month's price as the baseline
-        const currentMonthPrice = pricing.monthlyRates[new Date().getMonth()].basePrice;
-        const currentMinStay = pricing.monthlyRates[new Date().getMonth()].minStay;
+        if (!savedPricingRef.current) {
+            savedPricingRef.current = JSON.stringify(pricing);
+            setHasUnsavedChanges(false);
+            return;
+        }
 
-        updateChalet(chalet.id, {
-            pricingInfo: pricing,
-            baseNightPrice: currentMonthPrice,
-            minStay: currentMinStay
-        });
-        setHasUnsavedChanges(false);
+        setHasUnsavedChanges(
+            JSON.stringify(pricing) !== savedPricingRef.current
+        );
+    }, [pricing, ratesLoaded]);
+
+    const handleSave = async () => {
+        if (!chalet?.id || isSaving) {
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            setRatesError(null);
+
+            // Canonical pricing source.
+            await RateRuleService.upsertMonthlyRules(
+                chalet.id,
+                pricing.monthlyRates
+            );
+
+            // Legacy compatibility while CalendarBoard and other screens
+            // still consume pricingInfo/baseNightPrice.
+            const currentMonth = new Date().getMonth();
+            const currentMonthPrice =
+                pricing.monthlyRates[currentMonth].basePrice;
+            const currentMinStay =
+                pricing.monthlyRates[currentMonth].minStay;
+
+            await updateChalet(chalet.id, {
+                pricingInfo: pricing,
+                baseNightPrice: currentMonthPrice,
+                minStay: currentMinStay
+            });
+
+            savedPricingRef.current = JSON.stringify(pricing);
+            setHasUnsavedChanges(false);
+
+            console.log(
+                '[PricingModule] Monthly pricing saved to canonical rate_rules.'
+            );
+        } catch (error) {
+            console.error('[PricingModule] Pricing save failed:', error);
+            setRatesError(error.message || 'Impossible de sauvegarder les tarifs.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleChange = (section, field, value) => {
@@ -147,7 +279,7 @@ const PricingModule = ({ chalet }) => {
                     className="btn-primary"
                     style={{ position: 'absolute', top: '1.5rem', right: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
-                    <Save size={16} /> Save Pricing
+                    <Save size={16} /> {isSaving ? 'Saving…' : 'Save Pricing'}
                 </button>
             )}
 

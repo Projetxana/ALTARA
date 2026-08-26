@@ -56,9 +56,7 @@ ON public.rate_rules (chalet_id)
 WHERE rule_type = 'base';
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_rate_rules_one_month_per_chalet
-ON public.rate_rules (chalet_id, month_of_year)
-WHERE rule_type = 'seasonal'
-  AND month_of_year IS NOT NULL;
+ON public.rate_rules (chalet_id, rule_type, month_of_year);
 
 
 CREATE OR REPLACE FUNCTION public.set_rate_rules_updated_at()
