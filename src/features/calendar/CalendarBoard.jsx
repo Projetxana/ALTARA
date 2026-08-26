@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Filter, Home, Sparkles, List, Calendar as Ca
 import { useSanctuum } from '../../context/SanctuumContext';
 import { useLanguage } from '../../context/LanguageContext';
 import ReservationCard from './ReservationCard';
+import RateEngine from '../pricing/RateEngine';
 
 const CalendarBoard = () => {
     const {
@@ -19,6 +20,9 @@ const CalendarBoard = () => {
     // STATE: Dynamic Calendar Date
     const [viewDate, setViewDate] = useState(new Date());
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [resolvedRates, setResolvedRates] = useState({});
+    const [ratesLoading, setRatesLoading] = useState(false);
+    const [ratesError, setRatesError] = useState(null);
 
     // Compute formatted events for the currently selected chalet
     const events = React.useMemo(() => {
@@ -70,6 +74,68 @@ const CalendarBoard = () => {
         });
         return groups;
     }, [events, language]);
+
+    // Load authoritative pricing for the visible month.
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadRates = async () => {
+            if (!selectedChaletId) {
+                setResolvedRates({});
+                return;
+            }
+
+            const year = viewDate.getFullYear();
+            const month = viewDate.getMonth();
+
+            const startDate =
+                `${year}-${String(month + 1).padStart(2, '0')}-01`;
+
+            const lastDay = new Date(year, month + 1, 0).getDate();
+
+            const endDate =
+                `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+            try {
+                setRatesLoading(true);
+                setRatesError(null);
+
+                const rates = await RateEngine.getRatesForRange(
+                    selectedChaletId,
+                    startDate,
+                    endDate
+                );
+
+                if (cancelled) return;
+
+                const map = Object.fromEntries(
+                    rates.map(rate => [rate.date, rate])
+                );
+
+                setResolvedRates(map);
+            } catch (error) {
+                console.error(
+                    '[CalendarBoard] Unable to load canonical rates:',
+                    error
+                );
+
+                if (!cancelled) {
+                    setResolvedRates({});
+                    setRatesError(error.message);
+                }
+            } finally {
+                if (!cancelled) {
+                    setRatesLoading(false);
+                }
+            }
+        };
+
+        loadRates();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedChaletId, viewDate]);
 
     const days = [t('cal_mon'), t('cal_tue'), t('cal_wed'), t('cal_thu'), t('cal_fri'), t('cal_sat'), t('cal_sun')];
 
@@ -170,8 +236,19 @@ const CalendarBoard = () => {
     }, [events, viewDate, currentChalet]);
 
     // Calculate Daily Price
+    // Canonical source: RateEngine / rate_rules.
+    // Legacy pricingInfo remains as temporary fallback.
     const getDailyPrice = (dateStr) => {
-        if (!currentChalet || !currentChalet.pricingInfo) return currentChalet?.baseNightPrice || 0;
+        const resolved = resolvedRates[dateStr];
+
+        if (resolved) {
+            return resolved.nightlyRate;
+        }
+
+        if (!currentChalet || !currentChalet.pricingInfo) {
+            return currentChalet?.baseNightPrice || 0;
+        }
+
         const pricing = currentChalet.pricingInfo;
 
         const [y, m, d] = dateStr.split('-');
@@ -182,25 +259,37 @@ const CalendarBoard = () => {
         let weekendPrice = null;
 
         if (pricing.monthlyRates && pricing.monthlyRates[monthIndex]) {
-            currentPrice = pricing.monthlyRates[monthIndex].basePrice || currentPrice;
-            weekendPrice = pricing.monthlyRates[monthIndex].weekendPrice;
+            currentPrice =
+                pricing.monthlyRates[monthIndex].basePrice || currentPrice;
+
+            weekendPrice =
+                pricing.monthlyRates[monthIndex].weekendPrice;
         } else {
             currentPrice = pricing.basePrice || currentPrice;
             weekendPrice = pricing.weekendPrice;
         }
 
-        // Custom rules
         if (pricing.customRules && pricing.customRules.length > 0) {
             const activeRule = pricing.customRules.find(rule => {
                 if (!rule.startDate || !rule.endDate) return false;
-                return dateStr >= rule.startDate && dateStr <= rule.endDate;
+
+                return (
+                    dateStr >= rule.startDate &&
+                    dateStr <= rule.endDate
+                );
             });
-            if (activeRule && activeRule.price) return activeRule.price;
+
+            if (activeRule && activeRule.price) {
+                return activeRule.price;
+            }
         }
 
-        // Weekend price
         const dayOfWeek = localDate.getDay();
-        if ((dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) && weekendPrice) {
+
+        if (
+            (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) &&
+            weekendPrice
+        ) {
             return weekendPrice;
         }
 
