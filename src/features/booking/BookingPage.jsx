@@ -6,6 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { differenceInDays, addDays, format } from 'date-fns';
 import { Calendar, Users, Star, ArrowRight } from 'lucide-react';
 import PaymentForm from './PaymentForm';
+import BookingPricingService from '../pricing/BookingPricingService';
 
 const BookingPage = () => {
     const { id } = useParams();
@@ -22,12 +23,68 @@ const BookingPage = () => {
     const [guestName, setGuestName] = useState('');
     const [selectedUpsells, setSelectedUpsells] = useState([]);
     const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Success
+    const [stayPricing, setStayPricing] = useState(null);
+    const [pricingLoading, setPricingLoading] = useState(false);
+    const [pricingError, setPricingError] = useState(null);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const loadStayPricing = async () => {
+            if (!chalet?.id || !startDate || !endDate || startDate >= endDate) {
+                setStayPricing(null);
+                setPricingError(null);
+                return;
+            }
+
+            try {
+                setPricingLoading(true);
+                setPricingError(null);
+
+                const pricing = await BookingPricingService.calculateStay(
+                    chalet.id,
+                    startDate,
+                    endDate
+                );
+
+                if (!cancelled) {
+                    setStayPricing(pricing);
+                }
+            } catch (error) {
+                console.error(
+                    '[BookingPage] Unable to calculate canonical stay price:',
+                    error
+                );
+
+                if (!cancelled) {
+                    setStayPricing(null);
+                    setPricingError(error.message);
+                }
+            } finally {
+                if (!cancelled) {
+                    setPricingLoading(false);
+                }
+            }
+        };
+
+        loadStayPricing();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [chalet?.id, startDate, endDate]);
 
     // Derived Logic
     if (!chalet) return <div>Chalet not found</div>;
 
-    const nights = differenceInDays(new Date(endDate), new Date(startDate)) || 0;
-    const nightTotal = nights * chalet.baseNightPrice;
+    const nights =
+        stayPricing?.numberOfNights ??
+        differenceInDays(new Date(endDate), new Date(startDate)) ??
+        0;
+
+    const nightTotal =
+        stayPricing?.estimatedAccommodationRevenue ?? 0;
+
     const cleaningFee = 150;
     const upsellTotal = selectedUpsells.reduce((sum, id) => {
         const exp = experiences.find(e => e.id === id);
@@ -160,9 +217,26 @@ const BookingPage = () => {
                             <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>{t('book_price_details')}</h3>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: 'var(--color-text-muted)' }}>€{chalet.baseNightPrice} x {nights} {t('book_nights')}</span>
-                                    <span>€{nightTotal.toLocaleString()}</span>
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: 'var(--color-text-muted)' }}>
+                                            {nights} {t('book_nights')}
+                                        </span>
+                                        <span>€{nightTotal.toLocaleString()}</span>
+                                    </div>
+
+                                    {stayPricing?.nightlyBreakdown?.length > 0 && (
+                                        <div
+                                            style={{
+                                                marginTop: '0.35rem',
+                                                fontSize: '0.75rem',
+                                                color: 'var(--color-text-muted)',
+                                                opacity: 0.75
+                                            }}
+                                        >
+                                            Tarifs calculés nuit par nuit
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ color: 'var(--color-text-muted)' }}>{t('book_cleaning')}</span>

@@ -1,10 +1,23 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSanctuum } from '../../context/SanctuumContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Search, Bell, Plus, Globe } from 'lucide-react';
 
 const Header = () => {
-    const { currentChalet, platforms } = useSanctuum();
+
+    const navigate = useNavigate();
+    const {
+        currentChalet,
+        selectedChaletId,
+        chalets,
+        platforms
+    } = useSanctuum();
+
+    const bookingChaletId =
+        currentChalet?.id ||
+        selectedChaletId ||
+        chalets?.[0]?.id;
     const { language, setLanguage, t } = useLanguage();
 
     const getFlag = (lang) => {
@@ -86,7 +99,19 @@ const Header = () => {
                 </button>
 
                 {/* New Booking CTA */}
-                <button className="btn-primary">
+                <button
+                    className="btn-primary"
+                    onClick={() => {
+                        if (bookingChaletId) {
+                            navigate(`/book/${bookingChaletId}`);
+                        }
+                    }}
+                    disabled={!bookingChaletId}
+                    style={{
+                        opacity: bookingChaletId ? 1 : 0.5,
+                        cursor: bookingChaletId ? 'pointer' : 'not-allowed'
+                    }}
+                >
                     <Plus size={18} />
                     <span>{t('header_new_booking')}</span>
                 </button>
