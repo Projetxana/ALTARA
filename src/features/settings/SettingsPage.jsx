@@ -68,7 +68,7 @@ const SettingsPage = () => {
                         style={{
                             width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.875rem',
                             background: 'transparent',
-                            border: 'none', borderRadius: 'var(--radius-md)', color: '#fff',
+                            border: 'none', borderRadius: 'var(--radius-md)', color: 'var(--color-text)',
                             cursor: 'pointer', textAlign: 'left', marginBottom: '0.5rem'
                         }}
                     >
@@ -116,15 +116,15 @@ const SettingsPage = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>First Name</label>
-                                    <input type="text" defaultValue="Jerome" style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }} />
+                                    <input type="text" defaultValue="Jerome" style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Last Name</label>
-                                    <input type="text" defaultValue="D." style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }} />
+                                    <input type="text" defaultValue="D." style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }} />
                                 </div>
                                 <div style={{ gridColumn: '1/-1' }}>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Email Address</label>
-                                    <input type="email" defaultValue="jerome@altara.com" style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }} />
+                                    <input type="email" defaultValue="jerome@altara.com" style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }} />
                                 </div>
                             </div>
                         </div>
@@ -145,10 +145,10 @@ const SettingsPage = () => {
                                     style={{
                                         width: '100%', maxWidth: '300px',
                                         padding: '0.75rem',
-                                        background: 'rgba(255,255,255,0.05)',
+                                        background: 'var(--color-surface)',
                                         border: '1px solid var(--color-border)',
                                         borderRadius: 'var(--radius-md)',
-                                        color: '#fff',
+                                        color: 'var(--color-text)',
                                         fontSize: '1rem'
                                     }}
                                 >

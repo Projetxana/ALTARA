@@ -62,7 +62,7 @@ const PropertiesPage = () => {
                                         border: '1px solid var(--color-border)',
                                         padding: '0.5rem 1rem',
                                         borderRadius: 'var(--radius-md)',
-                                        color: '#fff',
+                                        color: 'var(--color-text)',
                                         cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', gap: '0.5rem',
                                         transition: 'all 0.2s'
@@ -87,22 +87,22 @@ const PropertiesPage = () => {
                         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Property Name</label>
-                                <input required type="text" value={newProperty.name} onChange={e => setNewProperty({ ...newProperty, name: e.target.value })} style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }} placeholder="e.g. Chalet L'Olympe" />
+                                <input required type="text" value={newProperty.name} onChange={e => setNewProperty({ ...newProperty, name: e.target.value })} style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }} placeholder="e.g. Chalet L'Olympe" />
                             </div>
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Location</label>
-                                <input required type="text" value={newProperty.location} onChange={e => setNewProperty({ ...newProperty, location: e.target.value })} style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }} placeholder="e.g. Courchevel 1850" />
+                                <input required type="text" value={newProperty.location} onChange={e => setNewProperty({ ...newProperty, location: e.target.value })} style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }} placeholder="e.g. Courchevel 1850" />
                             </div>
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Base Night Price (€)</label>
-                                <input required type="number" value={newProperty.baseNightPrice} onChange={e => setNewProperty({ ...newProperty, baseNightPrice: Number(e.target.value) })} style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }} />
+                                <input required type="number" value={newProperty.baseNightPrice} onChange={e => setNewProperty({ ...newProperty, baseNightPrice: Number(e.target.value) })} style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }} />
                             </div>
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Short Description</label>
-                                <textarea row="3" value={newProperty.description} onChange={e => setNewProperty({ ...newProperty, description: e.target.value })} style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }} placeholder="Luxury ski-in ski-out chalet..." />
+                                <textarea row="3" value={newProperty.description} onChange={e => setNewProperty({ ...newProperty, description: e.target.value })} style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }} placeholder="Luxury ski-in ski-out chalet..." />
                             </div>
 
                             <button type="submit" className="btn-primary" style={{ justifyContent: 'center', marginTop: '1rem' }}>Create Property</button>

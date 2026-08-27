@@ -65,7 +65,7 @@ const PlatformConnectionPanel = ({ chalet }) => {
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <button
                             onClick={handleSave}
-                            style={{ padding: '0.75rem 1.5rem', background: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff', cursor: 'pointer' }}>
+                            style={{ padding: '0.75rem 1.5rem', background: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)', cursor: 'pointer' }}>
                             Save URLs
                         </button>
                         <button
@@ -118,10 +118,10 @@ const PlatformConnectionPanel = ({ chalet }) => {
                                 style={{
                                     width: '100%',
                                     padding: '0.75rem',
-                                    background: 'rgba(0,0,0,0.2)',
+                                    background: 'var(--color-surface)',
                                     border: '1px solid var(--color-border)',
                                     borderRadius: 'var(--radius-md)',
-                                    color: '#fff',
+                                    color: 'var(--color-text)',
                                     fontSize: '0.9rem'
                                 }}
                             />

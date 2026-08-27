@@ -47,7 +47,11 @@ const DashboardLayout = () => {
   return (
     <div className="layout-grid">
       <Sidebar />
-      <main style={{ padding: '2rem', overflowY: 'auto' }}>
+      <main style={{
+        padding: '1.5rem',
+        overflowY: 'auto',
+        background: '#F7F4EE'
+      }}>
         <Header />
         {!isConfigured && (
           <div style={{ background: '#fef2f2', color: '#dc2626', padding: '1rem', marginBottom: '1rem', borderRadius: '8px', border: '1px solid #fecaca' }}>

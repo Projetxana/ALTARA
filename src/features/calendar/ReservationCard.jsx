@@ -3,6 +3,18 @@ import React from 'react';
 const ReservationCard = ({ segment }) => {
     const { booking, isCheckin, isCheckout, widthCells, leftPercent } = segment;
 
+    const platformColors = {
+        airbnb: '#B85F49',
+        vrbo: '#6D8290',
+        booking: '#315D55',
+        mrchalet: '#8B7564',
+        direct: '#C5A66A'
+    };
+
+    const reservationColor =
+        platformColors[booking.source] ||
+        '#7A8580';
+
     let borderRadius = '0';
     if (isCheckin && isCheckout) {
         borderRadius = '20px';
@@ -27,8 +39,8 @@ const ReservationCard = ({ segment }) => {
             width: `calc(${widthCells * 100}% + 1px)`,
             top: '32px',
             height: '26px',
-            background: booking.color || '#3b82f6',
-            opacity: booking.status === 'blocked' ? 0.4 : 1,
+            background: reservationColor,
+            opacity: booking.status === 'blocked' ? 0.20 : 0.94,
             borderRadius: borderRadius,
             zIndex: 10,
             display: 'flex',
@@ -39,9 +51,9 @@ const ReservationCard = ({ segment }) => {
             fontWeight: 600,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            border: '1px solid rgba(0,0,0,0.1)',
-            borderLeft: isCheckin ? '1px solid rgba(0,0,0,0.1)' : 'none',
-            borderRight: isCheckout ? '1px solid rgba(0,0,0,0.1)' : 'none',
+            border: '1px solid rgba(21,33,31,0.08)',
+            borderLeft: isCheckin ? '1px solid rgba(21,33,31,0.08)' : 'none',
+            borderRight: isCheckout ? '1px solid rgba(21,33,31,0.08)' : 'none',
             boxSizing: 'border-box'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>

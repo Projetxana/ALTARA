@@ -347,10 +347,10 @@ const PricingModule = ({ chalet }) => {
                         <div>
                             <div style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px dashed var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div>
-                                    <h4 style={{ fontSize: '1.25rem', margin: '0 0 0.25rem 0', color: 'white' }}>Tarifs de {monthsNames[selectedMonthIndex]}</h4>
+                                    <h4 style={{ fontSize: '1.25rem', margin: '0 0 0.25rem 0', color: 'var(--color-text)' }}>Tarifs de {monthsNames[selectedMonthIndex]}</h4>
                                     <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', margin: 0 }}>Configurez les tarifs standards et week-ends spécifiques à ce mois.</p>
                                 </div>
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', color: 'var(--color-primary)', fontWeight: 500 }}>
+                                <div style={{ background: 'var(--color-surface)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', color: 'var(--color-primary)', fontWeight: 500 }}>
                                     {monthsNames[selectedMonthIndex]}
                                 </div>
                             </div>
@@ -364,7 +364,7 @@ const PricingModule = ({ chalet }) => {
                                             type="number"
                                             value={pricing.monthlyRates[selectedMonthIndex].basePrice || 0}
                                             onChange={(e) => handleMonthlyChange(selectedMonthIndex, 'basePrice', parseFloat(e.target.value) || 0)}
-                                            style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
+                                            style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', fontSize: '1.25rem' }}
                                         />
                                     </div>
                                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Tarif par défaut pour les nuits du lundi au jeudi.</p>
@@ -378,7 +378,7 @@ const PricingModule = ({ chalet }) => {
                                             type="number"
                                             value={pricing.monthlyRates[selectedMonthIndex].weekendPrice || 0}
                                             onChange={(e) => handleMonthlyChange(selectedMonthIndex, 'weekendPrice', parseFloat(e.target.value) || 0)}
-                                            style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
+                                            style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', fontSize: '1.25rem' }}
                                         />
                                     </div>
                                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.5rem' }}>Appliqué automatiquement du vendredi au dimanche inclus.</p>
@@ -390,7 +390,7 @@ const PricingModule = ({ chalet }) => {
                                         type="number"
                                         value={pricing.monthlyRates[selectedMonthIndex].minStay || 0}
                                         onChange={(e) => handleMonthlyChange(selectedMonthIndex, 'minStay', parseInt(e.target.value) || 0)}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.25rem' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', fontSize: '1.25rem' }}
                                     />
                                 </div>
                             </div>
@@ -403,7 +403,7 @@ const PricingModule = ({ chalet }) => {
                     <div style={{ animation: 'fadeIn 0.3s' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', maxWidth: '600px' }}>Set specific prices and rules for holidays, high seasons, or special events. These will override your base pricing.</p>
-                            <button onClick={addCustomRule} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
+                            <button onClick={addCustomRule} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
                                 <Plus size={16} /> Add Rule
                             </button>
                         </div>
@@ -419,23 +419,23 @@ const PricingModule = ({ chalet }) => {
                                     <div key={rule.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1.5fr 1fr 1fr auto', gap: '1rem', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                                         <div>
                                             <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', display: 'block' }}>Season Name</label>
-                                            <input type="text" value={rule.name} onChange={(e) => updateCustomRule(rule.id, 'name', e.target.value)} style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white', borderRadius: '4px' }} placeholder="e.g. Christmas" />
+                                            <input type="text" value={rule.name} onChange={(e) => updateCustomRule(rule.id, 'name', e.target.value)} style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', borderRadius: '4px' }} placeholder="e.g. Christmas" />
                                         </div>
                                         <div>
                                             <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', display: 'block' }}>Start Date</label>
-                                            <input type="date" value={rule.startDate} onChange={(e) => updateCustomRule(rule.id, 'startDate', e.target.value)} style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white', borderRadius: '4px', colorScheme: 'dark' }} />
+                                            <input type="date" value={rule.startDate} onChange={(e) => updateCustomRule(rule.id, 'startDate', e.target.value)} style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', borderRadius: '4px', colorScheme: 'light' }} />
                                         </div>
                                         <div>
                                             <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', display: 'block' }}>End Date</label>
-                                            <input type="date" value={rule.endDate} onChange={(e) => updateCustomRule(rule.id, 'endDate', e.target.value)} style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white', borderRadius: '4px', colorScheme: 'dark' }} />
+                                            <input type="date" value={rule.endDate} onChange={(e) => updateCustomRule(rule.id, 'endDate', e.target.value)} style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', borderRadius: '4px', colorScheme: 'light' }} />
                                         </div>
                                         <div>
                                             <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', display: 'block' }}>Nightly Price</label>
-                                            <input type="number" value={rule.price} onChange={(e) => updateCustomRule(rule.id, 'price', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white', borderRadius: '4px' }} />
+                                            <input type="number" value={rule.price} onChange={(e) => updateCustomRule(rule.id, 'price', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', borderRadius: '4px' }} />
                                         </div>
                                         <div>
                                             <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem', display: 'block' }}>Min Stay</label>
-                                            <input type="number" value={rule.minStay} onChange={(e) => updateCustomRule(rule.id, 'minStay', parseInt(e.target.value))} style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white', borderRadius: '4px' }} />
+                                            <input type="number" value={rule.minStay} onChange={(e) => updateCustomRule(rule.id, 'minStay', parseInt(e.target.value))} style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', borderRadius: '4px' }} />
                                         </div>
                                         <div style={{ paddingTop: '1.25rem' }}>
                                             <button onClick={() => removeCustomRule(rule.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.5rem' }}>
@@ -454,26 +454,26 @@ const PricingModule = ({ chalet }) => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', animation: 'fadeIn 0.3s' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Cleaning Fee (Per Stay)</label>
-                            <input type="number" value={pricing.fees.cleaning} onChange={(e) => handleChange('fees', 'cleaning', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }} />
+                            <input type="number" value={pricing.fees.cleaning} onChange={(e) => handleChange('fees', 'cleaning', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                         </div>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Security Deposit</label>
-                            <input type="number" value={pricing.fees.securityDeposit} onChange={(e) => handleChange('fees', 'securityDeposit', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }} />
+                            <input type="number" value={pricing.fees.securityDeposit} onChange={(e) => handleChange('fees', 'securityDeposit', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                         </div>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Pet Fee (Per Stay)</label>
-                            <input type="number" value={pricing.fees.pet} onChange={(e) => handleChange('fees', 'pet', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }} />
+                            <input type="number" value={pricing.fees.pet} onChange={(e) => handleChange('fees', 'pet', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                         </div>
                         <div style={{ gridColumn: '1 / -1', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                             <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>Extra Guests</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Included Guests (Free)</label>
-                                    <input type="number" value={pricing.fees.includedGuests} onChange={(e) => handleChange('fees', 'includedGuests', parseInt(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }} />
+                                    <input type="number" value={pricing.fees.includedGuests} onChange={(e) => handleChange('fees', 'includedGuests', parseInt(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Fee per Extra Guest (Per Night)</label>
-                                    <input type="number" value={pricing.fees.extraGuest} onChange={(e) => handleChange('fees', 'extraGuest', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }} />
+                                    <input type="number" value={pricing.fees.extraGuest} onChange={(e) => handleChange('fees', 'extraGuest', parseFloat(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                                 </div>
                             </div>
                         </div>
@@ -492,14 +492,14 @@ const PricingModule = ({ chalet }) => {
                             <div style={{ marginBottom: '1.5rem' }}>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Weekly Discount (7+ nights)</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <input type="number" value={pricing.discounts.weekly} onChange={(e) => handleChange('discounts', 'weekly', parseFloat(e.target.value))} style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white' }} />
+                                    <input type="number" value={pricing.discounts.weekly} onChange={(e) => handleChange('discounts', 'weekly', parseFloat(e.target.value))} style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                                     <span style={{ fontSize: '1.2rem' }}>% off</span>
                                 </div>
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Monthly Discount (28+ nights)</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <input type="number" value={pricing.discounts.monthly} onChange={(e) => handleChange('discounts', 'monthly', parseFloat(e.target.value))} style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white' }} />
+                                    <input type="number" value={pricing.discounts.monthly} onChange={(e) => handleChange('discounts', 'monthly', parseFloat(e.target.value))} style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                                     <span style={{ fontSize: '1.2rem' }}>% off</span>
                                 </div>
                             </div>
@@ -519,9 +519,9 @@ const PricingModule = ({ chalet }) => {
 
                             <div style={{ opacity: pricing.discounts.lastMinute.active ? 1 : 0.4, pointerEvents: pricing.discounts.lastMinute.active ? 'auto' : 'none' }}>
                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <input type="number" value={pricing.discounts.lastMinute.percentage} onChange={(e) => handleDiscountObjectChange('lastMinute', 'percentage', parseFloat(e.target.value))} style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white' }} />
+                                    <input type="number" value={pricing.discounts.lastMinute.percentage} onChange={(e) => handleDiscountObjectChange('lastMinute', 'percentage', parseFloat(e.target.value))} style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                                     <span>% off if booked within</span>
-                                    <input type="number" value={pricing.discounts.lastMinute.daysBefore} onChange={(e) => handleDiscountObjectChange('lastMinute', 'daysBefore', parseInt(e.target.value))} style={{ width: '70px', padding: '0.5rem', borderRadius: '4px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--color-border)', color: 'white' }} />
+                                    <input type="number" value={pricing.discounts.lastMinute.daysBefore} onChange={(e) => handleDiscountObjectChange('lastMinute', 'daysBefore', parseInt(e.target.value))} style={{ width: '70px', padding: '0.5rem', borderRadius: '4px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }} />
                                     <span>days</span>
                                 </div>
                             </div>

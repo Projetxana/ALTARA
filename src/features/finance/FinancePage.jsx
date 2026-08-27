@@ -307,36 +307,36 @@ const FinancePage = () => {
                     <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0 }}>{t('fin_title')}</h1>
                     <p style={{ color: 'var(--color-text-muted)' }}>{t('fin_subtitle') || 'Track Revenue & Expenses'}</p>
 
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', marginTop: '1rem', width: 'fit-content' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'var(--color-surface)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', marginTop: '1rem', width: 'fit-content' }}>
                         <Filter size={16} color="var(--color-text-muted)" />
                         <select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(e.target.value)}
-                            style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--color-text)', outline: 'none', cursor: 'pointer', fontWeight: 'bold' }}
                         >
                             {Array.from({ length: 5 }, (_, i) => currentYear - i).map(year => (
-                                <option key={year} value={year} style={{ background: '#1a1a1a' }}>{year}</option>
+                                <option key={year} value={year} style={{ background: '#ffffff', color: '#15211F' }}>{year}</option>
                             ))}
                         </select>
                         <span style={{ color: 'var(--color-text-muted)' }}>|</span>
                         <select
                             value={selectedMonth}
                             onChange={(e) => setSelectedMonth(e.target.value)}
-                            style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--color-text)', outline: 'none', cursor: 'pointer', fontWeight: 'bold' }}
                         >
-                            <option value="All" style={{ background: '#1a1a1a' }}>{t('all_months') || 'Tous les mois'}</option>
-                            <option value="01" style={{ background: '#1a1a1a' }}>01 - Jan</option>
-                            <option value="02" style={{ background: '#1a1a1a' }}>02 - Fév</option>
-                            <option value="03" style={{ background: '#1a1a1a' }}>03 - Mar</option>
-                            <option value="04" style={{ background: '#1a1a1a' }}>04 - Avr</option>
-                            <option value="05" style={{ background: '#1a1a1a' }}>05 - Mai</option>
-                            <option value="06" style={{ background: '#1a1a1a' }}>06 - Jun</option>
-                            <option value="07" style={{ background: '#1a1a1a' }}>07 - Jul</option>
-                            <option value="08" style={{ background: '#1a1a1a' }}>08 - Aoû</option>
-                            <option value="09" style={{ background: '#1a1a1a' }}>09 - Sep</option>
-                            <option value="10" style={{ background: '#1a1a1a' }}>10 - Oct</option>
-                            <option value="11" style={{ background: '#1a1a1a' }}>11 - Nov</option>
-                            <option value="12" style={{ background: '#1a1a1a' }}>12 - Déc</option>
+                            <option value="All" style={{ background: '#ffffff', color: '#15211F' }}>{t('all_months') || 'Tous les mois'}</option>
+                            <option value="01" style={{ background: '#ffffff', color: '#15211F' }}>01 - Jan</option>
+                            <option value="02" style={{ background: '#ffffff', color: '#15211F' }}>02 - Fév</option>
+                            <option value="03" style={{ background: '#ffffff', color: '#15211F' }}>03 - Mar</option>
+                            <option value="04" style={{ background: '#ffffff', color: '#15211F' }}>04 - Avr</option>
+                            <option value="05" style={{ background: '#ffffff', color: '#15211F' }}>05 - Mai</option>
+                            <option value="06" style={{ background: '#ffffff', color: '#15211F' }}>06 - Jun</option>
+                            <option value="07" style={{ background: '#ffffff', color: '#15211F' }}>07 - Jul</option>
+                            <option value="08" style={{ background: '#ffffff', color: '#15211F' }}>08 - Aoû</option>
+                            <option value="09" style={{ background: '#ffffff', color: '#15211F' }}>09 - Sep</option>
+                            <option value="10" style={{ background: '#ffffff', color: '#15211F' }}>10 - Oct</option>
+                            <option value="11" style={{ background: '#ffffff', color: '#15211F' }}>11 - Nov</option>
+                            <option value="12" style={{ background: '#ffffff', color: '#15211F' }}>12 - Déc</option>
                         </select>
                     </div>
                 </div>
@@ -388,7 +388,7 @@ const FinancePage = () => {
                                 <YAxis stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-muted)' }} />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid var(--color-border)', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#fff' }}
+                                    itemStyle={{ color: 'var(--color-text)' }}
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                 />
                                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
@@ -553,7 +553,7 @@ const FinancePage = () => {
                             </div>
 
                             {/* Live calculation preview */}
-                            <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>
+                            <div style={{ padding: '1rem', background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
                                     <span style={{ color: 'var(--color-text-muted)' }}>Net (HT):</span>
                                     <span>${newItem.amount ? (parseFloat(newItem.amount) / (1 + getTaxRate(newItem.taxType) / 100)).toFixed(2) : '0.00'}</span>
@@ -690,7 +690,7 @@ const modalContentStyle = {
 };
 
 const closeButtonStyle = {
-    background: 'none', border: 'none', color: '#fff', cursor: 'pointer'
+    background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer'
 };
 
 const labelStyle = {
@@ -698,7 +698,7 @@ const labelStyle = {
 };
 
 const typeButtonStyle = {
-    flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', color: '#fff', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s'
+    flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', color: 'var(--color-text)', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s'
 };
 
 const StatsCard = ({ title, value, icon, color }) => (
@@ -715,8 +715,8 @@ const StatsCard = ({ title, value, icon, color }) => (
 
 const inputStyle = {
     width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
-    background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)',
-    color: '#fff', fontSize: '1rem', outline: 'none'
+    background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+    color: 'var(--color-text)', fontSize: '1rem', outline: 'none'
 };
 
 export default FinancePage;

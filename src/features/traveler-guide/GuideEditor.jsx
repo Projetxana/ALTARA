@@ -120,10 +120,10 @@ const GuideEditor = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h2 style={{ fontSize: '2rem', margin: 0 }}>Guide Editor</h2>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button onClick={() => window.open('/guide', '_blank')} className="btn-secondary" style={{ padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button onClick={() => window.open('/guide', '_blank')} className="btn-secondary" style={{ padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: 'none', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         👁️ Preview
                     </button>
-                    <button onClick={resetToDefaults} className="btn-secondary" style={{ padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button onClick={resetToDefaults} className="btn-secondary" style={{ padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', color: 'var(--color-text)', border: 'none', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                         <RotateCcw size={18} /> Reset
                     </button>
                     <button onClick={handleSave} disabled={isSaving} className="btn-primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', opacity: isSaving ? 0.7 : 1 }}>
@@ -144,7 +144,7 @@ const GuideEditor = () => {
                             type="text"
                             value={guideData.resortName}
                             onChange={(e) => updateResortInfo('resortName', e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                            style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                         />
                     </div>
 
@@ -154,7 +154,7 @@ const GuideEditor = () => {
                             type="text"
                             value={guideData.resortAddress}
                             onChange={(e) => updateResortInfo('resortAddress', e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                            style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                         />
                     </div>
 
@@ -166,7 +166,7 @@ const GuideEditor = () => {
                                     type="text"
                                     value={guideData.homeImage}
                                     onChange={(e) => updateResortInfo('homeImage', e.target.value)}
-                                    style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff', fontSize: '0.8rem' }}
+                                    style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)', fontSize: '0.8rem' }}
                                 />
                                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: 'var(--radius-md)', cursor: 'pointer', padding: '0 0.5rem', border: '1px solid var(--color-border)' }}>
                                     <Upload size={14} />
@@ -232,7 +232,7 @@ const GuideEditor = () => {
                                 placeholder="New Section..."
                                 value={newSectionTitle}
                                 onChange={e => setNewSectionTitle(e.target.value)}
-                                style={{ flex: 1, padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+                                style={{ flex: 1, padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', background: 'var(--color-surface)', color: 'var(--color-text)' }}
                             />
                             <button type="submit" style={{ background: 'var(--color-primary)', border: 'none', borderRadius: 'var(--radius-md)', width: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#000' }}>
                                 <Plus size={16} />
@@ -305,7 +305,7 @@ const GuideEditor = () => {
                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
 
                                     {/* VISIBILITY TOGGLE */}
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#fff' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-text)' }}>
                                         <input
                                             type="checkbox"
                                             checked={guideData.content[activeSection].isVisible !== false}
@@ -329,7 +329,7 @@ const GuideEditor = () => {
                                             padding: '0.25rem 0.75rem',
                                             borderRadius: '20px',
                                             background: 'rgba(255,255,255,0.1)',
-                                            color: '#fff',
+                                            color: 'var(--color-text)',
                                             border: '1px solid rgba(255,255,255,0.2)'
                                         }}
                                     >
@@ -366,7 +366,7 @@ const GuideEditor = () => {
                                         const newContent = { ...guideData.content[activeSection], title: e.target.value };
                                         updateSection(activeSection, newContent);
                                     }}
-                                    style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                                    style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                                 />
                             </div>
 
@@ -380,7 +380,7 @@ const GuideEditor = () => {
                                             const newContent = { ...guideData.content[activeSection], image: e.target.value };
                                             updateSection(activeSection, newContent);
                                         }}
-                                        style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                                        style={{ flex: 1, padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                                     />
                                     <label style={{
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -409,7 +409,7 @@ const GuideEditor = () => {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {guideData.content[activeSection].items.map((item, index) => (
-                                    <div key={index} style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+                                    <div key={index} style={{ background: 'var(--color-surface)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Title / Label</label>
@@ -423,7 +423,7 @@ const GuideEditor = () => {
                                                         if (item.label !== undefined) newItems[index].label = e.target.value;
                                                         updateSection(activeSection, { ...guideData.content[activeSection], items: newItems });
                                                     }}
-                                                    style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', color: '#fff' }}
+                                                    style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'var(--color-text)' }}
                                                 />
                                             </div>
                                             <div>
@@ -439,7 +439,7 @@ const GuideEditor = () => {
                                                         if (item.contact !== undefined) newItems[index].contact = e.target.value;
                                                         updateSection(activeSection, { ...guideData.content[activeSection], items: newItems });
                                                     }}
-                                                    style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', color: '#fff' }}
+                                                    style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'var(--color-text)' }}
                                                 />
                                             </div>
                                         </div>
@@ -455,7 +455,7 @@ const GuideEditor = () => {
                                                     updateSection(activeSection, { ...guideData.content[activeSection], items: newItems });
                                                 }}
                                                 placeholder="https://maps.google.com/..."
-                                                style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', color: '#fff' }}
+                                                style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'var(--color-text)' }}
                                             />
                                         </div>
 
@@ -469,7 +469,7 @@ const GuideEditor = () => {
                                                     newItems[index].desc = e.target.value;
                                                     updateSection(activeSection, { ...guideData.content[activeSection], items: newItems });
                                                 }}
-                                                style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', color: '#fff' }}
+                                                style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'var(--color-text)' }}
                                             />
                                         </div>
 
@@ -485,7 +485,7 @@ const GuideEditor = () => {
                                                     updateSection(activeSection, { ...guideData.content[activeSection], items: newItems });
                                                 }}
                                                 placeholder="Content shown when expanding this item (optional)..."
-                                                style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: '4px', color: '#fff', resize: 'vertical' }}
+                                                style={{ width: '100%', padding: '0.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'var(--color-text)', resize: 'vertical' }}
                                             />
                                         </div>
 

@@ -101,7 +101,7 @@ const SoulDashboard = () => {
                                     border: '1px solid var(--color-border)',
                                     borderRadius: 'var(--radius-md)',
                                     padding: '0.5rem 1rem',
-                                    color: '#fff',
+                                    color: 'var(--color-text)',
                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
                                     cursor: 'pointer',
                                     fontSize: '0.85rem'

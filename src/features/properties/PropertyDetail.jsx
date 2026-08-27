@@ -77,7 +77,7 @@ const PropertyDetail = () => {
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button
                                 onClick={() => setIsEditing(true)}
-                                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1px solid var(--color-border)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                             >
                                 <Settings size={16} /> Edit Property
                             </button>
@@ -102,7 +102,7 @@ const PropertyDetail = () => {
                                 type="text"
                                 value={editForm.name}
                                 onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1.2rem' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', fontSize: '1.2rem' }}
                             />
                         </div>
                         <div style={{ marginBottom: '1rem' }}>
@@ -111,7 +111,7 @@ const PropertyDetail = () => {
                                 type="text"
                                 value={editForm.location}
                                 onChange={e => setEditForm({ ...editForm, location: e.target.value })}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                             />
                         </div>
                         <div style={{ marginBottom: '1rem' }}>
@@ -120,7 +120,7 @@ const PropertyDetail = () => {
                                 value={editForm.description}
                                 rows={3}
                                 onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                             />
                         </div>
                     </div>
@@ -163,7 +163,7 @@ const PropertyDetail = () => {
                                 id="photo-url-input"
                                 style={{
                                     flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)',
-                                    background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white', fontSize: '1rem'
+                                    background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', fontSize: '1rem'
                                 }}
                             />
                             <button
@@ -198,7 +198,7 @@ const PropertyDetail = () => {
                                 type="text"
                                 placeholder="Paste Airbnb URL here..."
                                 id="airbnb-import-url"
-                                style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'white' }}
+                                style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                             />
                             <button
                                 className="btn-primary"

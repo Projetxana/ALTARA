@@ -35,7 +35,7 @@ const PaymentForm = ({ total, onSubmit }) => {
                     type="text"
                     placeholder="John Doe"
                     required
-                    style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                    style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                 />
             </div>
 
@@ -47,7 +47,7 @@ const PaymentForm = ({ total, onSubmit }) => {
                         type="text"
                         placeholder="0000 0000 0000 0000"
                         required
-                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                     />
                 </div>
             </div>
@@ -59,7 +59,7 @@ const PaymentForm = ({ total, onSubmit }) => {
                         type="text"
                         placeholder="MM / YY"
                         required
-                        style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                        style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                     />
                 </div>
                 <div>
@@ -68,7 +68,7 @@ const PaymentForm = ({ total, onSubmit }) => {
                         type="text"
                         placeholder="123"
                         required
-                        style={{ width: '100%', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: '#fff' }}
+                        style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
                     />
                 </div>
             </div>

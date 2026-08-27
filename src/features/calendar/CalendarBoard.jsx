@@ -354,112 +354,457 @@ const CalendarBoard = () => {
     };
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '1.5rem', height: 'calc(100vh - 140px)' }}>
+        <div
+            style={{
+                display: 'grid',
+                gridTemplateColumns: '215px minmax(0, 1fr)',
+                gap: '1rem',
+                height: 'calc(100vh - 140px)',
+                color: '#15211F'
+            }}
+        >
+            {/* PROPERTY PANEL */}
+            <aside
+                style={{
+                    padding: '1.1rem',
+                    border: '1px solid #DED8CD',
+                    borderRadius: '18px',
+                    background: '#FCFAF6',
+                    boxShadow: '0 6px 24px rgba(21,33,31,0.045)',
+                    overflow: 'auto'
+                }}
+            >
+                <div
+                    style={{
+                        marginBottom: '1.1rem',
+                        color: '#A6553F',
+                        fontSize: '0.67rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.16em',
+                        textTransform: 'uppercase'
+                    }}
+                >
+                    {t('cal_collection')}
+                </div>
 
-            {/* 2. PLANNING UI - LEFT PANEL (Chalet Selector) */}
-            <div className="glass-panel" style={{ borderRadius: 'var(--radius-lg)', padding: '1rem' }}>
-                <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('cal_collection')}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {chalets.map(chalet => (
-                        <button
-                            key={chalet.id}
-                            onClick={() => setSelectedChaletId(chalet.id)}
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.55rem'
+                    }}
+                >
+                    {chalets.map(chalet => {
+                        const active =
+                            selectedChaletId === chalet.id;
+
+                        return (
+                            <button
+                                key={chalet.id}
+                                onClick={() =>
+                                    setSelectedChaletId(chalet.id)
+                                }
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.7rem',
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '12px',
+                                    background: active
+                                        ? '#F4EFE6'
+                                        : 'transparent',
+                                    border: active
+                                        ? '1px solid #D7C7AC'
+                                        : '1px solid transparent',
+                                    color: '#15211F',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    transition: 'all 160ms ease'
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        width: '34px',
+                                        height: '34px',
+                                        flexShrink: 0,
+                                        display: 'grid',
+                                        placeItems: 'center',
+                                        borderRadius: '9px',
+                                        background: active
+                                            ? '#173A35'
+                                            : '#F4EFE6',
+                                        color: active
+                                            ? '#F4EFE6'
+                                            : '#315D55'
+                                    }}
+                                >
+                                    <Home size={16} />
+                                </div>
+
+                                <div style={{ minWidth: 0 }}>
+                                    <div
+                                        style={{
+                                            fontSize: '0.85rem',
+                                            fontWeight: 650,
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {chalet.name}
+                                    </div>
+
+                                    <div
+                                        style={{
+                                            marginTop: '0.1rem',
+                                            color: '#66716D',
+                                            fontSize: '0.68rem',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {chalet.location}
+                                    </div>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <div
+                    style={{
+                        marginTop: '1.5rem',
+                        padding: '1rem',
+                        border: '1px solid #E8E2D8',
+                        borderRadius: '13px',
+                        background: '#FCFAF6'
+                    }}
+                >
+                    <div
+                        style={{
+                            marginBottom: '0.8rem',
+                            color: '#66716D',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.12em',
+                            textTransform: 'uppercase'
+                        }}
+                    >
+                        {t('cal_stats')}
+                    </div>
+
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            marginBottom: '0.65rem'
+                        }}
+                    >
+                        <span
+                            style={{
+                                color: '#66716D',
+                                fontSize: '0.78rem'
+                            }}
+                        >
+                            {t('cal_occupancy')}
+                        </span>
+
+                        <span
+                            style={{
+                                color: '#173A35',
+                                fontSize: '1.05rem',
+                                fontWeight: 700
+                            }}
+                        >
+                            {monthStats.occupancy}%
+                        </span>
+                    </div>
+
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline'
+                        }}
+                    >
+                        <span
+                            style={{
+                                color: '#66716D',
+                                fontSize: '0.78rem'
+                            }}
+                        >
+                            {t('cal_revpar')}
+                        </span>
+
+                        <span
+                            style={{
+                                color: '#A6553F',
+                                fontSize: '1rem',
+                                fontWeight: 700
+                            }}
+                        >
+                            {formatPrice(monthStats.revPar)}
+                        </span>
+                    </div>
+                </div>
+
+                {ratesLoading && (
+                    <div
+                        style={{
+                            marginTop: '1rem',
+                            color: '#91A69F',
+                            fontSize: '0.68rem'
+                        }}
+                    >
+                        Actualisation des tarifs…
+                    </div>
+                )}
+
+                {ratesError && (
+                    <div
+                        style={{
+                            marginTop: '1rem',
+                            color: '#A6553F',
+                            fontSize: '0.68rem'
+                        }}
+                    >
+                        Tarifs temporairement indisponibles
+                    </div>
+                )}
+            </aside>
+
+            {/* CALENDAR */}
+            <section
+                style={{
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    border: '1px solid #DED8CD',
+                    borderRadius: '18px',
+                    background: '#FCFAF6',
+                    boxShadow: '0 6px 24px rgba(21,33,31,0.045)'
+                }}
+            >
+                {/* TOOLBAR */}
+                <div
+                    style={{
+                        minHeight: '74px',
+                        padding: '0.85rem 1rem',
+                        borderBottom: '1px solid #DED8CD',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        background: '#FCFAF6'
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem'
+                        }}
+                    >
+                        <div
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.75rem',
-                                padding: '0.75rem',
-                                borderRadius: 'var(--radius-md)',
-                                background: selectedChaletId === chalet.id ? 'var(--color-primary)' : 'rgba(255,255,255,0.03)',
-                                border: '1px solid',
-                                borderColor: selectedChaletId === chalet.id ? 'var(--color-primary)' : 'transparent',
-                                color: selectedChaletId === chalet.id ? '#000' : 'var(--color-text-main)',
-                                textAlign: 'left',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
+                                overflow: 'hidden',
+                                border: '1px solid #DED8CD',
+                                borderRadius: '10px',
+                                background: '#FCFAF6'
                             }}
                         >
-                            <div style={{
-                                width: '32px', height: '32px', borderRadius: '6px',
-                                background: selectedChaletId === chalet.id ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}>
-                                <Home size={16} />
-                            </div>
-                            <div>
-                                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{chalet.name}</div>
-                                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{chalet.location}</div>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-
-                <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>{t('cal_stats')}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.85rem' }}>{t('cal_occupancy')}</span>
-                        <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>{monthStats.occupancy}%</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.85rem' }}>{t('cal_revpar')}</span>
-                        <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{formatPrice(monthStats.revPar)}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* MAIN AREA - CALENDAR GRID */}
-            <div className="glass-panel" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                {/* Calendar Toolbar */}
-                <div style={{
-                    padding: '1rem 1.5rem',
-                    borderBottom: '1px solid var(--color-border)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    background: 'rgba(0,0,0,0.2)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)' }}>
                             <button
                                 onClick={prevMonth}
-                                style={{ padding: '0.5rem', border: 'none', background: 'transparent', color: 'var(--color-text-main)', cursor: 'pointer', visibility: viewMode === 'list' ? 'hidden' : 'visible' }}>
-                                <ChevronLeft size={20} />
+                                style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#315D55',
+                                    cursor: 'pointer',
+                                    visibility:
+                                        viewMode === 'list'
+                                            ? 'hidden'
+                                            : 'visible'
+                                }}
+                            >
+                                <ChevronLeft size={18} />
                             </button>
-                            <span style={{ padding: '0 1rem', fontWeight: 600, fontSize: '0.95rem', minWidth: '140px', textAlign: 'center', visibility: viewMode === 'list' ? 'hidden' : 'visible' }}>{monthLabel}</span>
+
+                            <span
+                                style={{
+                                    minWidth: '138px',
+                                    padding: '0 0.8rem',
+                                    color: '#15211F',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 650,
+                                    textAlign: 'center',
+                                    textTransform: 'capitalize',
+                                    visibility:
+                                        viewMode === 'list'
+                                            ? 'hidden'
+                                            : 'visible'
+                                }}
+                            >
+                                {monthLabel}
+                            </span>
+
                             <button
                                 onClick={nextMonth}
-                                style={{ padding: '0.5rem', border: 'none', background: 'transparent', color: 'var(--color-text-main)', cursor: 'pointer', visibility: viewMode === 'list' ? 'hidden' : 'visible' }}>
-                                <ChevronRight size={20} />
+                                style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    display: 'grid',
+                                    placeItems: 'center',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#315D55',
+                                    cursor: 'pointer',
+                                    visibility:
+                                        viewMode === 'list'
+                                            ? 'hidden'
+                                            : 'visible'
+                                }}
+                            >
+                                <ChevronRight size={18} />
                             </button>
                         </div>
+
                         <button
                             onClick={() => setViewDate(new Date())}
-                            style={{ fontSize: '0.8rem', background: 'none', border: '1px solid var(--color-border)', padding: '0.25rem 0.75rem', borderRadius: '4px', color: 'var(--color-text-muted)', cursor: 'pointer', visibility: viewMode === 'list' ? 'hidden' : 'visible' }}>
+                            style={{
+                                minHeight: '36px',
+                                padding: '0 0.8rem',
+                                border: '1px solid #DED8CD',
+                                borderRadius: '9px',
+                                background: '#FFFFFF',
+                                color: '#66716D',
+                                cursor: 'pointer',
+                                fontSize: '0.73rem',
+                                fontWeight: 600,
+                                visibility:
+                                    viewMode === 'list'
+                                        ? 'hidden'
+                                        : 'visible'
+                            }}
+                        >
                             {t('cal_today')}
                         </button>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                        <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF5A5F' }}></span>Airbnb</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6' }}></span>VRBO</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#003580' }}></span>Booking</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: '#d4af37' }}></span>Direct</div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            gap: '1rem',
+                            minWidth: 0
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.9rem',
+                                color: '#66716D',
+                                fontSize: '0.67rem'
+                            }}
+                        >
+                            {[
+                                ['#FF5A5F', 'Airbnb'],
+                                ['#3B82F6', 'VRBO'],
+                                ['#315D55', 'Booking'],
+                                ['#C5A66A', 'Direct']
+                            ].map(([color, label]) => (
+                                <div
+                                    key={label}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.3rem'
+                                    }}
+                                >
+                                    <span
+                                        style={{
+                                            width: 7,
+                                            height: 7,
+                                            borderRadius: '50%',
+                                            background: color
+                                        }}
+                                    />
+                                    {label}
+                                </div>
+                            ))}
                         </div>
 
-                        {/* View Toggle */}
-                        <div style={{ display: 'flex', gap: '0.25rem', padding: '0.25rem', background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '0.2rem',
+                                padding: '0.2rem',
+                                border: '1px solid #DED8CD',
+                                borderRadius: '9px',
+                                background: '#F1EBE1'
+                            }}
+                        >
                             <button
                                 onClick={() => setViewMode('grid')}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', border: 'none', background: viewMode === 'grid' ? 'var(--color-primary)' : 'transparent', color: viewMode === 'grid' ? '#000' : 'var(--color-text-muted)', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', transition: 'all 0.2s' }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    padding: '0.42rem 0.65rem',
+                                    border: 'none',
+                                    borderRadius: '7px',
+                                    background:
+                                        viewMode === 'grid'
+                                            ? '#173A35'
+                                            : 'transparent',
+                                    color:
+                                        viewMode === 'grid'
+                                            ? '#FFFFFF'
+                                            : '#66716D',
+                                    cursor: 'pointer',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 650
+                                }}
                             >
-                                <CalendarIcon size={14} /> Grid
+                                <CalendarIcon size={13} />
+                                Grid
                             </button>
+
                             <button
                                 onClick={() => setViewMode('list')}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', border: 'none', background: viewMode === 'list' ? 'var(--color-primary)' : 'transparent', color: viewMode === 'list' ? '#000' : 'var(--color-text-muted)', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', transition: 'all 0.2s' }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    padding: '0.42rem 0.65rem',
+                                    border: 'none',
+                                    borderRadius: '7px',
+                                    background:
+                                        viewMode === 'list'
+                                            ? '#173A35'
+                                            : 'transparent',
+                                    color:
+                                        viewMode === 'list'
+                                            ? '#FFFFFF'
+                                            : '#66716D',
+                                    cursor: 'pointer',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 650
+                                }}
                             >
-                                <List size={14} /> List
+                                <List size={13} />
+                                List
                             </button>
                         </div>
                     </div>
@@ -467,68 +812,147 @@ const CalendarBoard = () => {
 
                 {viewMode === 'grid' ? (
                     <>
-                        {/* Calendar Grid Header */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'rgba(255,255,255,0.02)' }}>
+                        {/* DAYS */}
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(7, 1fr)',
+                                background: '#F1EBE1'
+                            }}
+                        >
                             {days.map(day => (
-                                <div key={day} style={{
-                                    padding: '0.75rem',
-                                    textAlign: 'center',
-                                    borderBottom: '1px solid var(--color-border)',
-                                    borderRight: '1px solid var(--color-border)',
-                                    color: 'var(--color-text-muted)',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 700,
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em'
-                                }}>
+                                <div
+                                    key={day}
+                                    style={{
+                                        padding: '0.65rem',
+                                        borderBottom: '1px solid #DED8CD',
+                                        borderRight: '1px solid #DED8CD',
+                                        color: '#66716D',
+                                        fontSize: '0.64rem',
+                                        fontWeight: 700,
+                                        letterSpacing: '0.1em',
+                                        textAlign: 'center',
+                                        textTransform: 'uppercase'
+                                    }}
+                                >
                                     {day}
                                 </div>
                             ))}
                         </div>
 
-                        {/* Scrollable Grid */}
-                        <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridAutoRows: 'minmax(120px, 1fr)' }}>
+                        {/* GRID */}
+                        <div
+                            style={{
+                                flex: 1,
+                                overflowY: 'auto',
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(7, 1fr)',
+                                gridAutoRows: 'minmax(108px, 1fr)',
+                                background: '#FCFAF6'
+                            }}
+                        >
                             {dates.map((dateObj, i) => {
-                                const segments = getSegmentsForCell(i);
+                                const segments =
+                                    getSegmentsForCell(i);
 
                                 return (
-                                    <div key={i} style={{
-                                        borderBottom: '1px solid var(--color-border)',
-                                        borderRight: '1px solid var(--color-border)',
-                                        padding: '0.5rem',
-                                        position: 'relative',
-                                        cursor: 'pointer',
-                                        background: dateObj.isPadding ? 'rgba(0,0,0,0.2)' : 'transparent',
-                                        transition: 'background 0.2s',
-                                    }}
-                                        onMouseEnter={(e) => !dateObj.isPadding && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
-                                        onMouseLeave={(e) => !dateObj.isPadding && (e.currentTarget.style.background = 'transparent')}
+                                    <div
+                                        key={i}
+                                        style={{
+                                            position: 'relative',
+                                            minWidth: 0,
+                                            padding: '0.5rem',
+                                            borderBottom: '1px solid #EEE8DE',
+                                            borderRight: '1px solid #EEE8DE',
+                                            background:
+                                                dateObj.isPadding
+                                                    ? '#FAF8F4'
+                                                    : '#FFFFFF',
+                                            cursor: dateObj.isPadding
+                                                ? 'default'
+                                                : 'pointer',
+                                            transition: 'background 160ms ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!dateObj.isPadding) {
+                                                e.currentTarget.style.background =
+                                                    '#F8F4ED';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background =
+                                                dateObj.isPadding
+                                                    ? '#F4EFE6'
+                                                    : '#FCFAF6';
+                                        }}
                                     >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                            <span style={{
-                                                color: dateObj.isPadding ? 'rgba(255,255,255,0.2)' : 'var(--color-text-muted)',
-                                                fontSize: '0.85rem',
-                                                fontWeight: 500
-                                            }}>{dateObj.day}</span>
-                                            {/* Additional Cell Indicators */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                {!dateObj.isPadding && cleaningTasks.some(t => t.date === dateObj.dateStr && t.chaletId === selectedChaletId && t.status !== 'completed') && (
-                                                    <div title="Housekeeping required" style={{
-                                                        background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', borderRadius: '4px', padding: '2px 4px', display: 'flex', alignItems: 'center', gap: '2px', fontSize: '0.65rem', fontWeight: 600
-                                                    }}>
-                                                        <Sparkles size={10} />
-                                                    </div>
-                                                )}
-                                                {/* Hide base price on padding days */}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'flex-start'
+                                            }}
+                                        >
+                                            <span
+                                                style={{
+                                                    color:
+                                                        dateObj.isPadding
+                                                            ? '#C9C6C0'
+                                                            : '#52605C',
+                                                    fontSize: '0.76rem',
+                                                    fontWeight: 600
+                                                }}
+                                            >
+                                                {dateObj.day}
+                                            </span>
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.4rem'
+                                                }}
+                                            >
+                                                {!dateObj.isPadding &&
+                                                    cleaningTasks.some(
+                                                        t =>
+                                                            t.date === dateObj.dateStr &&
+                                                            t.chaletId === selectedChaletId &&
+                                                            t.status !== 'completed'
+                                                    ) && (
+                                                        <div
+                                                            title="Housekeeping required"
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                padding: '2px 4px',
+                                                                borderRadius: '5px',
+                                                                background: 'rgba(166,85,63,0.10)',
+                                                                color: '#A6553F'
+                                                            }}
+                                                        >
+                                                            <Sparkles size={10} />
+                                                        </div>
+                                                    )}
+
                                                 {!dateObj.isPadding && (
-                                                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)' }}>
-                                                        {formatPrice(getDailyPrice(dateObj.dateStr))}
+                                                    <span
+                                                        style={{
+                                                            color: '#91A69F',
+                                                            fontSize: '0.58rem',
+                                                            fontWeight: 600
+                                                        }}
+                                                    >
+                                                        {formatPrice(
+                                                            getDailyPrice(
+                                                                dateObj.dateStr
+                                                            )
+                                                        )}
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {/* Render Continuous Event Segments */}
                                         {segments.map(segment => (
                                             <ReservationCard
                                                 key={`${segment.booking.id}-${i}`}
@@ -542,63 +966,242 @@ const CalendarBoard = () => {
                     </>
                 ) : (
                     /* LIST VIEW */
-                    <div style={{ padding: '2rem', overflowY: 'auto', flex: 1, animation: 'fadeIn 0.2s' }}>
+                    <div
+                        style={{
+                            flex: 1,
+                            overflowY: 'auto',
+                            padding: '1.5rem'
+                        }}
+                    >
                         {Object.keys(groupedEvents).length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>
-                                <List size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
-                                <div style={{ fontSize: '1.1rem', fontWeight: 500 }}>No reservations found.</div>
+                            <div
+                                style={{
+                                    padding: '4rem',
+                                    color: '#66716D',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <List
+                                    size={42}
+                                    style={{
+                                        margin: '0 auto 1rem',
+                                        opacity: 0.22
+                                    }}
+                                />
+                                <div
+                                    style={{
+                                        fontSize: '0.95rem',
+                                        fontWeight: 500
+                                    }}
+                                >
+                                    No reservations found.
+                                </div>
                             </div>
                         ) : (
-                            Object.entries(groupedEvents).map(([month, monthEvents]) => (
-                                <div key={month} style={{ marginBottom: '3rem' }}>
-                                    <h4 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--color-text-main)', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', textTransform: 'capitalize', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <CalendarIcon size={20} color="var(--color-primary)" />
-                                        {month}
-                                    </h4>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                        <thead>
-                                            <tr style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--color-text-muted)', borderBottom: '1px solid rgba(255,255,255,0.05)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                <th style={{ padding: '1rem', fontWeight: 600 }}>Guest & Source</th>
-                                                <th style={{ padding: '1rem', fontWeight: 600 }}>Arrival</th>
-                                                <th style={{ padding: '1rem', fontWeight: 600 }}>Departure</th>
-                                                <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Duration</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {monthEvents.map(b => {
-                                                const nights = Math.round((new Date(b.end) - new Date(b.start)) / (1000 * 60 * 60 * 24));
-                                                const isBlocked = b.status === 'blocked';
-                                                return (
-                                                    <tr key={b.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', opacity: isBlocked ? 0.4 : 1 }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                                                        <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: b.color, boxShadow: `0 0 10px ${b.color}80` }}></div>
-                                                            <div>
-                                                                <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>{b.guestName}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', textTransform: 'capitalize', marginTop: '0.1rem' }}>{b.source}</div>
-                                                            </div>
-                                                        </td>
-                                                        <td style={{ padding: '1rem', fontWeight: 500 }}>
-                                                            {new Date(b.start).toLocaleDateString(navigator.language, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}
-                                                        </td>
-                                                        <td style={{ padding: '1rem', fontWeight: 500 }}>
-                                                            {new Date(b.end).toLocaleDateString(navigator.language, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}
-                                                        </td>
-                                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                                            <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary)' }}>
-                                                                {nights} nights
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ))
+                            Object.entries(groupedEvents).map(
+                                ([month, monthEvents]) => (
+                                    <div
+                                        key={month}
+                                        style={{
+                                            marginBottom: '2.5rem'
+                                        }}
+                                    >
+                                        <h4
+                                            style={{
+                                                marginBottom: '1rem',
+                                                paddingBottom: '0.7rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.6rem',
+                                                borderBottom: '1px solid #DED8CD',
+                                                color: '#15211F',
+                                                fontSize: '1.05rem',
+                                                fontWeight: 600,
+                                                textTransform: 'capitalize'
+                                            }}
+                                        >
+                                            <CalendarIcon
+                                                size={17}
+                                                color="#A6553F"
+                                            />
+                                            {month}
+                                        </h4>
+
+                                        <table
+                                            style={{
+                                                width: '100%',
+                                                borderCollapse: 'collapse'
+                                            }}
+                                        >
+                                            <thead>
+                                                <tr
+                                                    style={{
+                                                        borderBottom: '1px solid #DED8CD',
+                                                        color: '#66716D',
+                                                        fontSize: '0.64rem',
+                                                        letterSpacing: '0.09em',
+                                                        textAlign: 'left',
+                                                        textTransform: 'uppercase'
+                                                    }}
+                                                >
+                                                    <th style={{ padding: '0.8rem', fontWeight: 700 }}>
+                                                        Guest & Source
+                                                    </th>
+                                                    <th style={{ padding: '0.8rem', fontWeight: 700 }}>
+                                                        Arrival
+                                                    </th>
+                                                    <th style={{ padding: '0.8rem', fontWeight: 700 }}>
+                                                        Departure
+                                                    </th>
+                                                    <th style={{ padding: '0.8rem', fontWeight: 700, textAlign: 'right' }}>
+                                                        Duration
+                                                    </th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                {monthEvents.map(b => {
+                                                    const nights = Math.round(
+                                                        (
+                                                            new Date(b.end) -
+                                                            new Date(b.start)
+                                                        ) /
+                                                            (
+                                                                1000 *
+                                                                60 *
+                                                                60 *
+                                                                24
+                                                            )
+                                                    );
+
+                                                    const isBlocked =
+                                                        b.status === 'blocked';
+
+                                                    return (
+                                                        <tr
+                                                            key={b.id}
+                                                            style={{
+                                                                borderBottom: '1px solid #EEE9E1',
+                                                                opacity: isBlocked ? 0.45 : 1
+                                                            }}
+                                                        >
+                                                            <td
+                                                                style={{
+                                                                    padding: '0.85rem',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '0.75rem'
+                                                                }}
+                                                            >
+                                                                <div
+                                                                    style={{
+                                                                        width: 10,
+                                                                        height: 10,
+                                                                        flexShrink: 0,
+                                                                        borderRadius: '50%',
+                                                                        background: b.color
+                                                                    }}
+                                                                />
+
+                                                                <div>
+                                                                    <div
+                                                                        style={{
+                                                                            color: '#15211F',
+                                                                            fontSize: '0.86rem',
+                                                                            fontWeight: 650
+                                                                        }}
+                                                                    >
+                                                                        {b.guestName}
+                                                                    </div>
+
+                                                                    <div
+                                                                        style={{
+                                                                            marginTop: '0.08rem',
+                                                                            color: '#66716D',
+                                                                            fontSize: '0.68rem',
+                                                                            textTransform: 'capitalize'
+                                                                        }}
+                                                                    >
+                                                                        {b.source}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                style={{
+                                                                    padding: '0.85rem',
+                                                                    color: '#315D55',
+                                                                    fontSize: '0.78rem',
+                                                                    fontWeight: 500
+                                                                }}
+                                                            >
+                                                                {new Date(
+                                                                    b.start
+                                                                ).toLocaleDateString(
+                                                                    navigator.language,
+                                                                    {
+                                                                        weekday: 'short',
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                        timeZone: 'UTC'
+                                                                    }
+                                                                )}
+                                                            </td>
+
+                                                            <td
+                                                                style={{
+                                                                    padding: '0.85rem',
+                                                                    color: '#315D55',
+                                                                    fontSize: '0.78rem',
+                                                                    fontWeight: 500
+                                                                }}
+                                                            >
+                                                                {new Date(
+                                                                    b.end
+                                                                ).toLocaleDateString(
+                                                                    navigator.language,
+                                                                    {
+                                                                        weekday: 'short',
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                        timeZone: 'UTC'
+                                                                    }
+                                                                )}
+                                                            </td>
+
+                                                            <td
+                                                                style={{
+                                                                    padding: '0.85rem',
+                                                                    textAlign: 'right'
+                                                                }}
+                                                            >
+                                                                <span
+                                                                    style={{
+                                                                        display: 'inline-block',
+                                                                        padding: '0.3rem 0.65rem',
+                                                                        border: '1px solid #DED8CD',
+                                                                        borderRadius: '999px',
+                                                                        background: '#F4EFE6',
+                                                                        color: '#173A35',
+                                                                        fontSize: '0.68rem',
+                                                                        fontWeight: 700
+                                                                    }}
+                                                                >
+                                                                    {nights} nights
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )
+                            )
                         )}
                     </div>
                 )}
-            </div>
+            </section>
         </div>
     );
 };

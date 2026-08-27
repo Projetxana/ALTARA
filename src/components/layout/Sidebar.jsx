@@ -1,5 +1,18 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, Home, Users, Settings, Sparkles, BarChart, Tag, Briefcase, DollarSign, ClipboardList, Moon, Sun } from 'lucide-react';
+import {
+    Calendar,
+    Home,
+    Users,
+    Settings,
+    Sparkles,
+    BarChart,
+    Tag,
+    Briefcase,
+    DollarSign,
+    ClipboardList,
+    Moon,
+    Sun
+} from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -7,114 +20,167 @@ import { useTheme } from '../../context/ThemeContext';
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { t } = useLanguage();
+    const { language } = useLanguage();
     const { theme, toggleTheme } = useTheme();
 
-    const navItems = [
-        { icon: <Calendar size={20} />, label: t('nav_planning'), path: '/planning' },
-        { icon: <Home size={20} />, label: t('nav_properties'), path: '/properties' },
-        { icon: <ClipboardList size={20} />, label: t('nav_housekeeping') || 'Housekeeping', path: '/housekeeping' },
-        { icon: <Tag size={20} />, label: t('nav_pricing'), path: '/pricing' },
-        { icon: <Sparkles size={20} />, label: t('nav_experiences'), path: '/experiences' },
-        { icon: <Briefcase size={20} />, label: t('nav_soul'), path: '/soul' },
-        { icon: <BarChart size={20} />, label: t('nav_analytics'), path: '/analytics' },
-        { icon: <DollarSign size={20} />, label: "Finance", path: '/finance' },
-        { icon: <Users size={20} />, label: t('nav_guests'), path: '/guests' },
+    const labels = {
+        fr: {
+            planning: 'Planning',
+            properties: 'Propriétés',
+            housekeeping: 'Entretien',
+            pricing: 'Tarification',
+            experiences: 'Expériences',
+            soul: 'Soul Engine',
+            analytics: 'Analyses',
+            finance: 'Finances',
+            guests: 'Voyageurs',
+            settings: 'Réglages',
+            light: 'Mode Clair',
+            dark: 'Mode Sombre'
+        },
+        en: {
+            planning: 'Planning',
+            properties: 'Properties',
+            housekeeping: 'Housekeeping',
+            pricing: 'Pricing',
+            experiences: 'Experiences',
+            soul: 'Soul Engine',
+            analytics: 'Analytics',
+            finance: 'Finance',
+            guests: 'Guests',
+            settings: 'Settings',
+            light: 'Light Mode',
+            dark: 'Dark Mode'
+        },
+        es: {
+            planning: 'Calendario',
+            properties: 'Propiedades',
+            housekeeping: 'Mantenimiento',
+            pricing: 'Precios',
+            experiences: 'Experiencias',
+            soul: 'Soul Engine',
+            analytics: 'Análisis',
+            finance: 'Finanzas',
+            guests: 'Huéspedes',
+            settings: 'Ajustes',
+            light: 'Modo Claro',
+            dark: 'Modo Oscuro'
+        }
+    };
+
+    const l = labels[language] || labels.en;
+
+    const groups = [
+        [
+            { icon: Calendar, label: l.planning, path: '/planning' },
+            { icon: Home, label: l.properties, path: '/properties' },
+            { icon: ClipboardList, label: l.housekeeping, path: '/housekeeping' },
+            { icon: Tag, label: l.pricing, path: '/pricing' }
+        ],
+        [
+            { icon: Sparkles, label: l.experiences, path: '/experiences' },
+            { icon: Briefcase, label: l.soul, path: '/soul' }
+        ],
+        [
+            { icon: BarChart, label: l.analytics, path: '/analytics' },
+            { icon: DollarSign, label: l.finance, path: '/finance' },
+            { icon: Users, label: l.guests, path: '/guests' }
+        ]
     ];
 
+    const isActivePath = (path) =>
+        location.pathname === path ||
+        location.pathname.startsWith(`${path}/`);
+
+    const navStyle = (active) => ({
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.9rem',
+        width: '100%',
+        minHeight: '46px',
+        padding: '0.72rem 0.9rem',
+        borderRadius: '10px',
+        background: active
+            ? 'rgba(255,255,255,0.105)'
+            : 'transparent',
+        border: active
+            ? '1px solid rgba(255,255,255,0.075)'
+            : '1px solid transparent',
+        color: active
+            ? '#FFFFFF'
+            : 'rgba(255,255,255,0.63)',
+        cursor: 'pointer',
+        transition: 'background 160ms ease, color 160ms ease, border-color 160ms ease',
+        textAlign: 'left',
+        fontFamily: 'var(--font-sans)',
+        fontSize: '0.88rem',
+        fontWeight: active ? 600 : 450
+    });
+
     return (
-        <aside className="glass-panel" style={{
-            borderRadius: 0,
-            borderRight: '1px solid var(--color-border)',
-            borderTop: 0,
-            borderBottom: 0,
-            borderLeft: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '2rem 1.5rem'
-        }}>
-            <div style={{ marginBottom: '3rem', paddingLeft: '0.75rem' }}>
-                <h1 style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 700,
-                    letterSpacing: '-0.03em',
-                    background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                }}>
-                    ALTARA
-                </h1>
+        <aside className="altara-sidebar">
+            <div className="altara-brand">
+                <img
+                    src="/brand/altara-logo-light.svg"
+                    alt="ALTARA"
+                    className="altara-brand-logo"
+                />
             </div>
 
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {navItems.map((item, index) => {
-                    const isActive = location.pathname.startsWith(item.path);
-                    return (
-                        <button
-                            key={index}
-                            onClick={() => navigate(item.path)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                padding: '0.875rem 1rem',
-                                borderRadius: 'var(--radius-md)',
-                                background: isActive ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
-                                border: 'none',
-                                color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                textAlign: 'left',
-                                fontFamily: 'var(--font-sans)',
-                                fontSize: '0.95rem',
-                                fontWeight: isActive ? 600 : 400
-                            }}
-                        >
-                            {item.icon}
-                            <span>{item.label}</span>
-                        </button>
-                    );
-                })}
+            <nav className="altara-nav">
+                {groups.map((group, groupIndex) => (
+                    <div
+                        className="altara-nav-group"
+                        key={groupIndex}
+                    >
+                        {group.map((item) => {
+                            const Icon = item.icon;
+                            const active = isActivePath(item.path);
+
+                            return (
+                                <button
+                                    key={item.path}
+                                    onClick={() => navigate(item.path)}
+                                    style={navStyle(active)}
+                                >
+                                    <span
+                                        className="altara-nav-icon"
+                                        data-active={active}
+                                    >
+                                        <Icon size={19} strokeWidth={1.7} />
+                                    </span>
+
+                                    <span>{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                ))}
             </nav>
 
-            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className="altara-sidebar-footer">
                 <button
                     onClick={toggleTheme}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        padding: '0.875rem 1rem',
-                        width: '100%',
-                        background: 'transparent',
-                        borderRadius: 'var(--radius-md)',
-                        border: 'none',
-                        color: 'var(--color-primary)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }}
+                    style={navStyle(false)}
                 >
-                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                    <span>{theme === 'dark' ? 'Mode Clair' : 'Mode Sombre'}</span>
+                    {theme === 'dark'
+                        ? <Sun size={19} strokeWidth={1.7} />
+                        : <Moon size={19} strokeWidth={1.7} />
+                    }
+
+                    <span>
+                        {theme === 'dark' ? l.light : l.dark}
+                    </span>
                 </button>
 
                 <button
                     onClick={() => navigate('/settings')}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        padding: '0.875rem 1rem',
-                        width: '100%',
-                        background: location.pathname === '/settings' ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
-                        borderRadius: 'var(--radius-md)',
-                        border: 'none',
-                        color: location.pathname === '/settings' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                        cursor: 'pointer'
-                    }}
+                    style={navStyle(
+                        location.pathname === '/settings'
+                    )}
                 >
-                    <Settings size={20} />
-                    <span>{t('nav_settings')}</span>
+                    <Settings size={19} strokeWidth={1.7} />
+                    <span>{l.settings}</span>
                 </button>
             </div>
         </aside>
