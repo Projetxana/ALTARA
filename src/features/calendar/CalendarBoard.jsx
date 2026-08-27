@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Filter, Home, Sparkles, List, Calendar as Ca
 import { useSanctuum } from '../../context/SanctuumContext';
 import { useLanguage } from '../../context/LanguageContext';
 import ReservationCard from './ReservationCard';
+import CalendarEventDrawer from './CalendarEventDrawer';
 import RateEngine from '../pricing/RateEngine';
 
 const CalendarBoard = () => {
@@ -13,53 +14,114 @@ const CalendarBoard = () => {
         currentChalet,
         formatPrice,
         bookings,
+        calendarBlocks,
         cleaningTasks
     } = useSanctuum();
     const { t, language } = useLanguage();
 
     // STATE: Dynamic Calendar Date
     const [viewDate, setViewDate] = useState(new Date());
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid');
+    const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null); // 'grid' or 'list'
     const [resolvedRates, setResolvedRates] = useState({});
     const [ratesLoading, setRatesLoading] = useState(false);
     const [ratesError, setRatesError] = useState(null);
 
-    // Compute formatted events for the currently selected chalet
+    // Compute canonical calendar events for the selected property.
     const events = React.useMemo(() => {
         if (!selectedChaletId) return [];
 
-        const chaletBookings = bookings.filter(b => b.chaletId === selectedChaletId);
+        const chaletBookings = bookings.filter(
+            booking =>
+                booking.chaletId === selectedChaletId &&
+                booking.status !== 'cancelled'
+        );
 
-        // 1. Map to uniform format
-        const mapped = chaletBookings.map(b => ({
-            id: b.id,
-            start: b.checkInDate,
-            end: b.checkOutDate,
-            title: b.source || 'reservation',
-            color: b.color,
-            guestName: b.guestName || 'Guest',
-            source: b.source,
-            totalRevenue: b.totalRevenue || 0,
-            status: b.status
+        const bookingEvents = chaletBookings.map(booking => ({
+            id: booking.id,
+            start: booking.checkInDate,
+            end: booking.checkOutDate,
+            title: booking.source || 'reservation',
+            color: booking.color,
+            guestName: booking.guestName || 'Guest',
+            source: booking.source,
+            totalRevenue: booking.totalRevenue || 0,
+            status: booking.status,
+            eventType: 'booking'
         }));
 
-        // 2. Deduplicate "blocked" events that overlap with "confirmed" ones
-        const confirmedEvents = mapped.filter(e => e.status !== 'blocked');
+        // Remove OTA "blocked" duplicates when a real booking overlaps.
+        const realBookings = bookingEvents.filter(
+            event => event.status !== 'blocked'
+        );
 
-        return mapped.filter(event => {
-            // Keep all confirmed events
-            if (event.status !== 'blocked') return true;
+        const deduplicatedBookings =
+            bookingEvents.filter(event => {
+                if (event.status !== 'blocked') {
+                    return true;
+                }
 
-            // For blocked events, check if there's any overlapping confirmed event
-            const hasOverlap = confirmedEvents.some(confirmed => {
-                // Check for date overlap: A ends after B starts AND A starts before B ends
-                return event.end > confirmed.start && event.start < confirmed.end;
+                return !realBookings.some(real =>
+                    event.end > real.start &&
+                    event.start < real.end
+                );
             });
 
-            // If it overlaps with a real booking, filter out this blocked period
-            return !hasOverlap;
-        });
-    }, [bookings, selectedChaletId]);
+        const now = Date.now();
+
+        const blockLabels = {
+            owner: 'Usage personnel',
+            maintenance: 'Maintenance',
+            guest_hold: 'Option client',
+            other: 'Indisponible'
+        };
+
+        const blockColors = {
+            owner: '#9A8B7E',
+            maintenance: '#66716D',
+            guest_hold: '#C5A66A',
+            other: '#8A7F76'
+        };
+
+        const blockEvents = (calendarBlocks || [])
+            .filter(block =>
+                block.chaletId === selectedChaletId &&
+                (
+                    !block.expiresAt ||
+                    new Date(block.expiresAt).getTime() > now
+                )
+            )
+            .map(block => ({
+                id: `block-${block.id}`,
+                blockId: block.id,
+                start: block.startDate,
+                end: block.endDate,
+                title: blockLabels[block.blockType] || 'Indisponible',
+                guestName:
+                    block.blockType === 'guest_hold' &&
+                    block.guestName
+                        ? block.guestName
+                        : blockLabels[block.blockType] ||
+                          'Indisponible',
+                source: 'altara-block',
+                totalRevenue: 0,
+                status: 'calendar_block',
+                eventType: 'calendar_block',
+                blockType: block.blockType,
+                color:
+                    blockColors[block.blockType] ||
+                    '#8A7F76'
+            }));
+
+        return [
+            ...deduplicatedBookings,
+            ...blockEvents
+        ];
+    }, [
+        bookings,
+        calendarBlocks,
+        selectedChaletId
+    ]);
 
     const groupedEvents = React.useMemo(() => {
         const groups = {};
@@ -957,6 +1019,7 @@ const CalendarBoard = () => {
                                             <ReservationCard
                                                 key={`${segment.booking.id}-${i}`}
                                                 segment={segment}
+                                                onClick={setSelectedCalendarEvent}
                                             />
                                         ))}
                                     </div>
@@ -1202,6 +1265,12 @@ const CalendarBoard = () => {
                     </div>
                 )}
             </section>
+
+            <CalendarEventDrawer
+                event={selectedCalendarEvent}
+                onClose={() => setSelectedCalendarEvent(null)}
+                formatPrice={formatPrice}
+            />
         </div>
     );
 };

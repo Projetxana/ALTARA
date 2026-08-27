@@ -1,39 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+    ArrowLeft,
+    CalendarDays,
+    Hammer,
+    Home,
+    UserRound,
+    Users,
+    Wrench,
+    Clock3
+} from 'lucide-react';
+import { addDays, format } from 'date-fns';
+
 import { useSanctuum } from '../../context/SanctuumContext';
 import { useNotification } from '../../context/NotificationContext';
-import { useLanguage } from '../../context/LanguageContext';
-import { differenceInDays, addDays, format } from 'date-fns';
-import { Calendar, Users, Star, ArrowRight } from 'lucide-react';
-import PaymentForm from './PaymentForm';
 import BookingPricingService from '../pricing/BookingPricingService';
+import BookingService from './BookingService';
+
+const fieldStyle = {
+    width: '100%',
+    padding: '0.8rem 0.9rem',
+    background: 'var(--color-surface)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-md)',
+    color: 'var(--color-text-main)'
+};
+
+const labelStyle = {
+    display: 'block',
+    marginBottom: '0.45rem',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    color: 'var(--color-text-muted)'
+};
 
 const BookingPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { chalets, experiences, createBooking } = useSanctuum();
+
+    const {
+        chalets,
+        experiences,
+        createBooking,
+        createCalendarBlock,
+        formatPrice,
+        currency
+    } = useSanctuum();
+
     const { addNotification } = useNotification();
-    const { t } = useLanguage();
 
     const chalet = chalets.find(c => c.id === id);
 
-    // State
-    const [startDate, setStartDate] = useState(format(addDays(new Date(), 7), 'yyyy-MM-dd'));
-    const [endDate, setEndDate] = useState(format(addDays(new Date(), 10), 'yyyy-MM-dd'));
+    const [mode, setMode] = useState(null);
+
+    const [startDate, setStartDate] = useState(
+        format(addDays(new Date(), 7), 'yyyy-MM-dd')
+    );
+
+    const [endDate, setEndDate] = useState(
+        format(addDays(new Date(), 10), 'yyyy-MM-dd')
+    );
+
+    // Booking
     const [guestName, setGuestName] = useState('');
+    const [guestEmail, setGuestEmail] = useState('');
+    const [guestPhone, setGuestPhone] = useState('');
+    const [guestNote, setGuestNote] = useState('');
     const [selectedUpsells, setSelectedUpsells] = useState([]);
-    const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Success
+
+    // Calendar block
+    const [blockType, setBlockType] = useState('owner');
+    const [blockGuestName, setBlockGuestName] = useState('');
+    const [blockGuestEmail, setBlockGuestEmail] = useState('');
+    const [blockNote, setBlockNote] = useState('');
+    const [expiryPreset, setExpiryPreset] = useState('none');
+
+    // Shared
     const [stayPricing, setStayPricing] = useState(null);
     const [pricingLoading, setPricingLoading] = useState(false);
     const [pricingError, setPricingError] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
+    const [success, setSuccess] = useState(null);
 
     useEffect(() => {
         let cancelled = false;
 
-        const loadStayPricing = async () => {
-            if (!chalet?.id || !startDate || !endDate || startDate >= endDate) {
+        const loadPricing = async () => {
+            if (
+                mode !== 'booking' ||
+                !chalet?.id ||
+                !startDate ||
+                !endDate ||
+                startDate >= endDate
+            ) {
                 setStayPricing(null);
-                setPricingError(null);
                 return;
             }
 
@@ -41,18 +102,19 @@ const BookingPage = () => {
                 setPricingLoading(true);
                 setPricingError(null);
 
-                const pricing = await BookingPricingService.calculateStay(
-                    chalet.id,
-                    startDate,
-                    endDate
-                );
+                const pricing =
+                    await BookingPricingService.calculateStay(
+                        chalet.id,
+                        startDate,
+                        endDate
+                    );
 
                 if (!cancelled) {
                     setStayPricing(pricing);
                 }
             } catch (error) {
                 console.error(
-                    '[BookingPage] Unable to calculate canonical stay price:',
+                    '[BookingPage] Unable to calculate stay:',
                     error
                 );
 
@@ -67,208 +129,1063 @@ const BookingPage = () => {
             }
         };
 
-        loadStayPricing();
+        loadPricing();
 
         return () => {
             cancelled = true;
         };
-    }, [chalet?.id, startDate, endDate]);
+    }, [mode, chalet?.id, startDate, endDate]);
 
-    // Derived Logic
-    if (!chalet) return <div>Chalet not found</div>;
-
-    const nights =
-        stayPricing?.numberOfNights ??
-        differenceInDays(new Date(endDate), new Date(startDate)) ??
-        0;
+    if (!chalet) {
+        return <div>Propriété introuvable.</div>;
+    }
 
     const nightTotal =
-        stayPricing?.estimatedAccommodationRevenue ?? 0;
+        stayPricing?.estimatedAccommodationRevenue || 0;
+
+    const nights =
+        stayPricing?.numberOfNights || 0;
 
     const cleaningFee = 150;
-    const upsellTotal = selectedUpsells.reduce((sum, id) => {
-        const exp = experiences.find(e => e.id === id);
-        return sum + (exp ? exp.price : 0);
-    }, 0);
-    const subtotal = nightTotal + cleaningFee + upsellTotal;
+
+    const upsellTotal = selectedUpsells.reduce(
+        (sum, experienceId) => {
+            const experience = experiences.find(
+                item => item.id === experienceId
+            );
+
+            return sum + (experience?.price || 0);
+        },
+        0
+    );
+
+    const subtotal =
+        nightTotal + cleaningFee + upsellTotal;
+
     const tax = subtotal * 0.10;
     const total = subtotal + tax;
 
-    const toggleUpsell = (id) => {
+    const toggleUpsell = (experienceId) => {
         setSelectedUpsells(prev =>
-            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+            prev.includes(experienceId)
+                ? prev.filter(id => id !== experienceId)
+                : [...prev, experienceId]
         );
     };
 
-    const handleBookingComplete = () => {
-        createBooking({
-            chaletId: chalet.id,
-            guestName: guestName || 'Guest User',
-            startDate,
-            endDate,
-            totalPrice: total
-        });
-        addNotification('success', 'Booking Confirmed', 'Confirmation email sent to guest.');
-        // Set success step
-        setStep(3);
+    const getExpiresAt = () => {
+        if (expiryPreset === 'none') {
+            return null;
+        }
+
+        const hours = Number(expiryPreset);
+
+        return new Date(
+            Date.now() + hours * 60 * 60 * 1000
+        ).toISOString();
     };
 
-    if (step === 3) {
+    const validateAvailability = async () => {
+        const available =
+            await BookingService.checkAvailability(
+                chalet.id,
+                startDate,
+                endDate
+            );
+
+        if (!available) {
+            throw new Error(
+                'Cette période n’est plus disponible.'
+            );
+        }
+    };
+
+    const handleCreateBooking = async () => {
+        try {
+            setSubmitting(true);
+            setSubmitError('');
+
+            if (!guestName.trim()) {
+                throw new Error(
+                    'Le nom du client est requis.'
+                );
+            }
+
+            await validateAvailability();
+
+            const booking = await createBooking({
+                chaletId: chalet.id,
+                guestName,
+                guestEmail,
+                guestPhone,
+                guestNote,
+                startDate,
+                endDate,
+                totalPrice: total,
+                currency
+            });
+
+            addNotification(
+                'success',
+                'Réservation créée',
+                'La réservation est enregistrée. Paiement non encaissé.'
+            );
+
+            setSuccess({
+                type: 'booking',
+                item: booking
+            });
+        } catch (error) {
+            console.error(error);
+            setSubmitError(error.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleCreateBlock = async () => {
+        try {
+            setSubmitting(true);
+            setSubmitError('');
+
+            await validateAvailability();
+
+            const block = await createCalendarBlock({
+                chaletId: chalet.id,
+                blockType,
+                startDate,
+                endDate,
+                guestName:
+                    blockType === 'guest_hold'
+                        ? blockGuestName
+                        : '',
+                guestEmail:
+                    blockType === 'guest_hold'
+                        ? blockGuestEmail
+                        : '',
+                note: blockNote,
+                expiresAt:
+                    blockType === 'guest_hold'
+                        ? getExpiresAt()
+                        : null
+            });
+
+            addNotification(
+                'success',
+                'Période bloquée',
+                'Les dates sont maintenant indisponibles.'
+            );
+
+            setSuccess({
+                type: 'block',
+                item: block
+            });
+        } catch (error) {
+            console.error(error);
+            setSubmitError(error.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (success) {
+        const isBooking = success.type === 'booking';
+
         return (
-            <div style={{ maxWidth: '800px', margin: '4rem auto', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>{t('book_success_title')}</h1>
-                <p style={{ fontSize: '1.25rem', color: 'var(--color-text-muted)', marginBottom: '3rem' }}>
-                    {t('book_success_msg')}
+            <div
+                style={{
+                    maxWidth: 760,
+                    margin: '4rem auto',
+                    textAlign: 'center'
+                }}
+            >
+                <div
+                    style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: '50%',
+                        background: '#173A35',
+                        color: '#fff',
+                        margin: '0 auto 1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    ✓
+                </div>
+
+                <h1
+                    className="page-title"
+                    style={{
+                        fontSize: '2.6rem',
+                        marginBottom: '0.75rem'
+                    }}
+                >
+                    {isBooking
+                        ? 'Réservation créée'
+                        : 'Période bloquée'}
+                </h1>
+
+                <p
+                    style={{
+                        color: 'var(--color-text-muted)',
+                        fontSize: '1.05rem',
+                        marginBottom: '2rem'
+                    }}
+                >
+                    {isBooking
+                        ? 'La réservation est enregistrée. Aucun paiement n’a encore été encaissé.'
+                        : 'Les dates sont maintenant protégées dans le planning.'}
                 </p>
-                <button className="btn-primary" onClick={() => navigate('/planning')}>
-                    {t('book_return')}
+
+                {isBooking && (
+                    <div
+                        className="glass-panel"
+                        style={{
+                            padding: '1.25rem 1.5rem',
+                            marginBottom: '2rem',
+                            textAlign: 'left'
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between'
+                            }}
+                        >
+                            <span>Paiement</span>
+
+                            <strong
+                                style={{
+                                    color: '#A75B45'
+                                }}
+                            >
+                                Non payé
+                            </strong>
+                        </div>
+
+                        <div
+                            style={{
+                                marginTop: '0.6rem',
+                                color: 'var(--color-text-muted)',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            Le lien de paiement sécurisé sera ajouté
+                            dans la prochaine étape.
+                        </div>
+                    </div>
+                )}
+
+                <button
+                    className="btn-primary"
+                    onClick={() => navigate('/planning')}
+                >
+                    Retour au planning
                 </button>
             </div>
         );
     }
 
-    return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '3rem', maxWidth: '1200px', margin: '0 auto' }}>
+    if (!mode) {
+        return (
+            <div
+                style={{
+                    maxWidth: 920,
+                    margin: '2rem auto'
+                }}
+            >
+                <header
+                    style={{
+                        marginBottom: '2.5rem'
+                    }}
+                >
+                    <h1
+                        className="page-title"
+                        style={{
+                            fontSize: '2.7rem',
+                            marginBottom: '0.5rem'
+                        }}
+                    >
+                        Nouvelle occupation
+                    </h1>
 
-            {/* LEFT COLUMN */}
-            <div>
-                <header style={{ marginBottom: '2rem' }}>
-                    <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{chalet.name}</h1>
-                    <p style={{ color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Users size={16} /> 8 {t('book_guests')} • {chalet.location}
+                    <p
+                        style={{
+                            color: 'var(--color-text-muted)'
+                        }}
+                    >
+                        {chalet.name} · {chalet.location}
                     </p>
                 </header>
 
-                <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>{t('book_your_stay')}</h3>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns:
+                            'repeat(2, minmax(0, 1fr))',
+                        gap: '1.5rem'
+                    }}
+                >
+                    <button
+                        onClick={() => setMode('booking')}
+                        className="glass-panel"
+                        style={{
+                            padding: '2rem',
+                            border: '1px solid var(--color-border)',
+                            background: '#FFFFFF',
+                            textAlign: 'left',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <UserRound
+                            size={30}
+                            color="#A75B45"
+                        />
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('book_checkin')}</label>
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('book_checkout')}</label>
-                            <input
-                                type="date"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                style={{ width: '100%', padding: '0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text)' }}
-                            />
-                        </div>
-                    </div>
+                        <h2
+                            style={{
+                                margin: '1rem 0 0.5rem'
+                            }}
+                        >
+                            Réservation client
+                        </h2>
+
+                        <p
+                            style={{
+                                color: 'var(--color-text-muted)',
+                                lineHeight: 1.55
+                            }}
+                        >
+                            Ajouter une réservation provenant d’un
+                            appel, email, WhatsApp ou client direct.
+                        </p>
+                    </button>
+
+                    <button
+                        onClick={() => setMode('block')}
+                        className="glass-panel"
+                        style={{
+                            padding: '2rem',
+                            border: '1px solid var(--color-border)',
+                            background: '#FFFFFF',
+                            textAlign: 'left',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <CalendarDays
+                            size={30}
+                            color="#173A35"
+                        />
+
+                        <h2
+                            style={{
+                                margin: '1rem 0 0.5rem'
+                            }}
+                        >
+                            Bloquer des dates
+                        </h2>
+
+                        <p
+                            style={{
+                                color: 'var(--color-text-muted)',
+                                lineHeight: 1.55
+                            }}
+                        >
+                            Usage personnel, maintenance, option client
+                            ou autre indisponibilité.
+                        </p>
+                    </button>
                 </div>
+            </div>
+        );
+    }
 
-                <div style={{ marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <Star size={20} color="var(--color-primary)" />
-                        {t('book_enhance')}
-                    </h3>
+    const dateFields = (
+        <div
+            style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '1rem'
+            }}
+        >
+            <div>
+                <label style={labelStyle}>
+                    Début
+                </label>
 
-                    <div style={{ display: 'grid', gap: '1rem' }}>
-                        {experiences.filter(e => e.active).map(exp => (
-                            <div
-                                key={exp.id}
-                                onClick={() => toggleUpsell(exp.id)}
-                                className="glass-panel"
-                                style={{
-                                    padding: '1rem',
-                                    borderRadius: 'var(--radius-md)',
-                                    cursor: 'pointer',
-                                    border: selectedUpsells.includes(exp.id) ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <div>
-                                    <div style={{ fontWeight: 600 }}>{exp.name}</div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t('book_premium_addon')}</div>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <span>€{exp.price}</span>
-                                    <div style={{
-                                        width: 20, height: 20, borderRadius: '50%',
-                                        border: '1px solid var(--color-text-muted)',
-                                        background: selectedUpsells.includes(exp.id) ? 'var(--color-primary)' : 'transparent',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                    }}>
-                                        {selectedUpsells.includes(exp.id) && <Users size={12} color="#000" />}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
+                <input
+                    type="date"
+                    value={startDate}
+                    onChange={e =>
+                        setStartDate(e.target.value)
+                    }
+                    style={fieldStyle}
+                />
             </div>
 
-            {/* RIGHT COLUMN (STICKY) */}
             <div>
-                <div className="glass-panel" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', position: 'sticky', top: '2rem' }}>
+                <label style={labelStyle}>
+                    Fin
+                </label>
 
-                    {step === 1 ? (
-                        <>
-                            <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>{t('book_price_details')}</h3>
+                <input
+                    type="date"
+                    value={endDate}
+                    onChange={e =>
+                        setEndDate(e.target.value)
+                    }
+                    style={fieldStyle}
+                />
+            </div>
+        </div>
+    );
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: 'var(--color-text-muted)' }}>
-                                            {nights} {t('book_nights')}
-                                        </span>
-                                        <span>€{nightTotal.toLocaleString()}</span>
-                                    </div>
+    if (mode === 'block') {
+        const blockOptions = [
+            {
+                id: 'owner',
+                label: 'Usage personnel',
+                icon: Home
+            },
+            {
+                id: 'maintenance',
+                label: 'Maintenance',
+                icon: Wrench
+            },
+            {
+                id: 'guest_hold',
+                label: 'Option client',
+                icon: Clock3
+            },
+            {
+                id: 'other',
+                label: 'Autre',
+                icon: Hammer
+            }
+        ];
 
-                                    {stayPricing?.nightlyBreakdown?.length > 0 && (
+        return (
+            <div
+                style={{
+                    maxWidth: 820,
+                    margin: '1rem auto'
+                }}
+            >
+                <button
+                    onClick={() => {
+                        setMode(null);
+                        setSubmitError('');
+                    }}
+                    style={{
+                        border: 0,
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        color: 'var(--color-text-muted)',
+                        marginBottom: '1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                    }}
+                >
+                    <ArrowLeft size={16} />
+                    Retour
+                </button>
+
+                <h1
+                    className="page-title"
+                    style={{
+                        fontSize: '2.5rem',
+                        marginBottom: '0.5rem'
+                    }}
+                >
+                    Bloquer une période
+                </h1>
+
+                <p
+                    style={{
+                        color: 'var(--color-text-muted)',
+                        marginBottom: '2rem'
+                    }}
+                >
+                    {chalet.name}
+                </p>
+
+                <div
+                    className="glass-panel"
+                    style={{
+                        padding: '2rem'
+                    }}
+                >
+                    {dateFields}
+
+                    <div
+                        style={{
+                            marginTop: '2rem'
+                        }}
+                    >
+                        <label style={labelStyle}>
+                            Motif
+                        </label>
+
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns:
+                                    'repeat(2, 1fr)',
+                                gap: '0.75rem'
+                            }}
+                        >
+                            {blockOptions.map(option => {
+                                const Icon = option.icon;
+                                const selected =
+                                    blockType === option.id;
+
+                                return (
+                                    <button
+                                        type="button"
+                                        key={option.id}
+                                        onClick={() =>
+                                            setBlockType(option.id)
+                                        }
+                                        style={{
+                                            padding: '1rem',
+                                            borderRadius:
+                                                'var(--radius-md)',
+                                            border: selected
+                                                ? '1px solid #173A35'
+                                                : '1px solid var(--color-border)',
+                                            background: selected
+                                                ? '#EEF2EE'
+                                                : '#FFFFFF',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            color:
+                                                'var(--color-text-main)'
+                                        }}
+                                    >
+                                        <Icon
+                                            size={18}
+                                            style={{
+                                                marginBottom: '0.5rem'
+                                            }}
+                                        />
+
                                         <div
                                             style={{
-                                                marginTop: '0.35rem',
-                                                fontSize: '0.75rem',
-                                                color: 'var(--color-text-muted)',
-                                                opacity: 0.75
+                                                fontWeight: 600
                                             }}
                                         >
-                                            Tarifs calculés nuit par nuit
+                                            {option.label}
                                         </div>
-                                    )}
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: 'var(--color-text-muted)' }}>{t('book_cleaning')}</span>
-                                    <span>€{cleaningFee}</span>
-                                </div>
-                                {selectedUpsells.length > 0 && (
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: 'var(--color-text-muted)' }}>Experiences ({selectedUpsells.length})</span>
-                                        <span>€{upsellTotal}</span>
-                                    </div>
-                                )}
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: 'var(--color-text-muted)' }}>{t('book_taxes')} (10%)</span>
-                                    <span>€{tax.toFixed(0)}</span>
-                                </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
 
-                                <div style={{ height: '1px', background: 'var(--color-border)', margin: '0.5rem 0' }}></div>
+                    {blockType === 'guest_hold' && (
+                        <div
+                            style={{
+                                marginTop: '1.5rem',
+                                display: 'grid',
+                                gap: '1rem'
+                            }}
+                        >
+                            <div>
+                                <label style={labelStyle}>
+                                    Nom du client
+                                </label>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 600 }}>
-                                    <span>{t('book_total')}</span>
-                                    <span>€{total.toLocaleString()}</span>
-                                </div>
+                                <input
+                                    value={blockGuestName}
+                                    onChange={e =>
+                                        setBlockGuestName(
+                                            e.target.value
+                                        )
+                                    }
+                                    style={fieldStyle}
+                                />
                             </div>
 
-                            <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setStep(2)}>
-                                {t('book_proceed')} <ArrowRight size={18} />
-                            </button>
-                        </>
-                    ) : (
-                        <PaymentForm total={total.toFixed(0)} onSubmit={handleBookingComplete} />
+                            <div>
+                                <label style={labelStyle}>
+                                    Email
+                                </label>
+
+                                <input
+                                    type="email"
+                                    value={blockGuestEmail}
+                                    onChange={e =>
+                                        setBlockGuestEmail(
+                                            e.target.value
+                                        )
+                                    }
+                                    style={fieldStyle}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={labelStyle}>
+                                    Expiration de l’option
+                                </label>
+
+                                <select
+                                    value={expiryPreset}
+                                    onChange={e =>
+                                        setExpiryPreset(
+                                            e.target.value
+                                        )
+                                    }
+                                    style={fieldStyle}
+                                >
+                                    <option value="none">
+                                        Aucune expiration
+                                    </option>
+                                    <option value="24">
+                                        24 heures
+                                    </option>
+                                    <option value="48">
+                                        48 heures
+                                    </option>
+                                    <option value="72">
+                                        72 heures
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
                     )}
 
+                    <div
+                        style={{
+                            marginTop: '1.5rem'
+                        }}
+                    >
+                        <label style={labelStyle}>
+                            Note
+                        </label>
+
+                        <textarea
+                            value={blockNote}
+                            onChange={e =>
+                                setBlockNote(e.target.value)
+                            }
+                            rows={4}
+                            style={{
+                                ...fieldStyle,
+                                resize: 'vertical'
+                            }}
+                        />
+                    </div>
+
+                    {submitError && (
+                        <div
+                            style={{
+                                marginTop: '1rem',
+                                color: '#A75B45'
+                            }}
+                        >
+                            {submitError}
+                        </div>
+                    )}
+
+                    <button
+                        className="btn-primary"
+                        disabled={submitting}
+                        onClick={handleCreateBlock}
+                        style={{
+                            width: '100%',
+                            justifyContent: 'center',
+                            marginTop: '2rem'
+                        }}
+                    >
+                        {submitting
+                            ? 'Enregistrement…'
+                            : 'Bloquer les dates'}
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div
+            style={{
+                maxWidth: 1100,
+                margin: '1rem auto'
+            }}
+        >
+            <button
+                onClick={() => {
+                    setMode(null);
+                    setSubmitError('');
+                }}
+                style={{
+                    border: 0,
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: 'var(--color-text-muted)',
+                    marginBottom: '1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem'
+                }}
+            >
+                <ArrowLeft size={16} />
+                Retour
+            </button>
+
+            <h1
+                className="page-title"
+                style={{
+                    fontSize: '2.5rem',
+                    marginBottom: '0.5rem'
+                }}
+            >
+                Nouvelle réservation
+            </h1>
+
+            <p
+                style={{
+                    color: 'var(--color-text-muted)',
+                    marginBottom: '2rem'
+                }}
+            >
+                {chalet.name}
+            </p>
+
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.4fr 0.8fr',
+                    gap: '2rem'
+                }}
+            >
+                <div
+                    className="glass-panel"
+                    style={{
+                        padding: '2rem'
+                    }}
+                >
+                    {dateFields}
+
+                    <div
+                        style={{
+                            marginTop: '1.5rem',
+                            display: 'grid',
+                            gap: '1rem'
+                        }}
+                    >
+                        <div>
+                            <label style={labelStyle}>
+                                Nom du client
+                            </label>
+
+                            <input
+                                value={guestName}
+                                onChange={e =>
+                                    setGuestName(e.target.value)
+                                }
+                                style={fieldStyle}
+                            />
+                        </div>
+
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1fr',
+                                gap: '1rem'
+                            }}
+                        >
+                            <div>
+                                <label style={labelStyle}>
+                                    Email
+                                </label>
+
+                                <input
+                                    type="email"
+                                    value={guestEmail}
+                                    onChange={e =>
+                                        setGuestEmail(
+                                            e.target.value
+                                        )
+                                    }
+                                    style={fieldStyle}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={labelStyle}>
+                                    Téléphone
+                                </label>
+
+                                <input
+                                    value={guestPhone}
+                                    onChange={e =>
+                                        setGuestPhone(
+                                            e.target.value
+                                        )
+                                    }
+                                    style={fieldStyle}
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style={labelStyle}>
+                                Note
+                            </label>
+
+                            <textarea
+                                value={guestNote}
+                                onChange={e =>
+                                    setGuestNote(e.target.value)
+                                }
+                                rows={3}
+                                style={{
+                                    ...fieldStyle,
+                                    resize: 'vertical'
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {experiences.filter(e => e.active).length > 0 && (
+                        <div
+                            style={{
+                                marginTop: '2rem'
+                            }}
+                        >
+                            <h3>
+                                Expériences
+                            </h3>
+
+                            <div
+                                style={{
+                                    display: 'grid',
+                                    gap: '0.7rem',
+                                    marginTop: '1rem'
+                                }}
+                            >
+                                {experiences
+                                    .filter(e => e.active)
+                                    .map(exp => (
+                                        <button
+                                            type="button"
+                                            key={exp.id}
+                                            onClick={() =>
+                                                toggleUpsell(exp.id)
+                                            }
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent:
+                                                    'space-between',
+                                                padding: '0.9rem 1rem',
+                                                borderRadius:
+                                                    'var(--radius-md)',
+                                                border:
+                                                    selectedUpsells.includes(
+                                                        exp.id
+                                                    )
+                                                        ? '1px solid #173A35'
+                                                        : '1px solid var(--color-border)',
+                                                background:
+                                                    selectedUpsells.includes(
+                                                        exp.id
+                                                    )
+                                                        ? '#EEF2EE'
+                                                        : '#FFFFFF',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <span>{exp.name}</span>
+                                            <span>
+                                                {formatPrice(exp.price)}
+                                            </span>
+                                        </button>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <div
+                        className="glass-panel"
+                        style={{
+                            padding: '1.75rem',
+                            position: 'sticky',
+                            top: '1.5rem'
+                        }}
+                    >
+                        <h2
+                            style={{
+                                marginBottom: '1.5rem'
+                            }}
+                        >
+                            Récapitulatif
+                        </h2>
+
+                        {pricingLoading ? (
+                            <p>Calcul du tarif…</p>
+                        ) : pricingError ? (
+                            <p
+                                style={{
+                                    color: '#A75B45'
+                                }}
+                            >
+                                {pricingError}
+                            </p>
+                        ) : (
+                            <>
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gap: '0.9rem'
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent:
+                                                'space-between'
+                                        }}
+                                    >
+                                        <span>
+                                            {nights} nuit
+                                            {nights > 1 ? 's' : ''}
+                                        </span>
+                                        <span>
+                                            {formatPrice(nightTotal)}
+                                        </span>
+                                    </div>
+
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent:
+                                                'space-between'
+                                        }}
+                                    >
+                                        <span>Ménage</span>
+                                        <span>
+                                            {formatPrice(cleaningFee)}
+                                        </span>
+                                    </div>
+
+                                    {upsellTotal > 0 && (
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent:
+                                                    'space-between'
+                                            }}
+                                        >
+                                            <span>Expériences</span>
+                                            <span>
+                                                {formatPrice(
+                                                    upsellTotal
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent:
+                                                'space-between'
+                                        }}
+                                    >
+                                        <span>Taxes</span>
+                                        <span>
+                                            {formatPrice(tax)}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div
+                                    style={{
+                                        height: 1,
+                                        background:
+                                            'var(--color-border)',
+                                        margin: '1.25rem 0'
+                                    }}
+                                />
+
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent:
+                                            'space-between',
+                                        fontSize: '1.25rem',
+                                        fontWeight: 700
+                                    }}
+                                >
+                                    <span>Total</span>
+                                    <span>
+                                        {formatPrice(total)}
+                                    </span>
+                                </div>
+
+                                <div
+                                    style={{
+                                        marginTop: '1rem',
+                                        padding: '0.8rem',
+                                        borderRadius:
+                                            'var(--radius-md)',
+                                        background: '#F7F1EC',
+                                        color: '#81513F',
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    Paiement : Non payé
+                                </div>
+                            </>
+                        )}
+
+                        {submitError && (
+                            <div
+                                style={{
+                                    marginTop: '1rem',
+                                    color: '#A75B45'
+                                }}
+                            >
+                                {submitError}
+                            </div>
+                        )}
+
+                        <button
+                            className="btn-primary"
+                            disabled={
+                                submitting ||
+                                pricingLoading ||
+                                !stayPricing
+                            }
+                            onClick={handleCreateBooking}
+                            style={{
+                                width: '100%',
+                                justifyContent: 'center',
+                                marginTop: '1.5rem'
+                            }}
+                        >
+                            {submitting
+                                ? 'Création…'
+                                : 'Créer la réservation'}
+                        </button>
+
+                        <p
+                            style={{
+                                marginTop: '0.8rem',
+                                fontSize: '0.75rem',
+                                textAlign: 'center',
+                                color: 'var(--color-text-muted)'
+                            }}
+                        >
+                            Aucun paiement bancaire n’est demandé ici.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
