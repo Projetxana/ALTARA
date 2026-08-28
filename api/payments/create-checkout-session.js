@@ -38,9 +38,7 @@ export default async function handler(req, res) {
             });
         }
 
-        const {
-            bookingId
-        } = req.body || {};
+        const { bookingId } = req.body || {};
 
         if (!bookingId) {
             return res.status(400).json({
@@ -101,7 +99,9 @@ export default async function handler(req, res) {
                 payment_status,
                 total_revenue,
                 amount_paid,
-                currency
+                currency,
+                payment_provider,
+                payment_reference
             `)
             .eq('id', bookingId)
             .single();
@@ -177,6 +177,71 @@ export default async function handler(req, res) {
             });
         }
 
+        /*
+         * Reuse the current Stripe Checkout Session whenever
+         * it is still open. This prevents multiple payment links.
+         */
+        if (
+            booking.payment_provider === 'stripe' &&
+            booking.payment_reference?.startsWith('cs_')
+        ) {
+            try {
+                const existingSession =
+                    await stripe.checkout.sessions.retrieve(
+                        booking.payment_reference
+                    );
+
+                const expectedAmountCents =
+                    Math.round(balance * 100);
+
+                const sessionAmountMatches =
+                    Number(existingSession.amount_total) ===
+                    expectedAmountCents;
+
+                const sessionCurrencyMatches =
+                    String(existingSession.currency || '')
+                        .toLowerCase() ===
+                    String(booking.currency || 'CAD')
+                        .toLowerCase();
+
+                const sessionDatesMatch =
+                    existingSession.metadata
+                        ?.booking_start_date ===
+                        booking.start_date &&
+                    existingSession.metadata
+                        ?.booking_end_date ===
+                        booking.end_date;
+
+                if (
+                    existingSession.status === 'open' &&
+                    existingSession.url &&
+                    sessionAmountMatches &&
+                    sessionCurrencyMatches &&
+                    sessionDatesMatch
+                ) {
+                    return res.status(200).json({
+                        success: true,
+                        sessionId: existingSession.id,
+                        url: existingSession.url,
+                        reused: true,
+                        expiresAt:
+                            existingSession.expires_at
+                    });
+                }
+
+                if (existingSession.status === 'open') {
+                    await stripe.checkout.sessions.expire(
+                        existingSession.id
+                    );
+                }
+            } catch (error) {
+                console.warn(
+                    '[CREATE CHECKOUT SESSION] Existing Stripe session unavailable:',
+                    error.message
+                );
+            }
+        }
+
         const currency =
             String(booking.currency || 'CAD')
                 .toLowerCase();
@@ -205,7 +270,16 @@ export default async function handler(req, res) {
                 metadata: {
                     booking_id: booking.id,
                     chalet_id: booking.chalet_id,
-                    altara_user_id: user.id
+                    altara_user_id: user.id,
+                    expected_amount_cents:
+                        String(Math.round(balance * 100)),
+                    expected_currency:
+                        String(booking.currency || 'CAD')
+                            .toLowerCase(),
+                    booking_start_date:
+                        booking.start_date,
+                    booking_end_date:
+                        booking.end_date
                 },
 
                 line_items: [
@@ -236,7 +310,9 @@ export default async function handler(req, res) {
                     `${appUrl}/planning?payment=cancelled&booking=${booking.id}`
             });
 
-        await supabase
+        const {
+            error: updateError
+        } = await supabase
             .from('booking')
             .update({
                 payment_status: 'payment_pending',
@@ -245,10 +321,28 @@ export default async function handler(req, res) {
             })
             .eq('id', booking.id);
 
+        if (updateError) {
+            /*
+             * Do not leave an orphan Checkout Session active
+             * if ALTARA could not save its reference.
+             */
+            try {
+                await stripe.checkout.sessions.expire(
+                    session.id
+                );
+            } catch {
+                // Best effort cleanup.
+            }
+
+            throw updateError;
+        }
+
         return res.status(200).json({
             success: true,
             sessionId: session.id,
-            url: session.url
+            url: session.url,
+            reused: false,
+            expiresAt: session.expires_at
         });
 
     } catch (error) {

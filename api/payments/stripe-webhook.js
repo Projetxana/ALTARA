@@ -172,6 +172,8 @@ export default {
                     .select(`
                         id,
                         total_revenue,
+                        amount_paid,
+                        currency,
                         payment_reference
                     `)
                     .eq('id', bookingId)
@@ -186,6 +188,100 @@ export default {
                         new Error(
                             'Booking not found'
                         )
+                    );
+                }
+
+                const expectedBalanceCents =
+                    Math.round(
+                        Math.max(
+                            Number(booking.total_revenue || 0) -
+                            Number(booking.amount_paid || 0),
+                            0
+                        ) * 100
+                    );
+
+                const paidAmountCents =
+                    Number(session.amount_total || 0);
+
+                const expectedCurrency =
+                    String(booking.currency || 'CAD')
+                        .toLowerCase();
+
+                const paidCurrency =
+                    String(session.currency || '')
+                        .toLowerCase();
+
+                const metadataAmount =
+                    Number(
+                        session.metadata
+                            ?.expected_amount_cents || 0
+                    );
+
+                const metadataCurrency =
+                    String(
+                        session.metadata
+                            ?.expected_currency || ''
+                    ).toLowerCase();
+
+                if (
+                    paidAmountCents <= 0 ||
+                    paidAmountCents !== expectedBalanceCents ||
+                    paidCurrency !== expectedCurrency
+                ) {
+                    console.error(
+                        '[Stripe webhook] Payment validation failed',
+                        {
+                            bookingId,
+                            expectedBalanceCents,
+                            paidAmountCents,
+                            expectedCurrency,
+                            paidCurrency
+                        }
+                    );
+
+                    return Response.json(
+                        {
+                            received: false,
+                            error:
+                                'Payment amount or currency mismatch'
+                        },
+                        { status: 409 }
+                    );
+                }
+
+                if (
+                    metadataAmount &&
+                    metadataAmount !== paidAmountCents
+                ) {
+                    console.error(
+                        '[Stripe webhook] Metadata amount mismatch'
+                    );
+
+                    return Response.json(
+                        {
+                            received: false,
+                            error:
+                                'Checkout metadata amount mismatch'
+                        },
+                        { status: 409 }
+                    );
+                }
+
+                if (
+                    metadataCurrency &&
+                    metadataCurrency !== paidCurrency
+                ) {
+                    console.error(
+                        '[Stripe webhook] Metadata currency mismatch'
+                    );
+
+                    return Response.json(
+                        {
+                            received: false,
+                            error:
+                                'Checkout metadata currency mismatch'
+                        },
+                        { status: 409 }
                     );
                 }
 
@@ -214,9 +310,9 @@ export default {
                     .from('booking')
                     .update({
                         payment_status: 'paid',
-                        amount_paid: Number(
-                            booking.total_revenue || 0
-                        ),
+                        amount_paid:
+                            Number(booking.amount_paid || 0) +
+                            paidAmountCents / 100,
                         payment_provider:
                             'stripe',
                         payment_reference:

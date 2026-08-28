@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 
 import { useSanctuum } from '../../context/SanctuumContext';
+import BookingPricingService from '../pricing/BookingPricingService';
+import BookingService from '../booking/BookingService';
 import PaymentService from '../payments/PaymentService';
 
 const sourceLabels = {
@@ -294,6 +296,95 @@ const CalendarEventDrawer = ({
                     );
                 }
 
+                const datesChanged =
+                    draft.startDate !== event.start ||
+                    draft.endDate !== event.end;
+
+                let recalculatedTotal;
+
+                if (datesChanged) {
+                    if (paymentStatus === 'paid') {
+                        throw new Error(
+                            'Cette réservation est déjà payée. Le changement de dates nécessite un ajustement de paiement.'
+                        );
+                    }
+
+                    const available =
+                        await BookingService.checkAvailability(
+                            event.chaletId,
+                            draft.startDate,
+                            draft.endDate,
+                            event.id
+                        );
+
+                    if (!available) {
+                        throw new Error(
+                            'Cette nouvelle période n’est pas disponible.'
+                        );
+                    }
+
+                    const [
+                        oldPricing,
+                        newPricing
+                    ] = await Promise.all([
+                        BookingPricingService.calculateStay(
+                            event.chaletId,
+                            event.start,
+                            event.end
+                        ),
+                        BookingPricingService.calculateStay(
+                            event.chaletId,
+                            draft.startDate,
+                            draft.endDate
+                        )
+                    ]);
+
+                    const oldAccommodation =
+                        Number(
+                            oldPricing
+                                ?.estimatedAccommodationRevenue ||
+                            0
+                        );
+
+                    const newAccommodation =
+                        Number(
+                            newPricing
+                                ?.estimatedAccommodationRevenue ||
+                            0
+                        );
+
+                    /*
+                     * Current ALTARA booking formula:
+                     * accommodation + cleaning + extras,
+                     * then 10% tax.
+                     *
+                     * Extras are not yet stored independently,
+                     * so preserve their existing value by deriving
+                     * them from the current reservation total.
+                     */
+                    const TAX_MULTIPLIER = 1.10;
+
+                    const preservedExtrasBeforeTax =
+                        totalRevenue > 0
+                            ? Math.max(
+                                0,
+                                totalRevenue /
+                                    TAX_MULTIPLIER -
+                                    oldAccommodation
+                            )
+                            : 150;
+
+                    recalculatedTotal =
+                        Math.round(
+                            (
+                                newAccommodation +
+                                preservedExtrasBeforeTax
+                            ) *
+                            TAX_MULTIPLIER *
+                            100
+                        ) / 100;
+                }
+
                 await updateBooking(
                     event.id,
                     {
@@ -302,7 +393,11 @@ const CalendarEventDrawer = ({
                         guestPhone: draft.guestPhone,
                         guestNote: draft.guestNote,
                         startDate: draft.startDate,
-                        endDate: draft.endDate
+                        endDate: draft.endDate,
+                        totalPrice:
+                            datesChanged
+                                ? recalculatedTotal
+                                : undefined
                     }
                 );
             }
