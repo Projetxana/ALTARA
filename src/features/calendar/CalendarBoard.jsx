@@ -38,6 +38,7 @@ const CalendarBoard = () => {
         );
 
         const bookingEvents = chaletBookings.map(booking => ({
+            ...booking,
             id: booking.id,
             start: booking.checkInDate,
             end: booking.checkOutDate,
@@ -92,6 +93,7 @@ const CalendarBoard = () => {
                 )
             )
             .map(block => ({
+                ...block,
                 id: `block-${block.id}`,
                 blockId: block.id,
                 start: block.startDate,

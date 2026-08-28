@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import { useSanctuum } from '../../context/SanctuumContext';
+import PaymentService from '../payments/PaymentService';
 
 const sourceLabels = {
     direct: 'Direct',
@@ -143,12 +144,19 @@ const CalendarEventDrawer = ({
     const [error, setError] = useState('');
 
     const [draft, setDraft] = useState({});
+    const [paymentLink, setPaymentLink] = useState('');
+    const [paymentLinkLoading, setPaymentLinkLoading] = useState(false);
+    const [paymentLinkError, setPaymentLinkError] = useState('');
+    const [paymentCopied, setPaymentCopied] = useState(false);
 
     useEffect(() => {
         if (!event) return;
 
         setEditing(false);
         setError('');
+        setPaymentLink('');
+        setPaymentLinkError('');
+        setPaymentCopied(false);
 
         setDraft({
             startDate: event.start || '',
@@ -305,6 +313,26 @@ const CalendarEventDrawer = ({
             setError(err.message);
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleCreatePaymentLink = async () => {
+        try {
+            setPaymentLinkLoading(true);
+            setPaymentLinkError('');
+            setPaymentCopied(false);
+
+            const result =
+                await PaymentService.createCheckoutLink(
+                    event.id
+                );
+
+            setPaymentLink(result.url);
+        } catch (err) {
+            console.error(err);
+            setPaymentLinkError(err.message);
+        } finally {
+            setPaymentLinkLoading(false);
         }
     };
 
@@ -961,7 +989,11 @@ const CalendarEventDrawer = ({
 
                                     <button
                                         type="button"
-                                        disabled
+                                        onClick={handleCreatePaymentLink}
+                                        disabled={
+                                            paymentLinkLoading ||
+                                            paymentStatus === 'paid'
+                                        }
                                         style={{
                                             width: '100%',
                                             minHeight: 46,
@@ -971,13 +1003,101 @@ const CalendarEventDrawer = ({
                                             background: '#A89A8E',
                                             color: '#FFFFFF',
                                             fontWeight: 600,
-                                            opacity: 0.65,
-                                            cursor: 'not-allowed',
+                                            cursor:
+                                                paymentLinkLoading
+                                                    ? 'wait'
+                                                    : 'pointer',
                                             marginBottom: '0.8rem'
                                         }}
                                     >
-                                        Envoyer le lien de paiement
+                                        {paymentLinkLoading
+                                            ? 'Création du lien…'
+                                            : paymentStatus === 'paid'
+                                                ? 'Paiement reçu'
+                                                : 'Générer le lien de paiement'}
                                     </button>
+
+                                    {paymentLink && (
+                                        <div
+                                            style={{
+                                                padding: '0.9rem',
+                                                marginBottom: '1rem',
+                                                border:
+                                                    '1px solid var(--color-border)',
+                                                borderRadius:
+                                                    'var(--radius-md)',
+                                                background: '#F4EFE6'
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    fontSize: '0.75rem',
+                                                    color:
+                                                        'var(--color-text-muted)',
+                                                    marginBottom: '0.5rem'
+                                                }}
+                                            >
+                                                Lien sécurisé pour le client
+                                            </div>
+
+                                            <input
+                                                readOnly
+                                                value={paymentLink}
+                                                onFocus={e =>
+                                                    e.target.select()
+                                                }
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.55rem',
+                                                    border:
+                                                        '1px solid var(--color-border)',
+                                                    borderRadius: '6px',
+                                                    background: '#FFFFFF',
+                                                    fontSize: '0.72rem',
+                                                    marginBottom: '0.6rem'
+                                                }}
+                                            />
+
+                                            <button
+                                                type="button"
+                                                onClick={async () => {
+                                                    await navigator.clipboard
+                                                        .writeText(
+                                                            paymentLink
+                                                        );
+
+                                                    setPaymentCopied(true);
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    minHeight: 38,
+                                                    border:
+                                                        '1px solid var(--color-border)',
+                                                    borderRadius:
+                                                        'var(--radius-md)',
+                                                    background: '#FFFFFF',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 600
+                                                }}
+                                            >
+                                                {paymentCopied
+                                                    ? '✓ Lien copié'
+                                                    : 'Copier le lien'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {paymentLinkError && (
+                                        <div
+                                            style={{
+                                                color: '#A75B45',
+                                                fontSize: '0.78rem',
+                                                marginBottom: '1rem'
+                                            }}
+                                        >
+                                            {paymentLinkError}
+                                        </div>
+                                    )}
 
                                     <button
                                         type="button"
