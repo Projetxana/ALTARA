@@ -248,6 +248,115 @@ export const SanctuumProvider = ({ children }) => {
         }
     };
 
+
+    // --- REALTIME BOOKING / PAYMENT UPDATES ---
+    useEffect(() => {
+        if (!user) return;
+
+        const channel = supabase
+            .channel(`altara-bookings-${user.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'booking'
+                },
+                payload => {
+                    if (
+                        payload.eventType === 'INSERT' ||
+                        payload.eventType === 'UPDATE'
+                    ) {
+                        const mapped =
+                            mapBookingFromDb(payload.new);
+
+                        if (!mapped) return;
+
+                        setBookings(prev => {
+                            const exists = prev.some(
+                                item => item.id === mapped.id
+                            );
+
+                            if (exists) {
+                                return prev.map(item =>
+                                    item.id === mapped.id
+                                        ? mapped
+                                        : item
+                                );
+                            }
+
+                            return [...prev, mapped];
+                        });
+                    }
+
+                    if (payload.eventType === 'DELETE') {
+                        setBookings(prev =>
+                            prev.filter(
+                                item =>
+                                    item.id !== payload.old.id
+                            )
+                        );
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'calendar_blocks'
+                },
+                payload => {
+                    if (
+                        payload.eventType === 'INSERT' ||
+                        payload.eventType === 'UPDATE'
+                    ) {
+                        const mapped =
+                            mapCalendarBlockFromDb(
+                                payload.new
+                            );
+
+                        if (!mapped) return;
+
+                        setCalendarBlocks(prev => {
+                            const exists = prev.some(
+                                item => item.id === mapped.id
+                            );
+
+                            if (exists) {
+                                return prev.map(item =>
+                                    item.id === mapped.id
+                                        ? mapped
+                                        : item
+                                );
+                            }
+
+                            return [...prev, mapped];
+                        });
+                    }
+
+                    if (payload.eventType === 'DELETE') {
+                        setCalendarBlocks(prev =>
+                            prev.filter(
+                                item =>
+                                    item.id !== payload.old.id
+                            )
+                        );
+                    }
+                }
+            )
+            .subscribe(status => {
+                console.log(
+                    '[ALTARA Realtime]',
+                    status
+                );
+            });
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user]);
+
     const updateChaletConnections = (chaletId, connections) => updateChalet(chaletId, { connections });
 
     const createBooking = async (bookingData) => {

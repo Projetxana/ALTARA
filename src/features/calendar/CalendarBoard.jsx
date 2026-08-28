@@ -125,6 +125,23 @@ const CalendarBoard = () => {
         selectedChaletId
     ]);
 
+
+    // Keep the open drawer synchronized with realtime booking updates.
+    React.useEffect(() => {
+        if (!selectedCalendarEvent) return;
+
+        const refreshedEvent = events.find(
+            event => event.id === selectedCalendarEvent.id
+        );
+
+        if (!refreshedEvent) {
+            setSelectedCalendarEvent(null);
+            return;
+        }
+
+        setSelectedCalendarEvent(refreshedEvent);
+    }, [events, selectedCalendarEvent?.id]);
+
     const groupedEvents = React.useMemo(() => {
         const groups = {};
         const sortedEvents = [...events].sort((a, b) => new Date(a.start) - new Date(b.start));
