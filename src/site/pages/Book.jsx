@@ -1,18 +1,30 @@
+import { altaraApi } from '../../config/appRuntime.js';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
 import BookingCalendar from '../components/BookingCalendar';
 import { useCurrency } from '../../context/CurrencyContext';
 import CurrencySelector from '../components/CurrencySelector';
 
 const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) => {
     const navigate = useNavigate();
-    // Default chalet data for display since pricing is static in UI
-    const chalet = {
-        name: "Chalet Ayana",
-        base_night_price: 405, // Extracted from DB previously
+    const [chalet, setChalet] = useState({
+        name: 'Ayana',
+        location: '',
         capacity: 6
-    };
+    });
+
+    const [quote, setQuote] = useState(null);
+    const [quoteLoading, setQuoteLoading] = useState(false);
+    const [dailyRates, setDailyRates] = useState({});
+
+    const [guestData, setGuestData] = useState({
+        fullName: '',
+        email: '',
+        phone: ''
+    });
+
+    const [bookingLoading, setBookingLoading] =
+        useState(false);
 
     const { formatPrice, currency } = useCurrency();
 
@@ -44,11 +56,26 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
         const fetchAvailability = async () => {
             try {
                 // Fetch availability (API updated to find chalet automatically)
-                const res = await fetch(`/api/public/availability`);
+                const res = await fetch(altaraApi(`/api/public/availability`));
                 const availData = await res.json();
 
-                if (availData.success && availData.blocked) {
-                    setBlockedDates(availData.blocked);
+                if (availData.success) {
+                    setBlockedDates(
+                        availData.blocked || []
+                    );
+
+                    if (availData.property) {
+                        setChalet(prev => ({
+                            ...prev,
+                            ...availData.property
+                        }));
+                    }
+
+                    if (availData.dailyRates) {
+                        setDailyRates(
+                            availData.dailyRates
+                        );
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching availability:', err);
@@ -90,35 +117,213 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
         return false;
     };
 
-    const handleVerifyDates = () => {
-        setError('');
+    const handleVerifyDates = async () => {
+        try {
+            setError('');
+            setQuote(null);
 
-        if (formData.checkIn && formData.checkOut) {
-            if (new Date(formData.checkIn) >= new Date(formData.checkOut)) {
-                return setError("La date de départ doit être ultérieure à la date d'arrivée.");
+            if (
+                !formData.checkIn ||
+                !formData.checkOut
+            ) {
+                setShowCalendar(true);
+                return;
             }
-            if (checkOverlap(formData.checkIn, formData.checkOut)) {
-                return setError('Ces dates ne sont plus disponibles. Veuillez sélectionner une autre période.');
+
+            if (
+                formData.checkIn >=
+                formData.checkOut
+            ) {
+                throw new Error(
+                    "La date de départ doit être ultérieure à la date d'arrivée."
+                );
             }
+
+            setQuoteLoading(true);
+
+            const params =
+                new URLSearchParams({
+                    checkIn:
+                        formData.checkIn,
+                    checkOut:
+                        formData.checkOut
+                });
+
+            const response =
+                await fetch(altaraApi(`/api/public/availability?${params.toString()}`)
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    'Ces dates ne sont pas disponibles.'
+                );
+            }
+
+            setBlockedDates(
+                data.blocked || []
+            );
+
+            if (data.property) {
+                setChalet(prev => ({
+                    ...prev,
+                    ...data.property
+                }));
+            }
+
+            setQuote(data.quote);
+
+        } catch (err) {
+            console.error(err);
+
+            setError(
+                err.message ||
+                'Impossible de vérifier ces dates.'
+            );
+        } finally {
+            setQuoteLoading(false);
         }
-
-        // Simply open the visual calendar in all cases
-        setShowCalendar(true);
     };
 
-    // Calculate nights and estimate
-    let nights = 0;
-    let estimatedTotal = 0;
-    if (formData.checkIn && formData.checkOut) {
-        const inDate = new Date(formData.checkIn);
-        const outDate = new Date(formData.checkOut);
-        if (outDate > inDate) {
-            nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
-            if (chalet && chalet.base_night_price) {
-                estimatedTotal = nights * chalet.base_night_price;
+    const handleGuestChange = (e) => {
+        setGuestData(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+
+        setError('');
+    };
+
+    const handleBookAndPay = async () => {
+        try {
+            setError('');
+
+            if (!quote) {
+                throw new Error(
+                    'Veuillez d’abord vérifier vos dates.'
+                );
             }
+
+            if (
+                !guestData.fullName.trim() ||
+                !guestData.email.trim()
+            ) {
+                throw new Error(
+                    'Votre nom et votre adresse courriel sont requis.'
+                );
+            }
+
+            setBookingLoading(true);
+
+            /*
+             * 1. Server creates the authoritative
+             * pending website booking and recalculates
+             * the stay price.
+             */
+            const bookingResponse =
+                await fetch(altaraApi('/api/public/request-booking'),
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+                        body: JSON.stringify({
+                            checkIn:
+                                formData.checkIn,
+                            checkOut:
+                                formData.checkOut,
+                            guests:
+                                Number(formData.guests),
+                            fullName:
+                                guestData.fullName,
+                            email:
+                                guestData.email,
+                            phone:
+                                guestData.phone
+                        })
+                    }
+                );
+
+            const bookingData =
+                await bookingResponse.json();
+
+            if (
+                !bookingResponse.ok ||
+                !bookingData.success
+            ) {
+                throw new Error(
+                    bookingData.details ||
+                    bookingData.error ||
+                    'Impossible de créer la réservation.'
+                );
+            }
+
+            /*
+             * 2. Create hosted Stripe Checkout.
+             * The high-entropy booking reference is
+             * required for public authorization.
+             */
+            const checkoutResponse =
+                await fetch(altaraApi('/api/payments/create-checkout-session'),
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+                        body: JSON.stringify({
+                            bookingId:
+                                bookingData.bookingId,
+                            bookingReference:
+                                bookingData.bookingReference
+                        })
+                    }
+                );
+
+            const checkoutData =
+                await checkoutResponse.json();
+
+            if (
+                !checkoutResponse.ok ||
+                !checkoutData.success ||
+                !checkoutData.url
+            ) {
+                throw new Error(
+                    checkoutData.error ||
+                    'Impossible d’ouvrir le paiement sécurisé.'
+                );
+            }
+
+            window.location.href =
+                checkoutData.url;
+
+        } catch (err) {
+            console.error(
+                '[PUBLIC BOOKING]',
+                err
+            );
+
+            setError(
+                err.message ||
+                'Une erreur est survenue.'
+            );
+        } finally {
+            setBookingLoading(false);
         }
-    }
+    };
+
+    const nights =
+        quote?.nights || 0;
+
+    const estimatedTotal =
+        quote?.total || 0;
 
     if (loading) {
         return <div style={{ paddingTop: '120px', textAlign: 'center', color: 'var(--ayana-text)', minHeight: '100vh', backgroundColor: 'var(--ayana-bg)' }}>Préchargement des dates...</div>;
@@ -206,12 +411,160 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
 
                             <button
                                 type="button"
-                                onClick={handleVerifyDates}
+                                onClick={() => {
+                                    if (quote) {
+                                        setShowCalendar(true);
+                                        return;
+                                    }
+
+                                    handleVerifyDates();
+                                }}
+                                disabled={quoteLoading}
                                 className="ayana-btn-outline"
                                 style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', border: '1px solid var(--ayana-text)' }}
                             >
-                                Vérifier les disponibilités
+                                {quoteLoading
+                                    ? 'Vérification…'
+                                    : quote
+                                        ? 'Modifier mes dates'
+                                        : 'Vérifier les disponibilités'}
                             </button>
+
+                            {quote && (
+                                <div
+                                    style={{
+                                        marginTop: '3rem',
+                                        paddingTop: '3rem',
+                                        borderTop:
+                                            '1px solid var(--ayana-border)'
+                                    }}
+                                >
+                                    <h3
+                                        style={{
+                                            fontFamily:
+                                                'var(--ayana-font-heading)',
+                                            fontSize: '1.5rem',
+                                            color:
+                                                'var(--ayana-text)',
+                                            fontWeight: 400,
+                                            margin:
+                                                '0 0 2rem'
+                                        }}
+                                    >
+                                        Vos coordonnées
+                                    </h3>
+
+                                    <div
+                                        style={{
+                                            display: 'grid',
+                                            gap: '1.5rem'
+                                        }}
+                                    >
+                                        <div>
+                                            <label style={labelStyle}>
+                                                Nom complet
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="fullName"
+                                                value={
+                                                    guestData.fullName
+                                                }
+                                                onChange={
+                                                    handleGuestChange
+                                                }
+                                                autoComplete="name"
+                                                style={inputStyle}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={labelStyle}>
+                                                Adresse courriel
+                                            </label>
+
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={
+                                                    guestData.email
+                                                }
+                                                onChange={
+                                                    handleGuestChange
+                                                }
+                                                autoComplete="email"
+                                                style={inputStyle}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={labelStyle}>
+                                                Téléphone
+                                            </label>
+
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                value={
+                                                    guestData.phone
+                                                }
+                                                onChange={
+                                                    handleGuestChange
+                                                }
+                                                autoComplete="tel"
+                                                style={inputStyle}
+                                            />
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                handleBookAndPay
+                                            }
+                                            disabled={
+                                                bookingLoading
+                                            }
+                                            className="ayana-btn"
+                                            style={{
+                                                width: '100%',
+                                                padding: '1.25rem',
+                                                fontSize: '1.1rem',
+                                                marginTop: '1rem',
+                                                opacity:
+                                                    bookingLoading
+                                                        ? 0.65
+                                                        : 1,
+                                                cursor:
+                                                    bookingLoading
+                                                        ? 'wait'
+                                                        : 'pointer'
+                                            }}
+                                        >
+                                            {bookingLoading
+                                                ? 'Préparation du paiement…'
+                                                : `Réserver et payer ${formatPrice(
+                                                    quote.total
+                                                )}`}
+                                        </button>
+
+                                        <p
+                                            style={{
+                                                margin: 0,
+                                                textAlign: 'center',
+                                                color:
+                                                    'var(--ayana-muted)',
+                                                fontSize: '0.85rem',
+                                                lineHeight: 1.5
+                                            }}
+                                        >
+                                            Paiement sécurisé par Stripe.
+                                            Vos informations bancaires ne
+                                            transitent jamais par AYANA.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -227,10 +580,10 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                             
                             {/* Property Mini-Info */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--ayana-border)' }}>
-                                <img src="/ayana/photos/exterior.jpg" alt="Chalet Ayana" style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} />
+                                <img src="/ayana/photos/exterior.jpg" alt={chalet.name} style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} />
                                 <div style={{ flex: 1 }}>
-                                    <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--ayana-text)', fontWeight: 400 }}>Chalet Ayana</h4>
-                                    <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: 'var(--ayana-muted)' }}>Sainte-Adèle, QC</p>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--ayana-text)', fontWeight: 400 }}>{chalet.name}</h4>
+                                    <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: 'var(--ayana-muted)' }}>{chalet.location || 'Sainte-Adèle, QC'}</p>
                                 </div>
                                 <a href="#lieux" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', border: '1px solid var(--ayana-border)', borderRadius: '4px', textDecoration: 'none', color: 'var(--ayana-text)', transition: 'background 0.3s' }}>
                                     Détails
@@ -259,14 +612,109 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
 
                             {/* Pricing summary */}
                             <div style={{ padding: '1.5rem 0' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', color: 'var(--ayana-text)', fontSize: '1rem' }}>
-                                    <span>Location {nights > 0 ? `(${nights} ${nights > 1 ? 'nuits' : 'nuit'})` : ''}</span>
-                                    <span>{nights > 0 ? formatPrice(estimatedTotal) : formatPrice(0)}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', fontWeight: 600, color: 'var(--ayana-text)' }}>
-                                    <span>Total ({currency})</span>
-                                    <span>{nights > 0 ? formatPrice(estimatedTotal) : formatPrice(0)}</span>
-                                </div>
+                                {quoteLoading ? (
+                                    <div
+                                        style={{
+                                            color: 'var(--ayana-muted)',
+                                            lineHeight: 1.6
+                                        }}
+                                    >
+                                        Calcul du meilleur tarif disponible…
+                                    </div>
+                                ) : quote ? (
+                                    <>
+                                        <div
+                                            style={{
+                                                display: 'grid',
+                                                gap: '0.9rem',
+                                                paddingBottom: '1.25rem',
+                                                borderBottom: '1px solid var(--ayana-border)'
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between'
+                                                }}
+                                            >
+                                                <span>
+                                                    Hébergement ({quote.nights}{' '}
+                                                    {quote.nights > 1
+                                                        ? 'nuits'
+                                                        : 'nuit'})
+                                                </span>
+
+                                                <span>
+                                                    {formatPrice(
+                                                        quote.accommodation
+                                                    )}
+                                                </span>
+                                            </div>
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between'
+                                                }}
+                                            >
+                                                <span>
+                                                    Frais de ménage
+                                                </span>
+
+                                                <span>
+                                                    {formatPrice(
+                                                        quote.cleaningFee
+                                                    )}
+                                                </span>
+                                            </div>
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between'
+                                                }}
+                                            >
+                                                <span>Taxes</span>
+
+                                                <span>
+                                                    {formatPrice(
+                                                        quote.taxes
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                paddingTop: '1.25rem',
+                                                fontSize: '1.3rem',
+                                                fontWeight: 600,
+                                                color: 'var(--ayana-text)'
+                                            }}
+                                        >
+                                            <span>
+                                                Total ({currency})
+                                            </span>
+
+                                            <span>
+                                                {formatPrice(
+                                                    quote.total
+                                                )}
+                                            </span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div
+                                        style={{
+                                            color: 'var(--ayana-muted)',
+                                            lineHeight: 1.6
+                                        }}
+                                    >
+                                        Sélectionnez vos dates pour obtenir le tarif exact du séjour.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -279,9 +727,70 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                 <BookingCalendar
                     chalet={chalet}
                     blockedDates={blockedDates}
-                    onDatesSelected={(inDate, outDate) => {
-                        setFormData(prev => ({ ...prev, checkIn: inDate, checkOut: outDate }));
-                        setIsDatesValidated(false); // Force re-validation
+                    dailyRates={dailyRates}
+                    onDatesSelected={async (inDate, outDate) => {
+                        setFormData(prev => ({
+                            ...prev,
+                            checkIn: inDate,
+                            checkOut: outDate
+                        }));
+
+                        setError('');
+                        setQuote(null);
+                        setQuoteLoading(true);
+
+                        try {
+                            const params =
+                                new URLSearchParams({
+                                    checkIn: inDate,
+                                    checkOut: outDate
+                                });
+
+                            const response =
+                                await fetch(altaraApi(`/api/public/availability?${params.toString()}`)
+                                );
+
+                            const data =
+                                await response.json();
+
+                            if (
+                                !response.ok ||
+                                !data.success
+                            ) {
+                                throw new Error(
+                                    data.error ||
+                                    'Impossible de calculer le séjour.'
+                                );
+                            }
+
+                            setBlockedDates(
+                                data.blocked || []
+                            );
+
+                            if (data.property) {
+                                setChalet(prev => ({
+                                    ...prev,
+                                    ...data.property
+                                }));
+                            }
+
+                            setQuote(
+                                data.quote || null
+                            );
+
+                        } catch (err) {
+                            console.error(
+                                '[QUOTE AFTER CALENDAR]',
+                                err
+                            );
+
+                            setError(
+                                err.message ||
+                                'Impossible de calculer le séjour.'
+                            );
+                        } finally {
+                            setQuoteLoading(false);
+                        }
                     }}
                     onClose={() => setShowCalendar(false)}
                 />

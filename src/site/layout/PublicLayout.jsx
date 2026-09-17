@@ -1,3 +1,4 @@
+import { isAyanaApp } from '../../config/appRuntime.js';
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import CurrencySelector from '../components/CurrencySelector';
@@ -22,7 +23,7 @@ const PublicLayout = () => {
         }
     }, [location.pathname]);
 
-    const homeUrl = window.location.hostname.includes('chaletayana.ca') ? '/' : '/ayana';
+    const homeUrl = isAyanaApp ? '/' : '/ayana';
 
     return (
         <div className="ayana-wrap" style={{ display: 'flex', flexDirection: 'column' }}>

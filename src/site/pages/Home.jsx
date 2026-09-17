@@ -1,3 +1,4 @@
+import { altaraApi } from '../../config/appRuntime.js';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookingCalendar from '../components/BookingCalendar';
@@ -14,7 +15,7 @@ const Home = () => {
     useEffect(() => {
         const fetchAvailability = async () => {
             try {
-                const res = await fetch(`/api/public/availability`);
+                const res = await fetch(altaraApi(`/api/public/availability`));
                 const availData = await res.json();
                 if (availData.success && availData.blocked) {
                     setBlockedDates(availData.blocked);

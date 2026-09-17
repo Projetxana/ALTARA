@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isBefore, startOfToday, addDays, getDay } from 'date-fns';
+import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isBefore, startOfToday, getDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => {
+const parseLocalDate = (dateString) => {
+    const [year, month, day] =
+        dateString.split('-').map(Number);
+
+    return new Date(
+        year,
+        month - 1,
+        day
+    );
+};
+
+const BookingCalendar = ({ chalet, blockedDates, dailyRates = {}, onDatesSelected, onClose }) => {
     const today = startOfToday();
     const [currentDate, setCurrentDate] = useState(startOfMonth(today));
 
@@ -20,10 +31,8 @@ const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => 
         if (isBefore(dateObj, today)) return true;
 
         for (const block of blockedDates) {
-            const start = new Date(block.start);
-            const end = new Date(block.end);
-            start.setHours(0, 0, 0, 0);
-            end.setHours(0, 0, 0, 0);
+            const start = parseLocalDate(block.start);
+            const end = parseLocalDate(block.end);
 
             // If date is >= start and STRICTLY < end, it's blocked.
             // If date === end, it's available for check-in ONLY IF it's not starting another block immediately.
@@ -48,38 +57,19 @@ const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => 
     };
 
     const getDailyPrice = (dateObj) => {
-        if (!chalet || !chalet.pricingInfo) return chalet?.base_night_price || chalet?.baseNightPrice || 0;
-        const pricing = chalet.pricingInfo;
+        const dateStr =
+            format(dateObj, 'yyyy-MM-dd');
 
-        const monthIndex = dateObj.getMonth();
-        let currentPrice = chalet?.base_night_price || chalet?.baseNightPrice || 0;
-        let weekendPrice = null;
+        const rate =
+            dailyRates?.[dateStr];
 
-        if (pricing.monthlyRates && pricing.monthlyRates[monthIndex]) {
-            currentPrice = pricing.monthlyRates[monthIndex].basePrice || currentPrice;
-            weekendPrice = pricing.monthlyRates[monthIndex].weekendPrice;
-        } else {
-            currentPrice = pricing.basePrice || currentPrice;
-            weekendPrice = pricing.weekendPrice;
+        if (!rate) {
+            return null;
         }
 
-        // Custom rules
-        if (pricing.customRules && pricing.customRules.length > 0) {
-            const dateStr = format(dateObj, 'yyyy-MM-dd');
-            const activeRule = pricing.customRules.find(rule => {
-                if (!rule.startDate || !rule.endDate) return false;
-                return dateStr >= rule.startDate && dateStr <= rule.endDate;
-            });
-            if (activeRule && activeRule.price) return activeRule.price;
-        }
-
-        // Weekend price
-        const dayOfWeek = dateObj.getDay();
-        if ((dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) && weekendPrice) {
-            return weekendPrice;
-        }
-
-        return currentPrice;
+        return Number(
+            rate.nightlyRate
+        );
     };
 
     const calculateTotalPrice = () => {
@@ -240,7 +230,9 @@ const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => 
 
                                 {!(blocked || isPast) && (
                                     <span style={{ fontSize: '0.8rem', color: priceColor, fontWeight: isSelected ? 500 : 400 }}>
-                                        {getDailyPrice(date)}$ CAD
+                                        {getDailyPrice(date) !== null
+                                            ? `${getDailyPrice(date)}$ CAD`
+                                            : '—'}
                                     </span>
                                 )}
                             </button>
@@ -290,11 +282,17 @@ const BookingCalendar = ({ chalet, blockedDates, onDatesSelected, onClose }) => 
             {/* Scrollable Calendar Body */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '4rem 2rem' }}>
                 <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                    {/* Render current month + next 3 months */}
-                    {renderMonth(currentDate)}
-                    {renderMonth(addMonths(currentDate, 1))}
-                    {renderMonth(addMonths(currentDate, 2))}
-                    {renderMonth(addMonths(currentDate, 3))}
+                    {/* Render 18 months of booking availability */}
+                    {Array.from(
+                        { length: 18 },
+                        (_, index) =>
+                            renderMonth(
+                                addMonths(
+                                    currentDate,
+                                    index
+                                )
+                            )
+                    )}
                 </div>
             </div>
         </div>

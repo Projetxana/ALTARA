@@ -1,3 +1,4 @@
+import { isAyanaApp } from './config/appRuntime.js';
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
@@ -21,6 +22,7 @@ import HousekeepingPage from './features/housekeeping/HousekeepingPage'
 import TravelerGuide from './features/traveler-guide/TravelerGuide'
 import GuideEditor from './features/traveler-guide/GuideEditor'
 import AuthPage from './features/auth/AuthPage'
+import PaymentSuccessPage from './features/payments/PaymentSuccessPage'
 
 import { SanctuumProvider } from './context/SanctuumContext'
 import { NotificationProvider } from './context/NotificationContext'
@@ -42,7 +44,12 @@ import Thanks from './site/pages/Thanks'
 import Terms from './site/pages/Terms'
 
 const DashboardLayout = () => {
-  const isConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_KEY;
+  const isConfigured =
+    import.meta.env.VITE_SUPABASE_URL &&
+    (
+      import.meta.env.VITE_SUPABASE_ANON_KEY ||
+      import.meta.env.VITE_SUPABASE_KEY
+    );
 
   return (
     <div className="layout-grid">
@@ -55,7 +62,7 @@ const DashboardLayout = () => {
         <Header />
         {!isConfigured && (
           <div style={{ background: '#fef2f2', color: '#dc2626', padding: '1rem', marginBottom: '1rem', borderRadius: '8px', border: '1px solid #fecaca' }}>
-            <strong>Configuration Missing:</strong> Please update .env with your VITE_SUPABASE_URL and VITE_SUPABASE_KEY.
+            <strong>Configuration Missing:</strong> Please update .env with your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
           </div>
         )}
         <Outlet />
@@ -82,10 +89,7 @@ const RequireAuth = () => {
 }
 
 function App() {
-  const hostname = window.location.hostname || '';
-  const isAyanaDomain = hostname.includes('chaletayana.ca');
-
-  if (isAyanaDomain) {
+  if (isAyanaApp) {
     return (
       <NotificationProvider>
         <LanguageProvider>
@@ -104,6 +108,7 @@ function App() {
                     <Route path="thanks" element={<Thanks />} />
                     <Route path="regles" element={<Terms />} />
                   </Route>
+                  <Route path="/payment/success" element={<PaymentSuccessPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </BrowserRouter>
@@ -135,6 +140,7 @@ function App() {
                       <Route path="regles" element={<Terms />} />
                     </Route>
 
+                    <Route path="/payment/success" element={<PaymentSuccessPage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/guide" element={<TravelerGuide />} />
 
