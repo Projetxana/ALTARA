@@ -147,6 +147,273 @@ export default {
                 }
             );
 
+        const ensureCleaningTask =
+            async (bookingRecord) => {
+
+                if (
+                    !bookingRecord?.id ||
+                    !bookingRecord?.chalet_id ||
+                    !bookingRecord?.end_date
+                ) {
+                    throw new Error(
+                        'Missing booking data for cleaning task'
+                    );
+                }
+
+                const {
+                    data: existingTask,
+                    error: existingTaskError
+                } = await supabase
+                    .from('cleaning_tasks')
+                    .select('id')
+                    .eq(
+                        'booking_id',
+                        bookingRecord.id
+                    )
+                    .limit(1)
+                    .maybeSingle();
+
+                if (existingTaskError) {
+                    throw existingTaskError;
+                }
+
+                if (existingTask) {
+                    return existingTask;
+                }
+
+                const {
+                    data: createdTask,
+                    error: cleaningError
+                } = await supabase
+                    .from('cleaning_tasks')
+                    .insert({
+                        chalet_id:
+                            bookingRecord.chalet_id,
+                        booking_id:
+                            bookingRecord.id,
+                        date:
+                            bookingRecord.end_date,
+                        status: 'pending',
+                        auto_generated: true
+                    })
+                    .select('id')
+                    .single();
+
+                if (cleaningError) {
+                    throw cleaningError;
+                }
+
+                console.log(
+                    `[Stripe webhook] Cleaning task created for booking ${bookingRecord.id}`
+                );
+
+                return createdTask;
+            };
+
+        const ensureConfirmationEmail =
+            async (bookingRecord) => {
+
+                if (
+                    !bookingRecord?.guest_email ||
+                    bookingRecord?.confirmation_email_sent_at
+                ) {
+                    return;
+                }
+
+                const apiKey =
+                    process.env.RESEND_API_KEY;
+
+                const fromEmail =
+                    process.env.RESEND_FROM_EMAIL;
+
+                if (!apiKey || !fromEmail) {
+                    console.warn(
+                        '[Stripe webhook] Resend not configured'
+                    );
+                    return;
+                }
+
+                const escapeHtml = value =>
+                    String(value ?? '')
+                        .replaceAll('&', '&amp;')
+                        .replaceAll('<', '&lt;')
+                        .replaceAll('>', '&gt;')
+                        .replaceAll('"', '&quot;')
+                        .replaceAll("'", '&#039;');
+
+                const formatDate = value => {
+                    if (!value) return '';
+
+                    return new Intl.DateTimeFormat(
+                        'fr-CA',
+                        {
+                            dateStyle: 'long',
+                            timeZone: 'UTC'
+                        }
+                    ).format(
+                        new Date(`${value}T12:00:00Z`)
+                    );
+                };
+
+                const amount =
+                    new Intl.NumberFormat(
+                        'fr-CA',
+                        {
+                            style: 'currency',
+                            currency:
+                                String(
+                                    bookingRecord.currency ||
+                                    'CAD'
+                                ).toUpperCase()
+                        }
+                    ).format(
+                        Number(
+                            bookingRecord.total_revenue ||
+                            0
+                        )
+                    );
+
+                const guestName =
+                    bookingRecord.guest_name ||
+                    'cher voyageur';
+
+                const reference =
+                    bookingRecord.external_uid ||
+                    bookingRecord.id;
+
+                const checkIn =
+                    formatDate(
+                        bookingRecord.start_date
+                    );
+
+                const checkOut =
+                    formatDate(
+                        bookingRecord.end_date
+                    );
+
+                const html = `
+                    <div style="
+                        max-width:620px;
+                        margin:0 auto;
+                        font-family:Arial,sans-serif;
+                        color:#173A35;
+                        line-height:1.6;
+                    ">
+                        <h1>
+                            Réservation confirmée
+                        </h1>
+
+                        <p>
+                            Bonjour ${escapeHtml(guestName)},
+                        </p>
+
+                        <p>
+                            Votre paiement a bien été reçu.
+                            Votre séjour au
+                            <strong>Chalet Ayana</strong>
+                            est maintenant confirmé.
+                        </p>
+
+                        <div style="
+                            background:#F7F4EE;
+                            padding:22px;
+                            border-radius:12px;
+                            margin:24px 0;
+                        ">
+                            <p>
+                                <strong>Arrivée :</strong>
+                                ${escapeHtml(checkIn)}
+                            </p>
+
+                            <p>
+                                <strong>Départ :</strong>
+                                ${escapeHtml(checkOut)}
+                            </p>
+
+                            <p>
+                                <strong>Montant payé :</strong>
+                                ${escapeHtml(amount)}
+                            </p>
+
+                            <p>
+                                <strong>Référence :</strong>
+                                ${escapeHtml(reference)}
+                            </p>
+                        </div>
+
+                        <p>
+                            Nous vous transmettrons les
+                            informations pratiques de votre
+                            séjour avant votre arrivée.
+                        </p>
+
+                        <p>
+                            À bientôt,<br>
+                            <strong>Chalet Ayana</strong>
+                        </p>
+                    </div>
+                `;
+
+                const response =
+                    await fetch(
+                        'https://api.resend.com/emails',
+                        {
+                            method: 'POST',
+                            headers: {
+                                Authorization:
+                                    `Bearer ${apiKey}`,
+                                'Content-Type':
+                                    'application/json',
+                                'Idempotency-Key':
+                                    `ayana-booking-${bookingRecord.id}`
+                            },
+                            body: JSON.stringify({
+                                from: fromEmail,
+                                to: [
+                                    bookingRecord.guest_email
+                                ],
+                                subject:
+                                    'Votre réservation au Chalet Ayana est confirmée',
+                                html
+                            })
+                        }
+                    );
+
+                if (!response.ok) {
+                    const body =
+                        await response.text();
+
+                    throw new Error(
+                        `Resend ${response.status}: ${body}`
+                    );
+                }
+
+                const sentAt =
+                    new Date().toISOString();
+
+                const {
+                    error: trackingError
+                } = await supabase
+                    .from('booking')
+                    .update({
+                        confirmation_email_sent_at:
+                            sentAt
+                    })
+                    .eq('id', bookingRecord.id);
+
+                if (trackingError) {
+                    throw trackingError;
+                }
+
+                bookingRecord
+                    .confirmation_email_sent_at =
+                    sentAt;
+
+                console.log(
+                    `[Stripe webhook] Confirmation email sent for booking ${bookingRecord.id}`
+                );
+            };
+
         try {
             if (
                 event.type ===
@@ -171,10 +438,21 @@ export default {
                     .from('booking')
                     .select(`
                         id,
+                        chalet_id,
+                        guest_name,
+                        guest_email,
+                        start_date,
+                        end_date,
+                        external_uid,
+                        confirmation_email_sent_at,
                         total_revenue,
                         amount_paid,
                         currency,
-                        payment_reference
+                        payment_reference,
+                        payment_status,
+                        status,
+                        booking_channel,
+                        origin
                     `)
                     .eq('id', bookingId)
                     .single();
@@ -189,6 +467,30 @@ export default {
                             'Booking not found'
                         )
                     );
+                }
+
+                /*
+                 * Stripe may retry the same webhook.
+                 * Do not count an already processed payment twice.
+                 * Still repair the cleaning task if necessary.
+                 */
+                if (
+                    booking.payment_status === 'paid' &&
+                    booking.payment_reference ===
+                        session.id
+                ) {
+                    await ensureCleaningTask(
+                        booking
+                    );
+
+                    await ensureConfirmationEmail(
+                        booking
+                    );
+
+                    return Response.json({
+                        received: true,
+                        duplicate: true
+                    });
                 }
 
                 const expectedBalanceCents =
@@ -309,6 +611,10 @@ export default {
                 } = await supabase
                     .from('booking')
                     .update({
+                        status:
+                            booking.status === 'pending'
+                                ? 'confirmed'
+                                : booking.status,
                         payment_status: 'paid',
                         amount_paid:
                             Number(booking.amount_paid || 0) +
@@ -324,6 +630,17 @@ export default {
                     throw updateError;
                 }
 
+                await ensureCleaningTask(
+                    booking
+                );
+
+                booking.payment_reference =
+                    session.id;
+
+                await ensureConfirmationEmail(
+                    booking
+                );
+
                 console.log(
                     `[Stripe webhook] Booking ${bookingId} marked PAID`
                 );
@@ -331,7 +648,33 @@ export default {
 
             if (
                 event.type ===
-                    'checkout.session.expired' ||
+                    'checkout.session.expired'
+            ) {
+                const {
+                    error: updateError
+                } = await supabase
+                    .from('booking')
+                    .update({
+                        status: 'cancelled',
+                        payment_status: 'unpaid'
+                    })
+                    .eq('id', bookingId)
+                    .eq(
+                        'payment_reference',
+                        session.id
+                    )
+                    .eq('status', 'pending')
+                    .eq(
+                        'booking_channel',
+                        'website'
+                    );
+
+                if (updateError) {
+                    throw updateError;
+                }
+            }
+
+            if (
                 event.type ===
                     'checkout.session.async_payment_failed'
             ) {
