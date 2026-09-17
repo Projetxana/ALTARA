@@ -1,3 +1,4 @@
+import { altaraApi } from '../../config/appRuntime.js';
 import { supabase } from '../../lib/supabase';
 
 const PaymentService = {
@@ -21,7 +22,7 @@ const PaymentService = {
         }
 
         const response = await fetch(
-            '/api/payments/create-checkout-session',
+            altaraApi('/api/payments/create-checkout-session'),
             {
                 method: 'POST',
 
