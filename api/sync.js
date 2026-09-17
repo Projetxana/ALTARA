@@ -25,7 +25,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { syncChalet, syncChaletSource, syncAllChalets, bootstrapCalendarSources } from './lib/sync-engine.js';
+import { syncChalet, syncChaletSource, syncAllChalets, bootstrapCalendarSources } from '../server/lib/sync-engine.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -52,15 +52,6 @@ export default async function handler(req, res) {
         }
 
         // ─── Mode 2 : Utilisateur authentifié (JWT Supabase) ───
-        const { chaletId, source } = req.body || {};
-
-        if (!chaletId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Missing chaletId in request body.'
-            });
-        }
-
         // Validate the JWT using the anon key (read-only client)
         const supabaseUrl = process.env.VITE_SUPABASE_URL;
         const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
@@ -82,6 +73,15 @@ export default async function handler(req, res) {
             return res.status(401).json({
                 success: false,
                 error: 'Invalid or expired authentication token.'
+            });
+        }
+
+        const { chaletId, source } = req.body || {};
+
+        if (!chaletId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing chaletId in request body.'
             });
         }
 
