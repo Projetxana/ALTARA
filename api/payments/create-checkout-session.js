@@ -216,7 +216,7 @@ export default async function handler(req, res) {
         applyPublicCors(
             req,
             res,
-            { methods: ['POST', 'OPTIONS'] }
+            { methods: ['GET', 'POST', 'OPTIONS'] }
         )
     ) {
         return;
