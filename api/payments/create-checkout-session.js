@@ -1,3 +1,4 @@
+import { applyPublicCors } from '../../server/lib/public-cors.js';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
@@ -13,37 +14,52 @@ const createStripeClient = () => {
     return new Stripe(secretKey);
 };
 
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({
-            success: false,
-            error: 'Method not allowed'
-        });
-    }
 
+const calculateNights = (startDate, endDate) => {
+    const start = new Date(`${startDate}T00:00:00Z`);
+    const end = new Date(`${endDate}T00:00:00Z`);
+
+    return Math.max(
+        1,
+        Math.round((end - start) / 86400000)
+    );
+};
+
+async function handleCheckoutSummary(req, res) {
     try {
-        const stripe = createStripeClient();
+        const sessionId =
+            Array.isArray(req.query.session_id)
+                ? req.query.session_id[0]
+                : req.query.session_id;
 
-        const authHeader =
-            req.headers.authorization || '';
-
-        const token = authHeader.startsWith('Bearer ')
-            ? authHeader.slice(7)
-            : null;
-
-        if (!token) {
-            return res.status(401).json({
+        if (!sessionId || !sessionId.startsWith('cs_')) {
+            return res.status(400).json({
                 success: false,
-                error: 'Authentication required.'
+                error: 'Invalid checkout session.'
             });
         }
 
-        const { bookingId } = req.body || {};
+        const stripe = createStripeClient();
+
+        const session =
+            await stripe.checkout.sessions.retrieve(sessionId);
+
+        const bookingId =
+            session.metadata?.booking_id ||
+            session.client_reference_id;
 
         if (!bookingId) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
-                error: 'bookingId is required.'
+                error: 'Booking reference unavailable.'
+            });
+        }
+
+        if (session.payment_status !== 'paid') {
+            return res.status(202).json({
+                success: false,
+                status: 'processing',
+                message: 'Payment is still being confirmed.'
             });
         }
 
@@ -71,15 +87,230 @@ export default async function handler(req, res) {
         );
 
         const {
-            data: { user },
-            error: authError
-        } = await supabase.auth.getUser(token);
+            data: booking,
+            error: bookingError
+        } = await supabase
+            .from('booking')
+            .select(`
+                id,
+                chalet_id,
+                guest_name,
+                guest_email,
+                start_date,
+                end_date,
+                status,
+                payment_status,
+                total_revenue,
+                amount_paid,
+                currency,
+                payment_reference
+            `)
+            .eq('id', bookingId)
+            .single();
 
-        if (authError || !user) {
-            return res.status(401).json({
+        if (bookingError || !booking) {
+            return res.status(404).json({
                 success: false,
-                error: 'Invalid authentication.'
+                error: 'Booking not found.'
             });
+        }
+
+        if (
+            booking.payment_reference &&
+            booking.payment_reference !== session.id
+        ) {
+            return res.status(409).json({
+                success: false,
+                error:
+                    'This payment session is no longer active.'
+            });
+        }
+
+        const {
+            data: property,
+            error: propertyError
+        } = await supabase
+            .from('chalets')
+            .select('id, name')
+            .eq('id', booking.chalet_id)
+            .single();
+
+        if (propertyError || !property) {
+            return res.status(404).json({
+                success: false,
+                error: 'Property not found.'
+            });
+        }
+
+        const total =
+            Number(booking.total_revenue || 0);
+
+        const amountAlreadyRecorded =
+            Number(booking.amount_paid || 0);
+
+        const checkoutAmount =
+            Number(session.amount_total || 0) / 100;
+
+        const totalPaid =
+            booking.payment_status === 'paid'
+                ? amountAlreadyRecorded
+                : Math.min(
+                    total,
+                    amountAlreadyRecorded + checkoutAmount
+                );
+
+        const balance =
+            Math.max(total - totalPaid, 0);
+
+        return res.status(200).json({
+            success: true,
+
+            property: {
+                id: property.id,
+                name: property.name
+            },
+
+            booking: {
+                id: booking.id,
+                guestName: booking.guest_name,
+                guestEmail: booking.guest_email,
+                checkIn: booking.start_date,
+                checkOut: booking.end_date,
+                nights: calculateNights(
+                    booking.start_date,
+                    booking.end_date
+                ),
+                total,
+                amountPaid: totalPaid,
+                balance,
+                currency:
+                    String(booking.currency || 'CAD')
+                        .toUpperCase()
+            },
+
+            payment: {
+                status: 'paid',
+                sessionId: session.id,
+                amountPaidToday: checkoutAmount
+            },
+
+            arrivalInfoLeadDays: 7
+        });
+
+    } catch (error) {
+        console.error(
+            '[CHECKOUT SUMMARY]',
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error:
+                'Unable to load the payment confirmation.'
+        });
+    }
+}
+
+export default async function handler(req, res) {
+    if (
+        applyPublicCors(
+            req,
+            res,
+            { methods: ['POST', 'OPTIONS'] }
+        )
+    ) {
+        return;
+    }
+
+    if (req.method === 'GET') {
+        return handleCheckoutSummary(req, res);
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({
+            success: false,
+            error: 'Method not allowed'
+        });
+    }
+
+    try {
+        const stripe = createStripeClient();
+
+        const authHeader =
+            req.headers.authorization || '';
+
+        const token =
+            authHeader.startsWith('Bearer ')
+                ? authHeader.slice(7)
+                : null;
+
+        const {
+            bookingId,
+            bookingReference
+        } = req.body || {};
+
+        if (!bookingId) {
+            return res.status(400).json({
+                success: false,
+                error: 'bookingId is required.'
+            });
+        }
+
+        const isPublicCheckout =
+            !token &&
+            typeof bookingReference === 'string' &&
+            bookingReference.startsWith('web_');
+
+        const supabaseUrl =
+            process.env.VITE_SUPABASE_URL;
+
+        const serviceRoleKey =
+            process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+        if (!supabaseUrl || !serviceRoleKey) {
+            throw new Error(
+                'Supabase server configuration missing.'
+            );
+        }
+
+        const supabase = createClient(
+            supabaseUrl,
+            serviceRoleKey,
+            {
+                auth: {
+                    persistSession: false,
+                    autoRefreshToken: false
+                }
+            }
+        );
+
+        let user = null;
+
+        if (!isPublicCheckout) {
+            if (!token) {
+                return res.status(401).json({
+                    success: false,
+                    error:
+                        'Authentication required.'
+                });
+            }
+
+            const {
+                data: authData,
+                error: authError
+            } =
+                await supabase.auth
+                    .getUser(token);
+
+            user = authData?.user || null;
+
+            if (authError || !user) {
+                return res.status(401).json({
+                    success: false,
+                    error:
+                        'Invalid authentication.'
+                });
+            }
         }
 
         const {
@@ -101,7 +332,10 @@ export default async function handler(req, res) {
                 amount_paid,
                 currency,
                 payment_provider,
-                payment_reference
+                payment_reference,
+                external_uid,
+                booking_channel,
+                origin
             `)
             .eq('id', bookingId)
             .single();
@@ -128,10 +362,36 @@ export default async function handler(req, res) {
             );
         }
 
-        if (chalet.user_id !== user.id) {
+        if (isPublicCheckout) {
+            const publicChaletId =
+                process.env.PUBLIC_SITE_CHALET_ID;
+
+            const validPublicBooking =
+                booking.chalet_id ===
+                    publicChaletId &&
+                booking.external_uid ===
+                    bookingReference &&
+                booking.booking_channel ===
+                    'website' &&
+                booking.origin ===
+                    'chalet-ayana' &&
+                booking.status ===
+                    'pending';
+
+            if (!validPublicBooking) {
+                return res.status(403).json({
+                    success: false,
+                    error:
+                        'Invalid public booking reference.'
+                });
+            }
+        } else if (
+            chalet.user_id !== user.id
+        ) {
             return res.status(403).json({
                 success: false,
-                error: 'Not authorized for this booking.'
+                error:
+                    'Not authorized for this booking.'
             });
         }
 
@@ -246,19 +506,49 @@ export default async function handler(req, res) {
             String(booking.currency || 'CAD')
                 .toLowerCase();
 
-        const appUrl =
+        /*
+         * ALTARA and the public booking site are independent.
+         *
+         * ALTARA_APP_URL:
+         *   back-office / admin return URL.
+         *
+         * PUBLIC_BOOKING_SITE_URL:
+         *   public website return URL (AYANA today).
+         *
+         * req.headers.origin remains a migration fallback.
+         */
+        const altaraAppUrl =
             process.env.ALTARA_APP_URL ||
             req.headers.origin;
 
+        const publicBookingSiteUrl =
+            process.env.PUBLIC_BOOKING_SITE_URL ||
+            req.headers.origin;
+
+        const appUrl =
+            isPublicCheckout
+                ? publicBookingSiteUrl
+                : altaraAppUrl;
+
         if (!appUrl) {
             throw new Error(
-                'ALTARA_APP_URL configuration missing.'
+                isPublicCheckout
+                    ? 'PUBLIC_BOOKING_SITE_URL configuration missing.'
+                    : 'ALTARA_APP_URL configuration missing.'
             );
         }
 
         const session =
             await stripe.checkout.sessions.create({
                 mode: 'payment',
+
+                ...(isPublicCheckout
+                    ? {
+                        expires_at:
+                            Math.floor(Date.now() / 1000) +
+                            30 * 60
+                    }
+                    : {}),
 
                 client_reference_id: booking.id,
 
@@ -270,7 +560,12 @@ export default async function handler(req, res) {
                 metadata: {
                     booking_id: booking.id,
                     chalet_id: booking.chalet_id,
-                    altara_user_id: user.id,
+                    altara_user_id:
+                        chalet.user_id,
+                    checkout_origin:
+                        isPublicCheckout
+                            ? 'website'
+                            : 'altara-admin',
                     expected_amount_cents:
                         String(Math.round(balance * 100)),
                     expected_currency:
@@ -304,10 +599,12 @@ export default async function handler(req, res) {
                 ],
 
                 success_url:
-                    `${appUrl}/planning?payment=success&booking=${booking.id}`,
+                    `${appUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
 
                 cancel_url:
-                    `${appUrl}/planning?payment=cancelled&booking=${booking.id}`
+                    isPublicCheckout
+                        ? `${appUrl}/reservation?payment=cancelled`
+                        : `${appUrl}/planning?payment=cancelled&booking=${booking.id}`
             });
 
         const {
