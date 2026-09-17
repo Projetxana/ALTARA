@@ -478,11 +478,39 @@ const FinancePage = () => {
                                 <label style={labelStyle}>{t('fin_type')}</label>
                                 <div style={{ display: 'flex', gap: '1rem' }}>
                                     <button type="button" onClick={() => setNewItem({ ...newItem, type: 'expense' })}
-                                        style={{ ...typeButtonStyle, background: newItem.type === 'expense' ? '#ef4444' : 'rgba(255,255,255,0.05)', border: newItem.type === 'expense' ? 'none' : '1px solid var(--color-border)' }}>
+                                        style={{
+    ...typeButtonStyle,
+    background:
+        newItem.type === 'expense'
+            ? '#A6553F'
+            : '#FFFFFF',
+    color:
+        newItem.type === 'expense'
+            ? '#FCFAF6'
+            : '#315D55',
+    border:
+        newItem.type === 'expense'
+            ? '1px solid #A6553F'
+            : '1px solid #DED8CD'
+}}>
                                         {t('fin_exp')}
                                     </button>
                                     <button type="button" onClick={() => setNewItem({ ...newItem, type: 'revenue' })}
-                                        style={{ ...typeButtonStyle, background: newItem.type === 'revenue' ? '#10b981' : 'rgba(255,255,255,0.05)', border: newItem.type === 'revenue' ? 'none' : '1px solid var(--color-border)' }}>
+                                        style={{
+    ...typeButtonStyle,
+    background:
+        newItem.type === 'revenue'
+            ? '#315D55'
+            : '#FFFFFF',
+    color:
+        newItem.type === 'revenue'
+            ? '#FCFAF6'
+            : '#315D55',
+    border:
+        newItem.type === 'revenue'
+            ? '1px solid #315D55'
+            : '1px solid #DED8CD'
+}}>
                                         {t('fin_rev')}
                                     </button>
                                 </div>
@@ -553,7 +581,14 @@ const FinancePage = () => {
                             </div>
 
                             {/* Live calculation preview */}
-                            <div style={{ padding: '1rem', background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>
+                            <div style={{
+    padding: '1rem',
+    background: '#F4EFE6',
+    border: '1px solid #DED8CD',
+    borderRadius: '10px',
+    color: '#15211F',
+    fontSize: '0.9rem'
+}}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
                                     <span style={{ color: 'var(--color-text-muted)' }}>Net (HT):</span>
                                     <span>${newItem.amount ? (parseFloat(newItem.amount) / (1 + getTaxRate(newItem.taxType) / 100)).toFixed(2) : '0.00'}</span>
@@ -678,27 +713,60 @@ const FinancePage = () => {
 };
 
 const modalOverlayStyle = {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(21, 33, 31, 0.42)',
+    backdropFilter: 'blur(6px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '24px',
+    zIndex: 1000
 };
 
 const modalContentStyle = {
-    width: '500px', padding: '2rem', borderRadius: 'var(--radius-lg)',
-    background: '#1a1a1a', border: '1px solid var(--color-border)',
-    maxHeight: '90vh', overflowY: 'auto'
+    width: '500px',
+    maxWidth: '100%',
+    padding: '2rem',
+    borderRadius: '20px',
+    background: '#FCFAF6',
+    border: '1px solid #DED8CD',
+    color: '#15211F',
+    boxShadow: '0 30px 80px rgba(21, 33, 31, 0.22)',
+    maxHeight: '90vh',
+    overflowY: 'auto'
 };
 
 const closeButtonStyle = {
-    background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer'
+    width: 38,
+    height: 38,
+    display: 'grid',
+    placeItems: 'center',
+    background: '#F4EFE6',
+    border: '1px solid #DED8CD',
+    borderRadius: '10px',
+    color: '#315D55',
+    cursor: 'pointer'
 };
 
 const labelStyle = {
-    display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--color-text-muted)'
+    display: 'block',
+    marginBottom: '0.45rem',
+    fontSize: '0.78rem',
+    fontWeight: 700,
+    color: '#315D55'
 };
 
 const typeButtonStyle = {
-    flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', color: 'var(--color-text)', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s'
+    flex: 1,
+    padding: '0.8rem',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontWeight: 650,
+    transition: 'all 0.2s ease'
 };
 
 const StatsCard = ({ title, value, icon, color }) => (
@@ -714,9 +782,16 @@ const StatsCard = ({ title, value, icon, color }) => (
 );
 
 const inputStyle = {
-    width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
-    background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-    color: 'var(--color-text)', fontSize: '1rem', outline: 'none'
+    width: '100%',
+    padding: '0.8rem 0.9rem',
+    borderRadius: '10px',
+    background: '#FFFFFF',
+    border: '1px solid #DED8CD',
+    color: '#15211F',
+    fontSize: '0.95rem',
+    outline: 'none',
+    boxSizing: 'border-box',
+    colorScheme: 'light'
 };
 
 export default FinancePage;
