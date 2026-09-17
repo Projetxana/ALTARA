@@ -1,0 +1,36 @@
+{
+  "rewrites": [
+    {
+      "source": "/chalet",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/bien-etre",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/localisation",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/reservation",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/experience",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/thanks",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/regles",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/payment/success",
+      "destination": "/index.html"
+    }
+  ]
+}

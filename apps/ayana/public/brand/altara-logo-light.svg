@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="385 90 445 505">
+  <title>ALTARA</title>
+
+  <path
+    fill="#F4EFE6"
+    d="M399 502
+       C440 496 472 469 491 428
+       C498 413 501 406 502 407
+       C502 408 501 414 500 422
+       C496 465 503 492 520 499
+       V503 H399 Z"
+  />
+
+  <path
+    fill="#F4EFE6"
+    d="M620 105
+       C602 164 601 239 620 312
+       C637 376 663 432 664 466
+       C665 487 650 498 629 499
+       H601 V503 H811 V499 H804
+       C773 497 753 475 738 440
+       C712 380 691 315 669 247
+       C649 184 633 130 620 105 Z"
+  />
+
+  <text
+    x="399"
+    y="574"
+    textLength="412"
+    lengthAdjust="spacingAndGlyphs"
+    fill="#F4EFE6"
+    font-family="Helvetica Neue, Arial, sans-serif"
+    font-size="50"
+    font-weight="300"
+    letter-spacing="18"
+  >ALTARA</text>
+</svg>
