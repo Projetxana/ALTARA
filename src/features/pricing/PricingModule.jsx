@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, Calendar, Percent, Plus, Trash2, Save, Info } from 'lucide-react';
+import { Settings, Calendar, Percent, Plus, Trash2, Save, Info, Upload } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useSanctuum } from '../../context/SanctuumContext';
 import RateRuleService from './RateRuleService';
+import IntelligentRateImport from './import/IntelligentRateImport';
+
+import {
+    DEFAULT_BOOKING_FEES,
+    DEFAULT_TAX_SETTINGS
+} from './BookingCostCalculator';
 
 const PricingModule = ({ chalet }) => {
     const { t } = useLanguage();
@@ -13,12 +19,13 @@ const PricingModule = ({ chalet }) => {
         weekendPrice: chalet.baseNightPrice ? chalet.baseNightPrice + 30 : 180,
         defaultMinStay: chalet.minStay || 2,
         fees: {
-            cleaning: 80,
-            pet: 30,
-            extraGuest: 20,
-            includedGuests: 4,
-            securityDeposit: 500
+            ...DEFAULT_BOOKING_FEES
         },
+
+        taxes: {
+            ...DEFAULT_TAX_SETTINGS
+        },
+
         discounts: {
             weekly: 10,
             monthly: 20,
@@ -37,6 +44,16 @@ const PricingModule = ({ chalet }) => {
     const buildInitialPricing = () => {
         if (!chalet.pricingInfo) return defaultPricing;
         const info = { ...chalet.pricingInfo };
+
+        info.fees = {
+            ...defaultPricing.fees,
+            ...(info.fees || {})
+        };
+
+        info.taxes = {
+            ...defaultPricing.taxes,
+            ...(info.taxes || {})
+        };
         if (!info.monthlyRates) {
             info.monthlyRates = Array(12).fill(null).map(() => ({
                 basePrice: info.basePrice || chalet.baseNightPrice || 150,
@@ -268,7 +285,8 @@ const PricingModule = ({ chalet }) => {
         { id: 'base', icon: <Settings size={18} />, label: 'Base Price' },
         { id: 'custom', icon: <Calendar size={18} />, label: 'Custom Rules' },
         { id: 'fees', icon: <Plus size={18} />, label: 'Fees & Extras' },
-        { id: 'discounts', icon: <Percent size={18} />, label: 'Discounts' }
+        { id: 'discounts', icon: <Percent size={18} />, label: 'Discounts' },
+        { id: 'import', icon: <Upload size={18} />, label: 'Import intelligent' }
     ];
 
     return (
@@ -480,6 +498,127 @@ const PricingModule = ({ chalet }) => {
                     </div>
                 )}
 
+                {activeTab === 'fees' && (
+                    <div
+                        style={{
+                            marginTop: '2rem',
+                            padding: '1.5rem',
+                            background: 'rgba(255,255,255,0.02)',
+                            borderRadius: 'var(--radius-md)',
+                            border: '1px solid var(--color-border)'
+                        }}
+                    >
+                        <h4
+                            style={{
+                                margin: '0 0 0.4rem 0',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            Taxes — Québec
+                        </h4>
+
+                        <p
+                            style={{
+                                margin: '0 0 1.25rem 0',
+                                color: 'var(--color-text-muted)',
+                                fontSize: '0.82rem'
+                            }}
+                        >
+                            Paramètres utilisés par ALTARA,
+                            le site AYANA et Stripe.
+                        </p>
+
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns:
+                                    'repeat(auto-fit, minmax(200px, 1fr))',
+                                gap: '1.5rem'
+                            }}
+                        >
+                            {[
+                                {
+                                    label: "Taxe hébergement",
+                                    enabled: "lodgingTaxEnabled",
+                                    rate: "lodgingTaxPct"
+                                },
+                                {
+                                    label: "TPS",
+                                    enabled: "gstEnabled",
+                                    rate: "gstPct"
+                                },
+                                {
+                                    label: "TVQ",
+                                    enabled: "qstEnabled",
+                                    rate: "qstPct"
+                                }
+                            ].map(item => (
+                                <div key={item.rate}>
+                                    <label
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            marginBottom: '0.6rem'
+                                        }}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                Boolean(
+                                                    pricing.taxes[
+                                                        item.enabled
+                                                    ]
+                                                )
+                                            }
+                                            onChange={e =>
+                                                handleChange(
+                                                    'taxes',
+                                                    item.enabled,
+                                                    e.target.checked
+                                                )
+                                            }
+                                        />
+
+                                        {item.label}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        step="0.001"
+                                        value={
+                                            pricing.taxes[
+                                                item.rate
+                                            ]
+                                        }
+                                        onChange={e =>
+                                            handleChange(
+                                                'taxes',
+                                                item.rate,
+                                                parseFloat(
+                                                    e.target.value
+                                                ) || 0
+                                            )
+                                        }
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            borderRadius:
+                                                'var(--radius-md)',
+                                            background:
+                                                'var(--color-surface)',
+                                            border:
+                                                '1px solid var(--color-border)',
+                                            color:
+                                                'var(--color-text)'
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* 4. DISCOUNTS */}
                 {activeTab === 'discounts' && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', animation: 'fadeIn 0.3s' }}>
@@ -528,6 +667,13 @@ const PricingModule = ({ chalet }) => {
                         </div>
 
                     </div>
+                )}
+                {/* 5. INTELLIGENT RATE IMPORT */}
+                {activeTab === 'import' && (
+                    <IntelligentRateImport
+                        chaletId={chalet.id}
+                        directCleaningFee={pricing.fees.cleaning}
+                    />
                 )}
             </div>
 

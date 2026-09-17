@@ -203,6 +203,79 @@ export const RateRuleService = {
         if (error) {
             throw new Error(`Unable to save special rates: ${error.message}`);
         }
+    },
+
+    /**
+     * Replace one-day manual overrides for imported calendar prices.
+     *
+     * These rules have the highest pricing precedence and therefore
+     * override seasonal/special pricing only for the exact imported dates.
+     */
+    async replaceManualRatesForDates(chaletId, overrides) {
+        if (!chaletId) {
+            throw new Error('RateRuleService: chaletId is required');
+        }
+
+        const validOverrides = (overrides || []).filter(rule =>
+            /^\\d{4}-\\d{2}-\\d{2}$/.test(rule.date || '') &&
+            Number.isFinite(Number(rule.price)) &&
+            Number(rule.price) >= 0
+        );
+
+        if (!validOverrides.length) {
+            return { count: 0 };
+        }
+
+        const dates = [...new Set(
+            validOverrides.map(rule => rule.date)
+        )];
+
+        // Only replace manual rules for the dates being imported.
+        // Seasonal and special rules remain untouched.
+        const { error: deleteError } = await supabase
+            .from('rate_rules')
+            .delete()
+            .eq('chalet_id', chaletId)
+            .eq('rule_type', 'manual')
+            .in('start_date', dates);
+
+        if (deleteError) {
+            throw new Error(
+                `Unable to replace imported rates: ${deleteError.message}`
+            );
+        }
+
+        const payload = validOverrides.map(rule => ({
+            chalet_id: chaletId,
+            name: `Import Airbnb — ${rule.date}`,
+            rule_type: 'manual',
+            start_date: rule.date,
+            end_date: rule.date,
+            month_of_year: null,
+            nightly_rate: Number(rule.price),
+            weekend_rate: null,
+
+            // Preserve the minimum stay that was already effective
+            // on that date when the import was reviewed.
+            min_stay: Math.max(1, Number(rule.minStay || 1)),
+
+            priority: 1000,
+            enabled: true
+        }));
+
+        const { error } = await supabase
+            .from('rate_rules')
+            .insert(payload);
+
+        if (error) {
+            throw new Error(
+                `Unable to save imported rates: ${error.message}`
+            );
+        }
+
+        return {
+            count: payload.length
+        };
     }
 };
 
