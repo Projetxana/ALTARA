@@ -1,0 +1,4 @@
+-- Migration already applied remotely.
+-- Introduced current/future-only protection for iCal reconciliation.
+-- The reconciliation function is replaced by the following
+-- multi-chalet migration.

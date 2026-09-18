@@ -680,6 +680,7 @@ async function syncOneSource(supabase, calendarSource, userId) {
         const { data: snapshotReconciliation, error: snapshotError } =
             await supabase.rpc('reconcile_ical_snapshot', {
                 p_provider: provider,
+                p_chalet_id: chaletId,
                 p_present_uids: presentUids,
                 p_seen_at: new Date().toISOString(),
                 p_cancel_after: 2
