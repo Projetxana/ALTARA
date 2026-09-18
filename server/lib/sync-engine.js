@@ -665,6 +665,52 @@ async function syncOneSource(supabase, calendarSource, userId) {
         console.log(`[SyncEngine] Reconciling ${feedEvents.length} events for ${provider}...`);
         const reconcileResult = await reconcile(supabase, chaletId, userId, provider, feedEvents);
 
+        // 4b. Safe missing-from-feed reconciliation
+        //
+        // An imported booking is NOT cancelled after one missing snapshot.
+        // Supabase keeps a consecutive-missing counter:
+        //   1st successful absence -> suspect
+        //   2nd successful absence -> cancelled
+        //
+        // If the booking reappears later, the DB reconciliation can reactivate it.
+        const presentUids = feedEvents
+            .map((event) => event.uid)
+            .filter((uid) => typeof uid === 'string' && uid.length > 0);
+
+        const { data: snapshotReconciliation, error: snapshotError } =
+            await supabase.rpc('reconcile_ical_snapshot', {
+                p_provider: provider,
+                p_present_uids: presentUids,
+                p_seen_at: new Date().toISOString(),
+                p_cancel_after: 2
+            });
+
+        if (snapshotError) {
+            throw new Error(
+                `Safe cancellation reconciliation failed: ${snapshotError.message}`
+            );
+        }
+
+        const autoCancelled = Number(
+            snapshotReconciliation?.cancelled_count || 0
+        );
+
+        const suspectedMissing = Number(
+            snapshotReconciliation?.suspect_count || 0
+        );
+
+        if (autoCancelled > 0) {
+            reconcileResult.cancelled =
+                (reconcileResult.cancelled || 0) + autoCancelled;
+
+            reconcileResult.existingBookingsModified = true;
+        }
+
+        console.log(
+            `[SyncEngine] ${provider} missing-from-feed: ` +
+            `${suspectedMissing} suspect(s), ${autoCancelled} auto-cancelled`
+        );
+
         // 5. Check for partial DB errors
         //    A sync with DB errors is NEVER declared successful.
         if (reconcileResult.hasErrors) {
