@@ -135,17 +135,17 @@ const BookingCalendar = ({ chalet, blockedDates, dailyRates = {}, onDatesSelecte
         const paddingDays = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
 
         return (
-            <div key={monthStart.toString()} style={{ marginBottom: '4rem' }}>
+            <div className="ayana-calendar-month" key={monthStart.toString()} style={{ marginBottom: '4rem' }}>
                 <h3 style={{ fontSize: '2rem', fontFamily: 'var(--ayana-font-heading)', color: 'var(--ayana-text)', marginBottom: '2rem', textTransform: 'lowercase' }}>
                     {format(monthStart, 'MMMM', { locale: fr })}
                 </h3>
 
                 {/* Days of week header */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginBottom: '1rem', textAlign: 'center', color: 'var(--ayana-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <div className="ayana-calendar-weekdays" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginBottom: '1rem', textAlign: 'center', color: 'var(--ayana-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                     <div>Lu</div><div>Ma</div><div>Me</div><div>Je</div><div>Ve</div><div>Sa</div><div>Di</div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px' }}>
+                <div className="ayana-calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px' }}>
                     {/* Empty padding blocks */}
                     {[...Array(paddingDays)].map((_, i) => (
                         <div key={`pad-${i}`} />
@@ -198,6 +198,7 @@ const BookingCalendar = ({ chalet, blockedDates, dailyRates = {}, onDatesSelecte
 
                         return (
                             <button
+                                className="ayana-calendar-day"
                                 key={date.toString()}
                                 disabled={blocked || isPast}
                                 onClick={() => handleDateClick(date)}
@@ -244,10 +245,10 @@ const BookingCalendar = ({ chalet, blockedDates, dailyRates = {}, onDatesSelecte
     };
 
     return (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--ayana-bg)', zIndex: 1000, display: 'flex', flexDirection: 'column' }}>
+        <div className="ayana-calendar-modal" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--ayana-bg)', zIndex: 1000, display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
-            <div style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--ayana-border)', backgroundColor: 'var(--ayana-bg)', zIndex: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+            <div className="ayana-calendar-header" style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--ayana-border)', backgroundColor: 'var(--ayana-bg)', zIndex: 10 }}>
+                <div className="ayana-calendar-header-left" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', padding: '0.5rem', color: 'var(--ayana-text)' }}>✕</button>
                     <div>
                         <h2 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', fontWeight: 400 }}>Dates du Séjour</h2>
@@ -261,7 +262,7 @@ const BookingCalendar = ({ chalet, blockedDates, dailyRates = {}, onDatesSelecte
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <div className="ayana-calendar-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                     {checkIn && checkOut && (
                         <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>{calculateTotalPrice()}$ CAD</div>
@@ -269,9 +270,9 @@ const BookingCalendar = ({ chalet, blockedDates, dailyRates = {}, onDatesSelecte
                         </div>
                     )}
                     <button
+                        className="ayana-btn ayana-calendar-validate"
                         onClick={handleValidate}
                         disabled={!checkIn || !checkOut}
-                        className="ayana-btn"
                         style={{ padding: '1rem 3rem', opacity: (!checkIn || !checkOut) ? 0.5 : 1, cursor: (!checkIn || !checkOut) ? 'not-allowed' : 'pointer' }}
                     >
                         Valider ces dates
@@ -280,7 +281,7 @@ const BookingCalendar = ({ chalet, blockedDates, dailyRates = {}, onDatesSelecte
             </div>
 
             {/* Scrollable Calendar Body */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '4rem 2rem' }}>
+            <div className="ayana-calendar-scroll" style={{ flex: 1, overflowY: 'auto', padding: '4rem 2rem' }}>
                 <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                     {/* Render 18 months of booking availability */}
                     {Array.from(

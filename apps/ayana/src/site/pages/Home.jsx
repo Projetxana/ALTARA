@@ -46,12 +46,12 @@ const Home = () => {
             />
 
             {/* 1. HERO SECTION */}
-            <section id="hero" style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}>
+            <section id="hero" className="ayana-home-hero" style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}>
                 <img src="/ayana/photos/v2/ayana-chalet-spa-laurentides.jpg" alt="Chalet spa AYANA dans les Laurentides avec jacuzzi extérieur" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to bottom, rgba(26,26,26,0.2), rgba(26,26,26,0.6))' }}></div>
 
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '0 2rem' }}>
-                    <div className="ayana-animate" style={{ maxWidth: '900px' }}>
+                <div className="ayana-home-hero-content" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '0 2rem' }}>
+                    <div className="ayana-animate ayana-home-hero-copy" style={{ maxWidth: '900px' }}>
                         <h1 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', color: '#fff', marginBottom: '1.5rem', fontWeight: 300, lineHeight: 1.1, letterSpacing: '2px', textTransform: 'uppercase' }}>
                             AYANA — Sanctuaire Thermal privé au cœur des Laurentides
                         </h1>
@@ -59,7 +59,7 @@ const Home = () => {
                             Une expérience rare, entre silence, nature et bien-être absolu.
                         </p>
                         
-                        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <div className="ayana-home-hero-actions" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                              <button onClick={() => navigate('/reservation')} className="ayana-btn" style={{ padding: '1rem 3rem', fontSize: '1.1rem', backgroundColor: 'var(--ayana-surface)', color: 'var(--ayana-text)', border: 'none' }}>
                                  Réserver votre séjour
                              </button>
@@ -71,10 +71,10 @@ const Home = () => {
                 </div>
 
                 {/* Hero Quick Booking Bar */}
-                <div style={{ position: 'absolute', bottom: '3rem', left: '0', right: '0', display: 'flex', justifyContent: 'center', padding: '0 2rem', zIndex: 20 }}>
+                <div className="ayana-hero-booking-shell" style={{ position: 'absolute', bottom: '3rem', left: '0', right: '0', display: 'flex', justifyContent: 'center', padding: '0 2rem', zIndex: 20 }}>
                      {/* The booking bar logic remains for when the user wants to use it */}
-                    <div className="ayana-animate ayana-delay-3" style={{ display: 'flex', background: 'var(--ayana-surface)', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 15px 40px rgba(0,0,0,0.1)', color: 'var(--ayana-text)' }}>
-                        <button type="button" onClick={() => setShowHeroCalendar(true)} style={{ display: 'flex', flex: 1, padding: '1.2rem 2rem', alignItems: 'center', background: 'none', border: 'none', borderRight: '1px solid var(--ayana-border)', cursor: 'pointer' }}>
+                    <div className="ayana-animate ayana-delay-3 ayana-hero-booking-bar" style={{ display: 'flex', background: 'var(--ayana-surface)', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 15px 40px rgba(0,0,0,0.1)', color: 'var(--ayana-text)' }}>
+                        <button className="ayana-hero-date-button" type="button" onClick={() => setShowHeroCalendar(true)} style={{ display: 'flex', flex: 1, padding: '1.2rem 2rem', alignItems: 'center', background: 'none', border: 'none', borderRight: '1px solid var(--ayana-border)', cursor: 'pointer' }}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ayana-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '1rem' }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             <div style={{ display: 'flex', alignItems: 'center', color: (heroCheckIn || heroCheckOut) ? 'var(--ayana-text)' : 'var(--ayana-muted)', fontSize: '1rem', fontStyle: (heroCheckIn || heroCheckOut) ? 'normal' : 'italic', fontWeight: 300 }}>
                                 <span>{heroCheckIn ? formatDisplayDate(heroCheckIn) : 'arrivée'}</span>
@@ -82,7 +82,7 @@ const Home = () => {
                                 <span>{heroCheckOut ? formatDisplayDate(heroCheckOut) : 'départ'}</span>
                             </div>
                         </button>
-                        <div style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 2rem', borderRight: '1px solid var(--ayana-border)' }}>
+                        <div className="ayana-hero-guests" style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 2rem', borderRight: '1px solid var(--ayana-border)' }}>
                             <select value={heroGuests} onChange={(e) => setHeroGuests(Number(e.target.value))} style={{ border: 'none', background: 'transparent', color: 'var(--ayana-text)', fontSize: '1rem', outline: 'none', cursor: 'pointer', appearance: 'none', paddingRight: '1.5rem' }}>
                                 {[...Array(6)].map((_, i) => (
                                     <option key={i+1} value={i+1}>{i+1} {i === 0 ? 'convive' : 'convives'}</option>
@@ -90,7 +90,7 @@ const Home = () => {
                             </select>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '-1rem', pointerEvents: 'none' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
-                        <a href="/reservation" onClick={handleHeroReserve} style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 3rem', backgroundColor: 'var(--ayana-accent)', color: '#fff', textDecoration: 'none', fontSize: '1rem', transition: 'background 0.3s ease' }}>
+                        <a className="ayana-hero-availability" href="/reservation" onClick={handleHeroReserve} style={{ display: 'flex', alignItems: 'center', padding: '1.2rem 3rem', backgroundColor: 'var(--ayana-accent)', color: '#fff', textDecoration: 'none', fontSize: '1rem', transition: 'background 0.3s ease' }}>
                             Voir les disponibilités
                         </a>
                     </div>
@@ -102,7 +102,7 @@ const Home = () => {
             </section>
 
             {/* 2. INTRO */}
-            <section id="intro" style={{ padding: '12rem 2rem', backgroundColor: 'var(--ayana-bg)', textAlign: 'center' }}>
+            <section id="intro" className="ayana-home-intro" style={{ padding: '12rem 2rem', backgroundColor: 'var(--ayana-bg)', textAlign: 'center' }}>
                 <div className="ayana-container ayana-animate">
                     <p style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', lineHeight: 1.6, color: 'var(--ayana-text)', maxWidth: '900px', margin: '0 auto', fontWeight: 300 }}>
                         "À une heure de Montréal, AYANA a été imaginé comme un refuge.<br />Un lieu où le temps ralentit, où chaque détail invite à relâcher la pression et à retrouver l’essentiel."
@@ -111,7 +111,7 @@ const Home = () => {
             </section>
 
             {/* 3. EXPERIENCE SECTION */}
-            <section style={{ padding: '8rem 0', backgroundColor: 'var(--ayana-surface)' }}>
+            <section className="ayana-home-features" style={{ padding: '8rem 0', backgroundColor: 'var(--ayana-surface)' }}>
                 <div className="ayana-container">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem' }}>
                         <div className="ayana-animate" style={{ textAlign: 'center', padding: '2rem' }}>
@@ -144,7 +144,7 @@ const Home = () => {
             </section>
 
              {/* 5. LOCALISATION -> Removed redundant structure to prioritize the user's explicit sections, but keep a visual break */}
-             <section style={{ padding: '12rem 2rem', position: 'relative', overflow: 'hidden' }}>
+             <section className="ayana-home-wellness-banner" style={{ padding: '12rem 2rem', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
                     <img src="/ayana/photos/v2/sauna-hammam-chalet-luxe.jpg" alt="Chalet spa AYANA dans les Laurentides" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
                 </div>
@@ -164,7 +164,7 @@ const Home = () => {
             <ReviewsSection />
 
             {/* 7. CTA FINAL SECTION */}
-            <section style={{ padding: '10rem 0', backgroundColor: 'var(--ayana-surface)', textAlign: 'center' }}>
+            <section className="ayana-home-final-cta" style={{ padding: '10rem 0', backgroundColor: 'var(--ayana-surface)', textAlign: 'center' }}>
                 <div className="ayana-animate">
                     <h2 style={{ fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', fontFamily: 'var(--ayana-font-heading)', marginBottom: '1.5rem', fontWeight: 300, color: 'var(--ayana-text)', lineHeight: 1.2 }}>
                         Offrez-vous une parenthèse hors du temps
@@ -189,7 +189,7 @@ const REVIEWS_DATA = [
 
 const ReviewsSection = () => {
     return (
-        <section id="avis" style={{ padding: '8rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)', borderBottom: '1px solid var(--ayana-border)' }}>
+        <section id="avis" className="ayana-reviews-section" style={{ padding: '8rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)', borderBottom: '1px solid var(--ayana-border)' }}>
             <div className="ayana-container">
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem' }}>
                     {REVIEWS_DATA.map((rev, idx) => (

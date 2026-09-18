@@ -332,19 +332,19 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
     return (
         <div style={{ backgroundColor: 'var(--ayana-bg)', minHeight: '100vh' }}>
             {/* Header */}
-            <div style={{ padding: '0 2rem 4rem', textAlign: 'center', borderBottom: '1px solid var(--ayana-border)' }}>
+            <div className="ayana-book-header" style={{ padding: '0 2rem 4rem', textAlign: 'center', borderBottom: '1px solid var(--ayana-border)' }}>
                 <h1 className="ayana-animate" style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem', fontWeight: 300, color: 'var(--ayana-text)' }}>Planifiez votre moment de détente</h1>
                 <p className="ayana-animate ayana-delay-1" style={{ color: 'var(--ayana-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
                     Découvrez l'expérience AYANA et arrêtez le temps pour prendre soin de vous.
                 </p>
             </div>
 
-            <div className="ayana-container" style={{ padding: '4rem 2rem 6rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '4rem', alignItems: 'start' }}>
+            <div className="ayana-container ayana-book-container" style={{ padding: '4rem 2rem 6rem' }}>
+                <div className="ayana-book-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '4rem', alignItems: 'start' }}>
 
                     {/* Colonne Gauche: Formulaire */}
                     <div className="ayana-animate ayana-delay-2">
-                        <div className="ayana-card" style={{ padding: '3rem' }}>
+                        <div className="ayana-card ayana-book-form-card" style={{ padding: '3rem' }}>
                             {error && (
                                 <div style={{ padding: '1rem 1.5rem', backgroundColor: '#fef2f2', borderLeft: '4px solid #ef4444', color: '#991b1b', borderRadius: '4px', marginBottom: '2rem', fontSize: '0.95rem' }}>
                                     {error}
@@ -353,35 +353,125 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                 <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', color: 'var(--ayana-text)', fontWeight: 400, margin: 0 }}>Dates du Séjour</h3>
+                            </div>
+
+                            {/* Single calendar date selector */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={labelStyle}>Dates du séjour</label>
+
                                 <button
                                     type="button"
                                     onClick={() => setShowCalendar(true)}
-                                    style={{ background: 'none', border: 'none', color: 'var(--ayana-text)', textDecoration: 'none', borderBottom: '1px solid var(--ayana-text)', cursor: 'pointer', fontSize: '0.9rem', paddingBottom: '2px' }}
+                                    className="ayana-book-date-picker"
+                                    style={{
+                                        width: '100%',
+                                        padding: '1.15rem 1.2rem',
+                                        border: '1px solid var(--ayana-border)',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'var(--ayana-surface)',
+                                        color: 'var(--ayana-text)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: '1rem',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}
                                 >
-                                    Voir les disponibilités →
-                                </button>
-                            </div>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.9rem',
+                                            minWidth: 0
+                                        }}
+                                    >
+                                        <svg
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            style={{ flexShrink: 0 }}
+                                        >
+                                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                                            <line x1="16" y1="2" x2="16" y2="6" />
+                                            <line x1="8" y1="2" x2="8" y2="6" />
+                                            <line x1="3" y1="10" x2="21" y2="10" />
+                                        </svg>
 
-                            {/* Native Date Inputs */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                                <div>
-                                    <label style={labelStyle}>Arrivée (16h00)</label>
-                                    <input
-                                        type="date" name="checkIn" required
-                                        value={formData.checkIn} onChange={handleChange}
-                                        min={new Date().toISOString().split('T')[0]}
-                                        style={inputStyle}
-                                    />
-                                </div>
-                                <div>
-                                    <label style={labelStyle}>Départ (11h00)</label>
-                                    <input
-                                        type="date" name="checkOut" required
-                                        value={formData.checkOut} onChange={handleChange}
-                                        min={formData.checkIn || new Date().toISOString().split('T')[0]}
-                                        style={inputStyle}
-                                    />
-                                </div>
+                                        <span
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.65rem',
+                                                flexWrap: 'wrap',
+                                                fontSize: '1rem'
+                                            }}
+                                        >
+                                            <span
+                                                style={{
+                                                    color: formData.checkIn
+                                                        ? 'var(--ayana-text)'
+                                                        : 'var(--ayana-muted)'
+                                                }}
+                                            >
+                                                {formData.checkIn
+                                                    ? new Date(
+                                                        `${formData.checkIn}T12:00:00`
+                                                      ).toLocaleDateString(
+                                                        'fr-CA',
+                                                        {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                        }
+                                                      )
+                                                    : 'Arrivée'}
+                                            </span>
+
+                                            <span style={{ opacity: 0.4 }}>—</span>
+
+                                            <span
+                                                style={{
+                                                    color: formData.checkOut
+                                                        ? 'var(--ayana-text)'
+                                                        : 'var(--ayana-muted)'
+                                                }}
+                                            >
+                                                {formData.checkOut
+                                                    ? new Date(
+                                                        `${formData.checkOut}T12:00:00`
+                                                      ).toLocaleDateString(
+                                                        'fr-CA',
+                                                        {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                        }
+                                                      )
+                                                    : 'Départ'}
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        style={{ flexShrink: 0, opacity: 0.5 }}
+                                    >
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </button>
                             </div>
 
                             <div style={{ marginBottom: '1.5rem' }}>
@@ -569,7 +659,7 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                     </div>
 
                     {/* Colonne Droite: Récapitulatif (Sticky) */}
-                    <div className="ayana-animate ayana-delay-3" style={{ position: 'sticky', top: '100px' }}>
+                    <div className="ayana-animate ayana-delay-3 ayana-book-summary" style={{ position: 'sticky', top: '100px' }}>
                         <div style={{ padding: '2.5rem', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid var(--ayana-border)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                                 <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.4rem', fontWeight: 600, margin: 0, color: 'var(--ayana-text)' }}>Résumé de la réservation</h3>

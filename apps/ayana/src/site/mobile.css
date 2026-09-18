@@ -1,0 +1,581 @@
+/* ==========================================================
+   AYANA MOBILE
+   ========================================================== */
+
+.ayana-mobile-menu-button,
+.ayana-mobile-nav-panel {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* ---------- Header ---------- */
+
+  .ayana-public-header {
+    padding: 1rem 1.1rem !important;
+    min-height: 68px;
+  }
+
+  .ayana-public-logo {
+    font-size: 1.35rem !important;
+    letter-spacing: 3px !important;
+    position: relative;
+    z-index: 103;
+  }
+
+  .ayana-desktop-nav,
+  .ayana-header-book-button {
+    display: none !important;
+  }
+
+  .ayana-header-actions {
+    gap: 0 !important;
+  }
+
+  .ayana-mobile-menu-button {
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border: 0;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    position: relative;
+    z-index: 103;
+  }
+
+  .ayana-mobile-menu-button span {
+    display: block;
+    width: 24px;
+    height: 1.5px;
+    background: #fff;
+    transition: 0.25s ease;
+  }
+
+  .ayana-mobile-menu-button.dark span {
+    background: var(--ayana-text);
+  }
+
+  .ayana-mobile-nav-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 102;
+    padding: 110px 24px 36px;
+    background: rgba(246, 242, 234, 0.99);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .ayana-mobile-nav-panel a {
+    color: var(--ayana-text);
+    text-decoration: none;
+    font-family: var(--ayana-font-heading);
+    font-size: 1.8rem;
+    font-weight: 300;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--ayana-border);
+  }
+
+  .ayana-mobile-nav-panel button {
+    margin-top: 32px;
+    min-height: 54px;
+    width: 100%;
+    border: 0;
+    background: var(--ayana-cta);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  /* ---------- Home hero ---------- */
+
+  .ayana-home-hero {
+    height: 100svh !important;
+    min-height: 680px;
+  }
+
+  .ayana-home-hero-content {
+    justify-content: flex-start !important;
+    padding: 118px 22px 190px !important;
+  }
+
+  .ayana-home-hero-copy h1 {
+    font-size: clamp(2rem, 9vw, 3rem) !important;
+    line-height: 1.08 !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  .ayana-home-hero-copy p {
+    font-size: 1rem !important;
+    margin-bottom: 2rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .ayana-home-hero-actions {
+    width: 100%;
+    gap: 0.75rem !important;
+  }
+
+  .ayana-home-hero-actions button {
+    width: 100%;
+    min-height: 50px;
+    padding: 0.9rem 1rem !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* ---------- Home quick booking ---------- */
+
+  .ayana-hero-booking-shell {
+    bottom: 18px !important;
+    padding: 0 14px !important;
+  }
+
+  .ayana-hero-booking-bar {
+    width: 100%;
+    max-width: 520px;
+    display: grid !important;
+    grid-template-columns: 1fr auto;
+    border-radius: 10px !important;
+  }
+
+  .ayana-hero-date-button {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 0.95rem 1rem !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--ayana-border) !important;
+    min-width: 0;
+  }
+
+  .ayana-hero-date-button > div {
+    min-width: 0;
+    font-size: 0.88rem !important;
+  }
+
+  .ayana-hero-guests {
+    padding: 0.9rem 1rem !important;
+    min-width: 0;
+  }
+
+  .ayana-hero-availability {
+    justify-content: center;
+    text-align: center;
+    padding: 0.9rem 1rem !important;
+    min-height: 48px;
+    font-size: 0.9rem !important;
+  }
+
+  /* ---------- Home sections ---------- */
+
+  .ayana-home-intro {
+    padding: 5rem 22px !important;
+  }
+
+  .ayana-home-intro br {
+    display: none;
+  }
+
+  .ayana-home-features {
+    padding: 4rem 18px !important;
+  }
+
+  .ayana-home-features .ayana-container > div:first-child {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  .ayana-home-features .ayana-container > div:first-child > div {
+    padding: 1.8rem 0 !important;
+  }
+
+  .ayana-home-features .ayana-container > div:last-child {
+    margin-top: 2rem !important;
+  }
+
+  .ayana-home-wellness-banner {
+    padding: 7rem 20px !important;
+  }
+
+  .ayana-home-wellness-banner h2 {
+    font-size: 2.2rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .ayana-reviews-section {
+    padding: 4rem 16px !important;
+  }
+
+  .ayana-reviews-section .ayana-container > div {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .ayana-reviews-section .ayana-container > div > div {
+    padding: 1.5rem !important;
+  }
+
+  .ayana-home-final-cta {
+    padding: 5rem 20px !important;
+  }
+
+  .ayana-home-final-cta h2 {
+    font-size: 2.2rem !important;
+  }
+
+  .ayana-home-final-cta > div > div {
+    margin-top: 2rem !important;
+  }
+
+  .ayana-home-final-cta button {
+    width: 100%;
+    max-width: 420px;
+    padding: 1rem !important;
+  }
+
+  /* ---------- Booking page ---------- */
+
+  .ayana-book-header {
+    padding: 96px 20px 2rem !important;
+  }
+
+  .ayana-book-header h1 {
+    font-size: 2.25rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .ayana-book-header p {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .ayana-book-container {
+    padding: 1.5rem 14px 4rem !important;
+  }
+
+  .ayana-book-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .ayana-book-form-card {
+    padding: 1.25rem !important;
+  }
+
+  .ayana-book-form-card > div:first-of-type {
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .ayana-book-date-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .ayana-book-summary {
+    position: static !important;
+    top: auto !important;
+    order: 2;
+  }
+
+  .ayana-book-summary > div {
+    padding: 1.25rem !important;
+    border-radius: 12px !important;
+  }
+
+  .ayana-book-summary a[href="#lieux"] {
+    display: none !important;
+  }
+
+  /* ---------- Calendar modal ---------- */
+
+  .ayana-calendar-modal {
+    height: 100dvh;
+  }
+
+  .ayana-calendar-header {
+    padding: 0.75rem 0.9rem !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+  }
+
+  .ayana-calendar-header-left {
+    gap: 0.5rem !important;
+    min-width: 0;
+  }
+
+  .ayana-calendar-header-left button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .ayana-calendar-header-left h2 {
+    font-size: 1rem !important;
+    margin: 0 !important;
+  }
+
+  .ayana-calendar-header-left p {
+    font-size: 0.75rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 190px;
+  }
+
+  .ayana-calendar-header-actions {
+    gap: 0.5rem !important;
+  }
+
+  .ayana-calendar-header-actions > div {
+    display: none;
+  }
+
+  .ayana-calendar-validate {
+    padding: 0.7rem 0.85rem !important;
+    font-size: 0.82rem !important;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .ayana-calendar-scroll {
+    padding: 1.5rem 8px 5rem !important;
+    overscroll-behavior: contain;
+  }
+
+  .ayana-calendar-month {
+    margin-bottom: 2.5rem !important;
+  }
+
+  .ayana-calendar-month h3 {
+    font-size: 1.5rem !important;
+    margin: 0 6px 1rem !important;
+  }
+
+  .ayana-calendar-weekdays {
+    gap: 2px !important;
+    font-size: 0.68rem !important;
+    margin-bottom: 5px !important;
+  }
+
+  .ayana-calendar-grid {
+    gap: 3px !important;
+  }
+
+  .ayana-calendar-day {
+    min-width: 0 !important;
+    min-height: 58px !important;
+    padding: 6px 2px !important;
+    border-radius: 7px !important;
+  }
+
+  .ayana-calendar-day span:first-child {
+    font-size: 0.9rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .ayana-calendar-day span:last-child {
+    font-size: 0.57rem !important;
+    white-space: nowrap;
+  }
+
+  /* ---------- Footer ---------- */
+
+  .ayana-public-footer {
+    padding: 3rem 20px 6rem !important;
+  }
+
+  .ayana-footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2.5rem !important;
+    margin-bottom: 2.5rem !important;
+  }
+
+  .ayana-footer-bottom {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  /* ---------- Newsletter ---------- */
+
+  .ayana-newsletter-bar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .ayana-home-hero {
+    min-height: 650px;
+  }
+
+  .ayana-home-hero-content {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .ayana-home-hero-copy h1 {
+    font-size: 1.9rem !important;
+  }
+
+  .ayana-hero-booking-shell {
+    padding: 0 8px !important;
+  }
+
+  .ayana-calendar-header-left p {
+    max-width: 145px;
+  }
+
+  .ayana-calendar-validate {
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+  }
+}
+
+/* ==========================================================
+   AYANA MOBILE — BOOKING POLISH
+   ========================================================== */
+
+@media (max-width: 768px) {
+
+  /* Booking page must use the full mobile viewport */
+  .ayana-book-container,
+  .ayana-book-container.ayana-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 1rem 14px 4rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .ayana-book-grid {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .ayana-book-grid > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  /* Main booking card */
+  .ayana-book-form-card {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 1.35rem 1.15rem !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Dates title / availability link */
+  .ayana-book-form-card > div:first-of-type {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: start !important;
+    gap: 1rem !important;
+    margin-bottom: 1.75rem !important;
+  }
+
+  .ayana-book-form-card > div:first-of-type h3 {
+    font-size: 1.45rem !important;
+    line-height: 1.15 !important;
+    max-width: 140px;
+  }
+
+  .ayana-book-form-card > div:first-of-type button {
+    font-size: 0.88rem !important;
+    line-height: 1.35 !important;
+    text-align: right !important;
+    max-width: 155px;
+  }
+
+  /* Inputs */
+  .ayana-book-form-card input,
+  .ayana-book-form-card select {
+    width: 100% !important;
+    min-height: 54px !important;
+    box-sizing: border-box !important;
+  }
+
+  .ayana-book-form-card label {
+    line-height: 1.35 !important;
+  }
+
+  /* Error / warning banner */
+  .ayana-book-form-card > div[style*="background-color: rgb(254, 242, 242)"],
+  .ayana-book-form-card > div[style*="#fef2f2"] {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Summary card */
+  .ayana-book-summary {
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .ayana-book-summary > div {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent any inherited desktop min-width */
+  .ayana-book-container *,
+  .ayana-book-grid * {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .ayana-book-container,
+  .ayana-book-container.ayana-container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .ayana-book-form-card {
+    padding: 1.2rem 1rem !important;
+  }
+
+  .ayana-book-form-card > div:first-of-type h3 {
+    font-size: 1.35rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .ayana-book-date-picker {
+    min-height: 64px !important;
+    padding: 1rem !important;
+    border-radius: 10px !important;
+  }
+
+  .ayana-book-date-picker span {
+    line-height: 1.35;
+  }
+}

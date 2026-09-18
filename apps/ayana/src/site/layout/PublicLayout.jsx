@@ -2,9 +2,11 @@ import { isAyanaApp } from '../../config/appRuntime.js';
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import CurrencySelector from '../components/CurrencySelector';
+import '../mobile.css';
 
 const PublicLayout = () => {
     const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -21,6 +23,7 @@ const PublicLayout = () => {
         if (!location.hash) {
             window.scrollTo(0, 0);
         }
+        setMobileMenuOpen(false);
     }, [location.pathname]);
 
     const homeUrl = isAyanaApp ? '/' : '/ayana';
@@ -28,7 +31,7 @@ const PublicLayout = () => {
     return (
         <div className="ayana-wrap" style={{ display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
-            <header style={{
+            <header className="ayana-public-header" style={{
                 position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
                 padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 transition: 'all 0.4s ease',
@@ -37,23 +40,46 @@ const PublicLayout = () => {
                 WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
                 borderBottom: scrolled ? '1px solid var(--ayana-border)' : '1px solid transparent'
             }}>
-                <Link to={homeUrl} style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
+                <Link className="ayana-public-logo" to={homeUrl} style={{ textDecoration: 'none', color: scrolled ? 'var(--ayana-text)' : '#fff', transition: 'color 0.4s', fontFamily: 'var(--ayana-font-heading)', fontSize: '1.8rem', fontWeight: '400', letterSpacing: '4px', textTransform: 'uppercase' }}>
                     AYANA
                 </Link>
 
-                <nav style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
+                <nav className={`ayana-desktop-nav ${mobileMenuOpen ? 'is-open' : ''}`} style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
                     <Link to={homeUrl} style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Accueil</Link>
                     <Link to="/chalet" style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Chalet</Link>
                     <Link to="/bien-etre" style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Bien-être</Link>
                     <Link to="/localisation" style={{ color: scrolled || location.pathname !== homeUrl ? 'var(--ayana-text)' : '#fff', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase', transition: 'color 0.4s' }}>Localisation</Link>
                 </nav>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <button onClick={() => navigate('/reservation')} className="ayana-btn" style={{ padding: '0.75rem 2rem', fontSize: '0.95rem', textDecoration: 'none', cursor: 'pointer', backgroundColor: scrolled ? 'var(--ayana-cta)' : 'rgba(255,255,255,0.1)', color: '#fff', border: scrolled ? '1px solid var(--ayana-cta)' : '1px solid rgba(255,255,255,0.5)', transition: 'all 0.3s ease' }} onMouseOver={(e) => { e.target.style.backgroundColor = scrolled ? 'var(--ayana-cta-hover)' : 'rgba(255,255,255,0.2)' }} onMouseOut={(e) => { e.target.style.backgroundColor = scrolled ? 'var(--ayana-cta)' : 'rgba(255,255,255,0.1)' }}>
+                <div className="ayana-header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <button
+                        type="button"
+                        className={`ayana-mobile-menu-button ${scrolled || location.pathname !== homeUrl ? 'dark' : ''}`}
+                        aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+                        aria-expanded={mobileMenuOpen}
+                        onClick={() => setMobileMenuOpen((open) => !open)}
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <button onClick={() => navigate('/reservation')} className="ayana-btn ayana-header-book-button" style={{ padding: '0.75rem 2rem', fontSize: '0.95rem', textDecoration: 'none', cursor: 'pointer', backgroundColor: scrolled ? 'var(--ayana-cta)' : 'rgba(255,255,255,0.1)', color: '#fff', border: scrolled ? '1px solid var(--ayana-cta)' : '1px solid rgba(255,255,255,0.5)', transition: 'all 0.3s ease' }} onMouseOver={(e) => { e.target.style.backgroundColor = scrolled ? 'var(--ayana-cta-hover)' : 'rgba(255,255,255,0.2)' }} onMouseOut={(e) => { e.target.style.backgroundColor = scrolled ? 'var(--ayana-cta)' : 'rgba(255,255,255,0.1)' }}>
                         Réserver
                     </button>
                 </div>
             </header>
+
+            {mobileMenuOpen && (
+                <div className="ayana-mobile-nav-panel">
+                    <Link to={homeUrl}>Accueil</Link>
+                    <Link to="/chalet">Chalet</Link>
+                    <Link to="/bien-etre">Bien-être</Link>
+                    <Link to="/localisation">Localisation</Link>
+                    <button type="button" onClick={() => navigate('/reservation')}>
+                        Réserver
+                    </button>
+                </div>
+            )}
 
             {/* Main Content */}
             <main style={{ flex: 1, paddingBottom: scrolled ? '80px' : '0', transition: 'padding-bottom 0.5s ease', minHeight: '100vh' }}>
@@ -61,8 +87,8 @@ const PublicLayout = () => {
             </main>
 
             {/* Premium Footer */}
-            <footer style={{ padding: '4rem 2rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)' }}>
-                <div className="ayana-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem', marginBottom: '4rem' }}>
+            <footer className="ayana-public-footer" style={{ padding: '4rem 2rem 2rem', backgroundColor: 'var(--ayana-bg)', borderTop: '1px solid var(--ayana-border)' }}>
+                <div className="ayana-container ayana-footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem', marginBottom: '4rem' }}>
                     <div>
                         <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '2rem', marginBottom: '1.5rem', letterSpacing: '2px', textTransform: 'uppercase' }}>AYANA</h3>
                         <p style={{ color: 'var(--ayana-muted)', lineHeight: 1.8, fontSize: '0.95rem' }}>
@@ -90,7 +116,7 @@ const PublicLayout = () => {
                         </p>
                     </div>
                 </div>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '2rem', borderTop: '1px solid var(--ayana-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--ayana-muted)', fontSize: '0.85rem' }}>
+                <div className="ayana-footer-bottom" style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '2rem', borderTop: '1px solid var(--ayana-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--ayana-muted)', fontSize: '0.85rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                         <p>© {new Date().getFullYear()} Ayana Chalet. Tous droits réservés.</p>
                     </div>
@@ -101,7 +127,7 @@ const PublicLayout = () => {
             </footer>
 
             {/* Sticky/Fixed Newsletter Bar */}
-            <div style={{
+            <div className="ayana-newsletter-bar" style={{
                 position: 'fixed',
                 bottom: 0,
                 left: 0,
@@ -120,7 +146,7 @@ const PublicLayout = () => {
                 <h4 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.2rem', color: 'var(--ayana-text)', margin: 0, fontWeight: 500 }}>
                     S'inscrire aux offres et promotions
                 </h4>
-                <form style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} onSubmit={(e) => { e.preventDefault(); alert("Merci d'avoir rejoint le Journal AYANA."); }}>
+                <form className="ayana-newsletter-form" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} onSubmit={(e) => { e.preventDefault(); alert("Merci d'avoir rejoint le Journal AYANA."); }}>
                     <input 
                         type="email" 
                         placeholder="votre adresse e-mail" 
