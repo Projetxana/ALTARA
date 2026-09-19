@@ -95,6 +95,19 @@ const PublicLayout = () => {
                             Un sanctuaire minimaliste entre forêt et rivière.<br />
                             L'élégance naturelle à l'état pur dans les Laurentides.
                         </p>
+                        <p style={{
+                            color: 'var(--ayana-text)',
+                            marginTop: '1.5rem',
+                            lineHeight: 1.7,
+                            fontSize: '0.9rem'
+                        }}>
+                            <strong style={{ fontWeight: 500 }}>
+                                AYANA — No d’enregistrement 322727
+                            </strong><br />
+                            <span style={{ color: 'var(--ayana-muted)' }}>
+                                Expire le 8 décembre 2026
+                            </span>
+                        </p>
                     </div>
                     <div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
