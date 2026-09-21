@@ -8,6 +8,16 @@ export default defineConfig({
 
   publicDir: 'public',
 
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://chaletayana.ca',
+        changeOrigin: true,
+        secure: true
+      }
+    }
+  },
+
   build: {
     outDir: 'dist',
     emptyOutDir: true
