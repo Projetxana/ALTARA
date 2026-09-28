@@ -59,6 +59,7 @@ export default async function handler(req, res) {
             checkIn,
             checkOut,
             guests,
+            pets,
             fullName,
             email,
             phone,
@@ -280,13 +281,76 @@ export default async function handler(req, res) {
                 stay.estimatedAccommodationRevenue
             );
 
+        const bookingSettings =
+            getBookingSettingsFromChalet(
+                chalet
+            );
+
+        const guestCount =
+            Math.max(
+                1,
+                Number(guests || 1)
+            );
+
+        const petCount =
+            Math.max(
+                0,
+                Number(pets || 0)
+            );
+
+        const includedGuests =
+            Math.max(
+                0,
+                Number(
+                    bookingSettings.fees?.includedGuests || 0
+                )
+            );
+
+        const extraGuestRate =
+            Math.max(
+                0,
+                Number(
+                    bookingSettings.fees?.extraGuest || 0
+                )
+            );
+
+        const petRate =
+            Math.max(
+                0,
+                Number(
+                    bookingSettings.fees?.pet || 0
+                )
+            );
+
+        const extraGuestCount =
+            Math.max(
+                0,
+                guestCount - includedGuests
+            );
+
+        const extraGuestFee =
+            roundMoney(
+                extraGuestCount *
+                extraGuestRate *
+                stay.numberOfNights
+            );
+
+        const petFee =
+            roundMoney(
+                petCount * petRate
+            );
+
+        const extras =
+            roundMoney(
+                extraGuestFee +
+                petFee
+            );
+
         const bookingTotals =
             calculateBookingTotals({
                 accommodation,
-                settings:
-                    getBookingSettingsFromChalet(
-                        chalet
-                    )
+                extras,
+                settings: bookingSettings
             });
 
         const cleaningFee =
@@ -337,6 +401,9 @@ export default async function handler(req, res) {
                 [
                     guests
                         ? `${guests} voyageur(s)`
+                        : null,
+                    Number(pets || 0) > 0
+                        ? `${pets} animal(aux)`
                         : null,
                     note?.trim() || null
                 ]

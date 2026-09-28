@@ -33,6 +33,7 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
     const [error, setError] = useState('');
     const [showCalendar, setShowCalendar] = useState(false);
     const [showPromo, setShowPromo] = useState(false);
+    const [showGuestModal, setShowGuestModal] = useState(false);
 
     const [formData, setFormData] = useState({
         checkIn: initialCheckIn,
@@ -146,7 +147,11 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                     checkIn:
                         formData.checkIn,
                     checkOut:
-                        formData.checkOut
+                        formData.checkOut,
+                    guests:
+                        String(formData.guests),
+                    pets:
+                        String(formData.pets)
                 });
 
             const response =
@@ -190,6 +195,18 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
             setQuoteLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (
+            formData.checkIn &&
+            formData.checkOut
+        ) {
+            handleVerifyDates().catch?.(() => {});
+        }
+    }, [
+        formData.guests,
+        formData.pets
+    ]);
 
     const handleGuestChange = (e) => {
         setGuestData(prev => ({
@@ -241,6 +258,8 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                 formData.checkOut,
                             guests:
                                 Number(formData.guests),
+                            pets:
+                                Number(formData.pets),
                             fullName:
                                 guestData.fullName,
                             email:
@@ -332,245 +351,292 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
     return (
         <div style={{ backgroundColor: 'var(--ayana-bg)', minHeight: '100vh' }}>
             {/* Header */}
-            <div style={{ padding: '0 2rem 4rem', textAlign: 'center', borderBottom: '1px solid var(--ayana-border)' }}>
-                <h1 className="ayana-animate" style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem', fontWeight: 300, color: 'var(--ayana-text)' }}>Planifiez votre moment de détente</h1>
+            <div className="ayana-book-header" style={{ padding: '0 2rem 2rem', textAlign: 'center', borderBottom: '1px solid var(--ayana-border)' }}>
+                <h1 className="ayana-animate" style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: 'clamp(2.2rem, 4vw, 3.25rem)', marginBottom: '1rem', fontWeight: 300, color: 'var(--ayana-text)' }}>Planifiez votre moment de détente</h1>
                 <p className="ayana-animate ayana-delay-1" style={{ color: 'var(--ayana-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
                     Découvrez l'expérience AYANA et arrêtez le temps pour prendre soin de vous.
                 </p>
             </div>
 
-            <div className="ayana-container" style={{ padding: '4rem 2rem 6rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '4rem', alignItems: 'start' }}>
+            <div className="ayana-container ayana-book-container" style={{ padding: '2rem 2rem 4rem' }}>
+                <div className="ayana-book-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.08fr) minmax(340px, 0.92fr)', gap: '2rem', alignItems: 'start' }}>
 
                     {/* Colonne Gauche: Formulaire */}
                     <div className="ayana-animate ayana-delay-2">
-                        <div className="ayana-card" style={{ padding: '3rem' }}>
+                        <div
+                            className="ayana-card ayana-book-form-card"
+                            style={{
+                                padding: '2.25rem'
+                            }}
+                        >
                             {error && (
-                                <div style={{ padding: '1rem 1.5rem', backgroundColor: '#fef2f2', borderLeft: '4px solid #ef4444', color: '#991b1b', borderRadius: '4px', marginBottom: '2rem', fontSize: '0.95rem' }}>
+                                <div
+                                    style={{
+                                        padding: '0.9rem 1.1rem',
+                                        backgroundColor: '#fef2f2',
+                                        borderLeft: '4px solid #ef4444',
+                                        color: '#991b1b',
+                                        borderRadius: '4px',
+                                        marginBottom: '1.5rem',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
                                     {error}
                                 </div>
                             )}
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.5rem', color: 'var(--ayana-text)', fontWeight: 400, margin: 0 }}>Dates du Séjour</h3>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <h3
+                                    style={{
+                                        fontFamily: 'var(--ayana-font-heading)',
+                                        fontSize: '1.65rem',
+                                        color: 'var(--ayana-text)',
+                                        fontWeight: 400,
+                                        margin: '0 0 0.35rem'
+                                    }}
+                                >
+                                    Réservez votre séjour
+                                </h3>
+
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        color: 'var(--ayana-muted)',
+                                        fontSize: '0.9rem',
+                                        lineHeight: 1.5
+                                    }}
+                                >
+                                    Choisissez vos dates et préparez votre séjour à AYANA.
+                                </p>
+                            </div>
+
+                            <div style={{ marginBottom: '1.35rem' }}>
+                                <label style={labelStyle}>
+                                    Dates du séjour
+                                </label>
+
                                 <button
                                     type="button"
                                     onClick={() => setShowCalendar(true)}
-                                    style={{ background: 'none', border: 'none', color: 'var(--ayana-text)', textDecoration: 'none', borderBottom: '1px solid var(--ayana-text)', cursor: 'pointer', fontSize: '0.9rem', paddingBottom: '2px' }}
+                                    className="ayana-book-date-picker"
+                                    style={{
+                                        width: '100%',
+                                        padding: '1rem 1.1rem',
+                                        border: '1px solid var(--ayana-border)',
+                                        borderRadius: '8px',
+                                        backgroundColor: 'var(--ayana-surface)',
+                                        color: 'var(--ayana-text)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: '1rem',
+                                        cursor: 'pointer',
+                                        textAlign: 'left'
+                                    }}
                                 >
-                                    Voir les disponibilités →
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.85rem',
+                                            minWidth: 0
+                                        }}
+                                    >
+                                        <svg
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            style={{ flexShrink: 0 }}
+                                        >
+                                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                                            <line x1="16" y1="2" x2="16" y2="6" />
+                                            <line x1="8" y1="2" x2="8" y2="6" />
+                                            <line x1="3" y1="10" x2="21" y2="10" />
+                                        </svg>
+
+                                        <div>
+                                            <div
+                                                style={{
+                                                    fontSize: '1rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.55rem',
+                                                    flexWrap: 'wrap'
+                                                }}
+                                            >
+                                                <span>
+                                                    {formData.checkIn
+                                                        ? new Date(
+                                                            `${formData.checkIn}T12:00:00`
+                                                        ).toLocaleDateString(
+                                                            'fr-CA',
+                                                            {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric'
+                                                            }
+                                                        )
+                                                        : 'Choisir mes dates'}
+                                                </span>
+
+                                                {formData.checkIn && (
+                                                    <>
+                                                        <span style={{ opacity: 0.4 }}>
+                                                            →
+                                                        </span>
+
+                                                        <span>
+                                                            {formData.checkOut
+                                                                ? new Date(
+                                                                    `${formData.checkOut}T12:00:00`
+                                                                ).toLocaleDateString(
+                                                                    'fr-CA',
+                                                                    {
+                                                                        day: 'numeric',
+                                                                        month: 'short',
+                                                                        year: 'numeric'
+                                                                    }
+                                                                )
+                                                                : 'Départ'}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            <div
+                                                style={{
+                                                    marginTop: '0.2rem',
+                                                    fontSize: '0.78rem',
+                                                    color: 'var(--ayana-muted)'
+                                                }}
+                                            >
+                                                {quoteLoading
+                                                    ? 'Calcul du séjour…'
+                                                    : quote
+                                                        ? `${quote.nights} nuit${quote.nights > 1 ? 's' : ''} · dates disponibles`
+                                                        : 'Voir les disponibilités et tarifs'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <span
+                                        style={{
+                                            fontSize: '1.25rem',
+                                            opacity: 0.45
+                                        }}
+                                    >
+                                        ›
+                                    </span>
                                 </button>
                             </div>
 
-                            {/* Native Date Inputs */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                            <div
+                                className="ayana-book-options-grid"
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns:
+                                        'repeat(2, minmax(0, 1fr))',
+                                    gap: '1rem',
+                                    marginBottom: '1.5rem'
+                                }}
+                            >
                                 <div>
-                                    <label style={labelStyle}>Arrivée (16h00)</label>
-                                    <input
-                                        type="date" name="checkIn" required
-                                        value={formData.checkIn} onChange={handleChange}
-                                        min={new Date().toISOString().split('T')[0]}
+                                    <label style={labelStyle}>
+                                        Voyageurs
+                                    </label>
+
+                                    <select
+                                        name="guests"
+                                        value={formData.guests}
+                                        onChange={handleChange}
                                         style={inputStyle}
-                                    />
+                                    >
+                                        {[...Array(6)].map((_, i) => (
+                                            <option
+                                                key={i + 1}
+                                                value={i + 1}
+                                            >
+                                                {i + 1}{' '}
+                                                {i === 0
+                                                    ? 'voyageur'
+                                                    : 'voyageurs'}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
+
                                 <div>
-                                    <label style={labelStyle}>Départ (11h00)</label>
-                                    <input
-                                        type="date" name="checkOut" required
-                                        value={formData.checkOut} onChange={handleChange}
-                                        min={formData.checkIn || new Date().toISOString().split('T')[0]}
+                                    <label style={labelStyle}>
+                                        Animaux
+                                    </label>
+
+                                    <select
+                                        name="pets"
+                                        value={formData.pets}
+                                        onChange={handleChange}
                                         style={inputStyle}
-                                    />
+                                    >
+                                        <option value={0}>
+                                            Aucun animal
+                                        </option>
+
+                                        <option value={1}>
+                                            1 animal
+                                        </option>
+                                    </select>
                                 </div>
-                            </div>
-
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={labelStyle}>Nombre de voyageurs (Max: 6)</label>
-                                <select
-                                    name="guests"
-                                    value={formData.guests} onChange={handleChange}
-                                    style={inputStyle}
-                                >
-                                    {[...Array(6)].map((_, i) => (
-                                        <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? 'voyageur' : 'voyageurs'}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div style={{ marginBottom: '3rem' }}>
-                                <label style={labelStyle}>Animaux de compagnie</label>
-                                <select
-                                    name="pets"
-                                    value={formData.pets} onChange={handleChange}
-                                    style={inputStyle}
-                                >
-                                    <option value={0}>Aucun animal</option>
-                                    <option value={1}>1 animal (Maximum autorisé)</option>
-                                </select>
                             </div>
 
                             <button
                                 type="button"
-                                onClick={() => {
-                                    if (quote) {
-                                        setShowCalendar(true);
-                                        return;
-                                    }
-
-                                    handleVerifyDates();
+                                onClick={() => setShowGuestModal(true)}
+                                disabled={!quote || quoteLoading}
+                                className="ayana-btn"
+                                style={{
+                                    width: '100%',
+                                    padding: '1.15rem',
+                                    fontSize: '1.05rem',
+                                    opacity:
+                                        !quote || quoteLoading
+                                            ? 0.5
+                                            : 1,
+                                    cursor:
+                                        !quote || quoteLoading
+                                            ? 'not-allowed'
+                                            : 'pointer'
                                 }}
-                                disabled={quoteLoading}
-                                className="ayana-btn-outline"
-                                style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', border: '1px solid var(--ayana-text)' }}
                             >
                                 {quoteLoading
-                                    ? 'Vérification…'
+                                    ? 'Calcul du séjour…'
                                     : quote
-                                        ? 'Modifier mes dates'
-                                        : 'Vérifier les disponibilités'}
+                                        ? `Réserver · ${formatPrice(
+                                            quote.total
+                                        )}`
+                                        : 'Sélectionnez vos dates'}
                             </button>
 
-                            {quote && (
-                                <div
-                                    style={{
-                                        marginTop: '3rem',
-                                        paddingTop: '3rem',
-                                        borderTop:
-                                            '1px solid var(--ayana-border)'
-                                    }}
-                                >
-                                    <h3
-                                        style={{
-                                            fontFamily:
-                                                'var(--ayana-font-heading)',
-                                            fontSize: '1.5rem',
-                                            color:
-                                                'var(--ayana-text)',
-                                            fontWeight: 400,
-                                            margin:
-                                                '0 0 2rem'
-                                        }}
-                                    >
-                                        Vos coordonnées
-                                    </h3>
-
-                                    <div
-                                        style={{
-                                            display: 'grid',
-                                            gap: '1.5rem'
-                                        }}
-                                    >
-                                        <div>
-                                            <label style={labelStyle}>
-                                                Nom complet
-                                            </label>
-
-                                            <input
-                                                type="text"
-                                                name="fullName"
-                                                value={
-                                                    guestData.fullName
-                                                }
-                                                onChange={
-                                                    handleGuestChange
-                                                }
-                                                autoComplete="name"
-                                                style={inputStyle}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label style={labelStyle}>
-                                                Adresse courriel
-                                            </label>
-
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={
-                                                    guestData.email
-                                                }
-                                                onChange={
-                                                    handleGuestChange
-                                                }
-                                                autoComplete="email"
-                                                style={inputStyle}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label style={labelStyle}>
-                                                Téléphone
-                                            </label>
-
-                                            <input
-                                                type="tel"
-                                                name="phone"
-                                                value={
-                                                    guestData.phone
-                                                }
-                                                onChange={
-                                                    handleGuestChange
-                                                }
-                                                autoComplete="tel"
-                                                style={inputStyle}
-                                            />
-                                        </div>
-
-                                        <button
-                                            type="button"
-                                            onClick={
-                                                handleBookAndPay
-                                            }
-                                            disabled={
-                                                bookingLoading
-                                            }
-                                            className="ayana-btn"
-                                            style={{
-                                                width: '100%',
-                                                padding: '1.25rem',
-                                                fontSize: '1.1rem',
-                                                marginTop: '1rem',
-                                                opacity:
-                                                    bookingLoading
-                                                        ? 0.65
-                                                        : 1,
-                                                cursor:
-                                                    bookingLoading
-                                                        ? 'wait'
-                                                        : 'pointer'
-                                            }}
-                                        >
-                                            {bookingLoading
-                                                ? 'Préparation du paiement…'
-                                                : `Réserver et payer ${formatPrice(
-                                                    quote.total
-                                                )}`}
-                                        </button>
-
-                                        <p
-                                            style={{
-                                                margin: 0,
-                                                textAlign: 'center',
-                                                color:
-                                                    'var(--ayana-muted)',
-                                                fontSize: '0.85rem',
-                                                lineHeight: 1.5
-                                            }}
-                                        >
-                                            Paiement sécurisé par Stripe.
-                                            Vos informations bancaires ne
-                                            transitent jamais par AYANA.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
+                            <p
+                                style={{
+                                    margin: '0.8rem 0 0',
+                                    textAlign: 'center',
+                                    color: 'var(--ayana-muted)',
+                                    fontSize: '0.8rem',
+                                    lineHeight: 1.4
+                                }}
+                            >
+                                Aucun paiement ne sera effectué avant confirmation.
+                            </p>
                         </div>
                     </div>
 
                     {/* Colonne Droite: Récapitulatif (Sticky) */}
-                    <div className="ayana-animate ayana-delay-3" style={{ position: 'sticky', top: '100px' }}>
-                        <div style={{ padding: '2.5rem', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid var(--ayana-border)' }}>
+                    <div className="ayana-animate ayana-delay-3 ayana-book-summary" style={{ position: 'sticky', top: '100px' }}>
+                        <div style={{ padding: '2.1rem', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid var(--ayana-border)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                                 <h3 style={{ fontFamily: 'var(--ayana-font-heading)', fontSize: '1.4rem', fontWeight: 600, margin: 0, color: 'var(--ayana-text)' }}>Résumé de la réservation</h3>
                                 <div style={{ marginTop: '-0.5rem', marginRight: '-0.5rem', zIndex: 50 }}>
@@ -585,9 +651,7 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                     <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--ayana-text)', fontWeight: 400 }}>{chalet.name}</h4>
                                     <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: 'var(--ayana-muted)' }}>{chalet.location || 'Sainte-Adèle, QC'}</p>
                                 </div>
-                                <a href="#lieux" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', border: '1px solid var(--ayana-border)', borderRadius: '4px', textDecoration: 'none', color: 'var(--ayana-text)', transition: 'background 0.3s' }}>
-                                    Détails
-                                </a>
+                                
                             </div>
 
                             {/* Promo section */}
@@ -668,6 +732,42 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                                 </span>
                                             </div>
 
+                                            {Number(quote.extraGuestFee || 0) > 0 && (
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between'
+                                                    }}
+                                                >
+                                                    <span>
+                                                        Voyageurs supplémentaires
+                                                    </span>
+                                                    <span>
+                                                        {formatPrice(
+                                                            quote.extraGuestFee
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {Number(quote.petFee || 0) > 0 && (
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between'
+                                                    }}
+                                                >
+                                                    <span>
+                                                        Frais animal
+                                                    </span>
+                                                    <span>
+                                                        {formatPrice(
+                                                            quote.petFee
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
+
                                             <div
                                                 style={{
                                                     display: 'flex',
@@ -721,6 +821,178 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
 
                 </div>
             </div>
+
+
+            {/* Guest details modal */}
+            {showGuestModal && quote && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 1100,
+                        backgroundColor: 'rgba(20,20,20,0.45)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '1.5rem'
+                    }}
+                    onClick={() => setShowGuestModal(false)}
+                >
+                    <div
+                        style={{
+                            width: '100%',
+                            maxWidth: '520px',
+                            backgroundColor: 'var(--ayana-bg)',
+                            borderRadius: '16px',
+                            padding: '2.25rem',
+                            boxShadow:
+                                '0 30px 80px rgba(0,0,0,0.18)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                justifyContent: 'space-between',
+                                gap: '1rem',
+                                marginBottom: '1.5rem'
+                            }}
+                        >
+                            <div>
+                                <h3
+                                    style={{
+                                        fontFamily:
+                                            'var(--ayana-font-heading)',
+                                        fontSize: '1.7rem',
+                                        fontWeight: 400,
+                                        margin: '0 0 0.4rem',
+                                        color:
+                                            'var(--ayana-text)'
+                                    }}
+                                >
+                                    Finaliser votre réservation
+                                </h3>
+
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        color:
+                                            'var(--ayana-muted)',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    Quelques informations avant le paiement.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setShowGuestModal(false)
+                                }
+                                style={{
+                                    border: 0,
+                                    background: 'transparent',
+                                    fontSize: '1.5rem',
+                                    cursor: 'pointer',
+                                    color:
+                                        'var(--ayana-text)'
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div
+                            style={{
+                                display: 'grid',
+                                gap: '1rem'
+                            }}
+                        >
+                            <div>
+                                <label style={labelStyle}>
+                                    Nom complet
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={guestData.fullName}
+                                    onChange={handleGuestChange}
+                                    autoComplete="name"
+                                    style={inputStyle}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={labelStyle}>
+                                    Adresse courriel
+                                </label>
+
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={guestData.email}
+                                    onChange={handleGuestChange}
+                                    autoComplete="email"
+                                    style={inputStyle}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={labelStyle}>
+                                    Téléphone
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={guestData.phone}
+                                    onChange={handleGuestChange}
+                                    autoComplete="tel"
+                                    style={inputStyle}
+                                />
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleBookAndPay}
+                                disabled={bookingLoading}
+                                className="ayana-btn"
+                                style={{
+                                    width: '100%',
+                                    padding: '1.15rem',
+                                    fontSize: '1.05rem',
+                                    marginTop: '0.4rem',
+                                    opacity:
+                                        bookingLoading
+                                            ? 0.6
+                                            : 1
+                                }}
+                            >
+                                {bookingLoading
+                                    ? 'Préparation du paiement…'
+                                    : `Continuer vers le paiement · ${formatPrice(
+                                        quote.total
+                                    )}`}
+                            </button>
+
+                            <p
+                                style={{
+                                    margin: 0,
+                                    textAlign: 'center',
+                                    color:
+                                        'var(--ayana-muted)',
+                                    fontSize: '0.8rem'
+                                }}
+                            >
+                                Paiement sécurisé par Stripe.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Calendar Modal */}
             {showCalendar && (

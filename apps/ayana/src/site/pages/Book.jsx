@@ -147,7 +147,11 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                     checkIn:
                         formData.checkIn,
                     checkOut:
-                        formData.checkOut
+                        formData.checkOut,
+                    guests:
+                        String(formData.guests),
+                    pets:
+                        String(formData.pets)
                 });
 
             const response =
@@ -191,6 +195,18 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
             setQuoteLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (
+            formData.checkIn &&
+            formData.checkOut
+        ) {
+            handleVerifyDates().catch?.(() => {});
+        }
+    }, [
+        formData.guests,
+        formData.pets
+    ]);
 
     const handleGuestChange = (e) => {
         setGuestData(prev => ({
@@ -242,6 +258,8 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                 formData.checkOut,
                             guests:
                                 Number(formData.guests),
+                            pets:
+                                Number(formData.pets),
                             fullName:
                                 guestData.fullName,
                             email:
@@ -633,9 +651,7 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                     <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--ayana-text)', fontWeight: 400 }}>{chalet.name}</h4>
                                     <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: 'var(--ayana-muted)' }}>{chalet.location || 'Sainte-Adèle, QC'}</p>
                                 </div>
-                                <a href="#lieux" style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', border: '1px solid var(--ayana-border)', borderRadius: '4px', textDecoration: 'none', color: 'var(--ayana-text)', transition: 'background 0.3s' }}>
-                                    Détails
-                                </a>
+                                
                             </div>
 
                             {/* Promo section */}
@@ -715,6 +731,42 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                                     )}
                                                 </span>
                                             </div>
+
+                                            {Number(quote.extraGuestFee || 0) > 0 && (
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between'
+                                                    }}
+                                                >
+                                                    <span>
+                                                        Voyageurs supplémentaires
+                                                    </span>
+                                                    <span>
+                                                        {formatPrice(
+                                                            quote.extraGuestFee
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {Number(quote.petFee || 0) > 0 && (
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between'
+                                                    }}
+                                                >
+                                                    <span>
+                                                        Frais animal
+                                                    </span>
+                                                    <span>
+                                                        {formatPrice(
+                                                            quote.petFee
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
 
                                             <div
                                                 style={{
