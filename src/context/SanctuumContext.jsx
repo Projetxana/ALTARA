@@ -219,32 +219,58 @@ export const SanctuumProvider = ({ children }) => {
         setChalets(prev => prev.map(c => c.id === chaletId ? { ...c, ...updates } : c));
 
         // 2. Persist to Cloud
-        if (user) {
-            try {
+        if (!user) {
+            throw new Error(
+                'Impossible de sauvegarder les paramètres : utilisateur non authentifié.'
+            );
+        }
+
+        try {
                 // Map camelCase updates back to snake_case for DB
                 const dbUpdates = {};
                 if (updates.name !== undefined) dbUpdates.name = updates.name;
                 if (updates.location !== undefined) dbUpdates.location = updates.location;
                 if (updates.description !== undefined) dbUpdates.description = updates.description;
                 if (updates.baseNightPrice !== undefined) dbUpdates.base_night_price = updates.baseNightPrice;
-                if (updates.minStay !== undefined) dbUpdates.min_stay = updates.minStay;
                 if (updates.image_url !== undefined) dbUpdates.image_url = updates.image_url;
                 if (updates.connections !== undefined) dbUpdates.connections = updates.connections;
                 if (updates.pricingInfo !== undefined) dbUpdates.pricing_info = JSON.stringify(updates.pricingInfo);
 
-                const { error } = await supabase
+                const {
+                    data: updatedRows,
+                    error
+                } = await supabase
                     .from('chalets')
                     .update(dbUpdates)
-                    .eq('id', chaletId);
+                    .eq('id', chaletId)
+                    .select('id, pricing_info, base_night_price');
 
                 if (error) {
-                    console.error("Error saving chalet update to Supabase:", error);
-                } else {
-                    console.log("Chalet updated in Supabase!");
+                    console.error(
+                        "Error saving chalet update to Supabase:",
+                        error
+                    );
+                    throw error;
                 }
-            } catch (err) {
-                console.error("Persist request failed:", err);
-            }
+
+                if (
+                    !updatedRows ||
+                    updatedRows.length !== 1
+                ) {
+                    throw new Error(
+                        `La sauvegarde du chalet ${chaletId} n'a modifié aucune ligne Supabase.`
+                    );
+                }
+
+                console.log(
+                    "Chalet updated in Supabase:",
+                    updatedRows[0]
+                );
+
+                return updatedRows[0];
+        } catch (err) {
+            console.error("Persist request failed:", err);
+            throw err;
         }
     };
 
