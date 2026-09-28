@@ -33,6 +33,10 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
     const [error, setError] = useState('');
     const [showCalendar, setShowCalendar] = useState(false);
     const [showPromo, setShowPromo] = useState(false);
+    const [promoInput, setPromoInput] = useState('');
+    const [appliedPromoCode, setAppliedPromoCode] = useState('');
+    const [promoLoading, setPromoLoading] = useState(false);
+    const [promoMessage, setPromoMessage] = useState('');
     const [showGuestModal, setShowGuestModal] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -154,6 +158,13 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                         String(formData.pets)
                 });
 
+            if (appliedPromoCode) {
+                params.set(
+                    'promoCode',
+                    appliedPromoCode
+                );
+            }
+
             const response =
                 await fetch(altaraApi(`/api/public/availability?${params.toString()}`)
                 );
@@ -207,6 +218,77 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
         formData.guests,
         formData.pets
     ]);
+
+    const handlePromoApply = async () => {
+        const code =
+            promoInput.trim().toUpperCase();
+
+        if (!code) {
+            setPromoMessage(
+                'Entrez un code promo.'
+            );
+            return;
+        }
+
+        if (
+            !formData.checkIn ||
+            !formData.checkOut
+        ) {
+            setPromoMessage(
+                'Choisissez d’abord vos dates.'
+            );
+            return;
+        }
+
+        try {
+            setPromoLoading(true);
+            setPromoMessage('');
+
+            const params =
+                new URLSearchParams({
+                    checkIn: formData.checkIn,
+                    checkOut: formData.checkOut,
+                    guests: String(formData.guests),
+                    pets: String(formData.pets),
+                    promoCode: code
+                });
+
+            const response =
+                await fetch(
+                    altaraApi(
+                        `/api/public/availability?${params.toString()}`
+                    )
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    'Code promo invalide.'
+                );
+            }
+
+            setAppliedPromoCode(code);
+            setQuote(data.quote);
+            setPromoMessage(
+                `Code ${code} appliqué.`
+            );
+
+        } catch (err) {
+            setAppliedPromoCode('');
+            setPromoMessage(
+                err.message ||
+                'Code promo invalide.'
+            );
+        } finally {
+            setPromoLoading(false);
+        }
+    };
 
     const handleGuestChange = (e) => {
         setGuestData(prev => ({
@@ -265,7 +347,9 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                             email:
                                 guestData.email,
                             phone:
-                                guestData.phone
+                                guestData.phone,
+                            promoCode:
+                                appliedPromoCode || null
                         })
                     }
                 );
@@ -668,8 +752,60 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                 </button>
                                 {showPromo && (
                                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                                        <input type="text" placeholder="Code promo" style={{ flex: 1, padding: '0.75rem', border: '1px solid var(--ayana-border)', borderRadius: '4px', backgroundColor: 'rgba(0,0,0,0.02)' }} />
-                                        <button type="button" style={{ padding: '0.75rem 1.5rem', backgroundColor: 'var(--ayana-text)', color: 'var(--ayana-bg)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Appliquer</button>
+                                        <input
+                                            type="text"
+                                            placeholder="Code promo"
+                                            value={promoInput}
+                                            onChange={e => {
+                                                setPromoInput(
+                                                    e.target.value.toUpperCase()
+                                                );
+                                                setPromoMessage('');
+                                            }}
+                                            style={{
+                                                flex: 1,
+                                                padding: '0.75rem',
+                                                border: '1px solid var(--ayana-border)',
+                                                borderRadius: '4px',
+                                                backgroundColor: 'rgba(0,0,0,0.02)'
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handlePromoApply}
+                                            disabled={promoLoading}
+                                            style={{
+                                                padding: '0.75rem 1.5rem',
+                                                backgroundColor: 'var(--ayana-text)',
+                                                color: 'var(--ayana-bg)',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: promoLoading
+                                                    ? 'wait'
+                                                    : 'pointer',
+                                                opacity: promoLoading
+                                                    ? 0.65
+                                                    : 1
+                                            }}
+                                        >
+                                            {promoLoading
+                                                ? 'Validation…'
+                                                : 'Appliquer'}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {promoMessage && (
+                                    <div
+                                        style={{
+                                            marginTop: '0.75rem',
+                                            fontSize: '0.82rem',
+                                            color: appliedPromoCode
+                                                ? '#2f7d57'
+                                                : '#991b1b'
+                                        }}
+                                    >
+                                        {promoMessage}
                                     </div>
                                 )}
                             </div>
@@ -714,6 +850,26 @@ const Book = ({ initialCheckIn = '', initialCheckOut = '', initialGuests = 2 }) 
                                                     )}
                                                 </span>
                                             </div>
+
+                                            {Number(quote.discountAmount || 0) > 0 && (
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        color: '#2f7d57'
+                                                    }}
+                                                >
+                                                    <span>
+                                                        Code promo {quote.promo?.code}
+                                                    </span>
+
+                                                    <span>
+                                                        -{formatPrice(
+                                                            quote.discountAmount
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
 
                                             <div
                                                 style={{

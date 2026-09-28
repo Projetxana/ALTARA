@@ -63,7 +63,8 @@ export default async function handler(req, res) {
             fullName,
             email,
             phone,
-            note
+            note,
+            promoCode
         } = req.body || {};
 
         if (
@@ -346,9 +347,104 @@ export default async function handler(req, res) {
                 petFee
             );
 
+        const normalizedPromoCode =
+            String(promoCode || '')
+                .trim()
+                .toUpperCase();
+
+        let promo = null;
+        let discountAmount = 0;
+        let discountedAccommodation = accommodation;
+
+        if (normalizedPromoCode) {
+            const {
+                data: promoRow,
+                error: promoError
+            } = await supabase
+                .from('promo_codes')
+                .select(`
+                    id,
+                    code,
+                    discount_type,
+                    discount_value,
+                    active,
+                    valid_from,
+                    valid_until,
+                    max_uses,
+                    uses_count,
+                    min_nights
+                `)
+                .eq('chalet_id', chaletId)
+                .eq('code', normalizedPromoCode)
+                .maybeSingle();
+
+            if (promoError) {
+                throw promoError;
+            }
+
+            const today =
+                new Date().toISOString().slice(0, 10);
+
+            const promoValid =
+                promoRow &&
+                promoRow.active &&
+                (!promoRow.valid_from ||
+                    today >= promoRow.valid_from) &&
+                (!promoRow.valid_until ||
+                    today <= promoRow.valid_until) &&
+                (!promoRow.max_uses ||
+                    Number(promoRow.uses_count || 0) <
+                        Number(promoRow.max_uses)) &&
+                stay.numberOfNights >=
+                    Number(promoRow.min_nights || 1);
+
+            if (!promoValid) {
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        'Ce code promo est invalide ou n’est plus disponible.'
+                });
+            }
+
+            if (promoRow.discount_type === 'percent') {
+                discountAmount =
+                    roundMoney(
+                        accommodation *
+                        Math.max(
+                            0,
+                            Number(promoRow.discount_value || 0)
+                        ) /
+                        100
+                    );
+            } else {
+                discountAmount =
+                    roundMoney(
+                        Math.max(
+                            0,
+                            Number(promoRow.discount_value || 0)
+                        )
+                    );
+            }
+
+            discountAmount =
+                Math.min(
+                    accommodation,
+                    discountAmount
+                );
+
+            discountedAccommodation =
+                roundMoney(
+                    accommodation -
+                    discountAmount
+                );
+
+            promo = promoRow;
+        }
+
         const bookingTotals =
             calculateBookingTotals({
-                accommodation,
+                accommodation:
+                    discountedAccommodation,
                 extras,
                 settings: bookingSettings
             });
@@ -405,6 +501,9 @@ export default async function handler(req, res) {
                     Number(pets || 0) > 0
                         ? `${pets} animal(aux)`
                         : null,
+                    normalizedPromoCode
+                        ? `Code promo ${normalizedPromoCode} (-${discountAmount} $)`
+                        : null,
                     note?.trim() || null
                 ]
                     .filter(Boolean)
@@ -442,6 +541,26 @@ export default async function handler(req, res) {
 
         if (insertError) {
             throw insertError;
+        }
+
+        if (promo?.id) {
+            const { error: promoUsageError } =
+                await supabase
+                    .from('promo_codes')
+                    .update({
+                        uses_count:
+                            Number(promo.uses_count || 0) + 1,
+                        updated_at:
+                            new Date().toISOString()
+                    })
+                    .eq('id', promo.id);
+
+            if (promoUsageError) {
+                console.error(
+                    '[PROMO USAGE]',
+                    promoUsageError
+                );
+            }
         }
 
         return res.status(200).json({

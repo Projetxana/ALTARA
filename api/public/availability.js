@@ -181,6 +181,11 @@ export default async function handler(req, res) {
                 Number(req.query.pets || 0)
             );
 
+        const promoCode =
+            String(req.query.promoCode || '')
+                .trim()
+                .toUpperCase();
+
         if (!checkIn && !checkOut) {
             /*
              * Public calendar pricing.
@@ -431,9 +436,105 @@ export default async function handler(req, res) {
                 petFee
             );
 
+        let promo = null;
+        let discountAmount = 0;
+        let discountedAccommodation = accommodation;
+
+        if (promoCode) {
+            const {
+                data: promoRow,
+                error: promoError
+            } = await supabase
+                .from('promo_codes')
+                .select(`
+                    id,
+                    code,
+                    discount_type,
+                    discount_value,
+                    active,
+                    valid_from,
+                    valid_until,
+                    max_uses,
+                    uses_count,
+                    min_nights
+                `)
+                .eq('chalet_id', chaletId)
+                .eq('code', promoCode)
+                .maybeSingle();
+
+            if (promoError) {
+                throw promoError;
+            }
+
+            const today =
+                new Date().toISOString().slice(0, 10);
+
+            const promoValid =
+                promoRow &&
+                promoRow.active &&
+                (!promoRow.valid_from ||
+                    today >= promoRow.valid_from) &&
+                (!promoRow.valid_until ||
+                    today <= promoRow.valid_until) &&
+                (!promoRow.max_uses ||
+                    Number(promoRow.uses_count || 0) <
+                        Number(promoRow.max_uses)) &&
+                stay.numberOfNights >=
+                    Number(promoRow.min_nights || 1);
+
+            if (!promoValid) {
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        'Ce code promo est invalide ou n’est plus disponible.'
+                });
+            }
+
+            if (promoRow.discount_type === 'percent') {
+                discountAmount =
+                    roundMoney(
+                        accommodation *
+                        Math.max(
+                            0,
+                            Number(promoRow.discount_value || 0)
+                        ) /
+                        100
+                    );
+            } else {
+                discountAmount =
+                    roundMoney(
+                        Math.max(
+                            0,
+                            Number(promoRow.discount_value || 0)
+                        )
+                    );
+            }
+
+            discountAmount =
+                Math.min(
+                    accommodation,
+                    discountAmount
+                );
+
+            discountedAccommodation =
+                roundMoney(
+                    accommodation -
+                    discountAmount
+                );
+
+            promo = {
+                code: promoRow.code,
+                type: promoRow.discount_type,
+                value:
+                    Number(promoRow.discount_value),
+                discountAmount
+            };
+        }
+
         const bookingTotals =
             calculateBookingTotals({
-                accommodation,
+                accommodation:
+                    discountedAccommodation,
                 extras,
                 settings:
                     bookingSettings
@@ -479,6 +580,9 @@ export default async function handler(req, res) {
                     stay.numberOfNights,
 
                 accommodation,
+                discountedAccommodation,
+                discountAmount,
+                promo,
                 cleaningFee,
                 extras,
                 extraGuestFee,
