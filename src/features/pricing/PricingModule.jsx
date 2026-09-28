@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useSanctuum } from '../../context/SanctuumContext';
 import RateRuleService from './RateRuleService';
 import IntelligentRateImport from './import/IntelligentRateImport';
+import PromoCodesPanel from './PromoCodesPanel';
 
 import {
     DEFAULT_BOOKING_FEES,
@@ -665,6 +666,10 @@ const PricingModule = ({ chalet }) => {
                                 </div>
                             </div>
                         </div>
+
+                        <PromoCodesPanel
+                            chaletId={chalet.id}
+                        />
 
                     </div>
                 )}
